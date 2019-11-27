@@ -97,7 +97,7 @@ def get_peaks(cell_line, factor, subsample_target_string):
     
     peak_path = get_peak_path(cell_line, factor, subsample_target_string)
     if not os.path.isfile(peak_path):
-        raise ValueError, "%s does not exist." % peak_path
+        raise ValueError("%s does not exist." % peak_path)
 
     d = pd.read_csv(peak_path, sep = '\t', header = None)
     d = d[[0, 1, 2, 13]]
@@ -108,7 +108,7 @@ def get_peaks(cell_line, factor, subsample_target_string):
     peak_log_pvalues = {}
     for chrom in chrs:
         idxs = d['chr'] == chrom
-        chrs_to_peaks[chrom] = np.array(zip(list(d.loc[idxs]['start']), list(d.loc[idxs]['end'])))
+        chrs_to_peaks[chrom] = np.array(list(zip(list(d.loc[idxs]['start']), list(d.loc[idxs]['end']))))
         chrs_to_peaks[chrom] = np.around(chrs_to_peaks[chrom] / BIN_SIZE).astype(int)
         peak_log_pvalues[chrom] = np.array(d.loc[idxs]['log10_pvalue'])
         assert(len(peak_log_pvalues[chrom]) == len(chrs_to_peaks[chrom]))
@@ -553,7 +553,7 @@ def make_intervals(species):
     elif species == 'mm9':
         chrom_sizes = MM9_CHROM_SIZES
     else:
-        raise ValueError, 'species must be hg19 or mm9'
+        raise ValueError('species must be hg19 or mm9')
 
     for chrom, chrom_size in chrom_sizes.items():
         print("Generating BED file for %s" % chrom)
@@ -874,14 +874,14 @@ def fork_and_wait(n_proc, target, args=[]):
         return
     else:
         pids = []
-        for i in xrange(n_proc):
+        for i in range(n_proc):
             pid = os.fork()
             if pid == 0:
                 try:
                     signal.signal(signal.SIGINT, handle_interrupt_signal)
                     target(*args)
                     os._exit(os.EX_OK)
-                except Exception, inst:
+                except Exception as inst:
                     print_exc()
                     config.log_statement( "Uncaught exception in subprocess\n" 
                                           + traceback.format_exc(), log=True)
@@ -893,9 +893,9 @@ def fork_and_wait(n_proc, target, args=[]):
                 ret_pid, error_code = os.wait()
                 if ret_pid in pids:
                     pids.remove(ret_pid)
-                if error_code != os.EX_OK: 
-                    raise OSError, "Process '{}' returned error code '{}'".format(
-                        ret_pid, error_code) 
+                if error_code != os.EX_OK:
+                    raise OSError("Process '{}' returned error code '{}'".format(
+                        ret_pid, error_code))
         except KeyboardInterrupt:
             for pid in pids:
                 try: os.kill(pid, signal.SIGHUP)

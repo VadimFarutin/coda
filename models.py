@@ -99,7 +99,7 @@ class SeqModel(object):
 
         self.model_library = model_params['model_library']
         if not (self.model_library in ['keras']):
-            raise ValueError, "model_library must be 'keras'"
+            raise ValueError("model_library must be 'keras'")
 
         self.model = None
         self.model_params = model_params
@@ -144,7 +144,7 @@ class SeqModel(object):
                 break
 
         if (self.model_params['predict_binary_output']) and ('INPUT' in self.output_marks):
-            raise ValueError, "Cannot predict peaks on INPUT."
+            raise ValueError("Cannot predict peaks on INPUT.")
             
         self.verbose = True
 
@@ -235,10 +235,10 @@ class SeqModel(object):
 
         if ((self.num_input_marks != X.shape[2]) or 
             (self.num_input_marks != peakPValueX.shape[2] + ('INPUT' in self.input_marks))):
-            raise Exception, "num_input_marks between model and data needs to agree"
+            raise Exception("num_input_marks between model and data needs to agree")
         if ((self.num_output_marks != Y.shape[2]) or 
             (self.num_output_marks != peakPValueY.shape[2] + ('INPUT' in self.output_marks))):
-            raise Exception, "num_output_marks between model and data needs to agree"
+            raise Exception("num_output_marks between model and data needs to agree")
 
         # See comment in __init__ about random seeds
         np.random.seed(self.model_params['random_seed'] + 42)
@@ -534,7 +534,7 @@ class SeqModel(object):
 
 
         if (test_Y_all.keys() != test_X_all.keys()):
-            raise Exception, "Subsampled and full data must have the same chroms"
+            raise Exception("Subsampled and full data must have the same chroms")
 
 
         chroms = sorted(test_X_all.keys())
@@ -903,7 +903,7 @@ class SeqToPoint(SeqModel):
                 model.add(Activation('sigmoid'))
 
         else:
-            raise Exception, "Model type not recognized"
+            raise Exception("Model type not recognized")
 
         self.model = model
         self.save_model_params()
@@ -933,7 +933,7 @@ class SeqToPoint(SeqModel):
         # If seq_length is 101
         # then the array goes from 0 to 100
         # and we want to pick mid = 50        
-        mid = (self.dataset_params['seq_length'] - 1) / 2
+        mid = (self.dataset_params['seq_length'] - 1) // 2
         
         # Y = np.squeeze(Y[:, mid, :]) 
         # return Y
@@ -983,7 +983,7 @@ class SeqToPoint(SeqModel):
         assert signalX.shape[1] == self.num_input_marks
         signalX_pad = pad_sequence_with_zeros(
             signalX,
-            padding=(self.dataset_params['seq_length'] - 1) / 2)
+            padding=(self.dataset_params['seq_length'] - 1) // 2)
 
         # After padding, we reshape the input to fit the Keras predict() API, 
         # which requires a 3-tensor where the first dimension is the number of examples.

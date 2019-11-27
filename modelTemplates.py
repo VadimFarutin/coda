@@ -176,7 +176,7 @@ def make_model_params(model_library,
         model_specific_params = {}
     for key in model_specific_params:
         if key in params:
-            raise ValueError, 'model_specific_params cannot overwrite existing model params'
+            raise ValueError('model_specific_params cannot overwrite existing model params')
         params[key] = model_specific_params[key]
 
     return params

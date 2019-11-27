@@ -102,14 +102,14 @@ class Dataset(object):
         elif self.chroms == VALID_CHROMS:
             self.chroms_string = "_chroms-valid"
         else:
-            raise ValueError, "chroms must be ALL_CHROMS, TEST_CHROMS, TRAIN_CHROMS, or VALID_CHROMS"
+            raise ValueError("chroms must be ALL_CHROMS, TEST_CHROMS, TRAIN_CHROMS, or VALID_CHROMS")
     
         if (self.normalization not in ['arcsinh', 'log', None]):
-            raise ValueError, "normalization must be 'arcsinh', 'log', or None"
+            raise ValueError("normalization must be 'arcsinh', 'log', or None")
 
         peak_fraction = float(peak_fraction)
         if peak_fraction < 0.0 or peak_fraction > 1.0:
-            raise ValueError, "peak_fraction must be in [0, 1]"
+            raise ValueError("peak_fraction must be in [0, 1]")
 
         try:
             metadata_path = get_metadata_path(self.dataset_name, self.X_subsample_target_string, self.normalization)
@@ -118,7 +118,7 @@ class Dataset(object):
                 self.marks_in_dataset = metadata['factors_to_include']
                 self.cell_line = metadata['cell_line']
         except IOError:
-            raise IOError, "Dataset %s doesn't exist." % metadata_path
+            raise IOError("Dataset %s doesn't exist." % metadata_path)
 
         try:
             # Sanity check to make sure that metadata is consistent with different subsample target string            
@@ -128,7 +128,7 @@ class Dataset(object):
                 assert self.marks_in_dataset == metadata['factors_to_include']
                 assert self.cell_line == metadata['cell_line']
         except IOError:
-            raise IOError, "Dataset %s doesn't exist." % metadata_path
+            raise IOError("Dataset %s doesn't exist." % metadata_path)
 
 
     def get_subsample_target_string(self, X_or_Y):
@@ -196,11 +196,11 @@ class Dataset(object):
 
         for input_mark in input_marks:
             if input_mark not in self.marks_in_dataset:
-                raise ValueError, "input_marks must be in marks_in_dataset"
+                raise ValueError("input_marks must be in marks_in_dataset")
 
         for output_mark in output_marks:
             if output_mark not in self.marks_in_dataset:
-                raise ValueError, "output_marks must be in marks_in_dataset"
+                raise ValueError("output_marks must be in marks_in_dataset")
 
         # Construct an identifying string for this dataset based on what the output marks are.
         # If all marks in marks_in_dataset are present, then for brevity we omit output_marks_string. 
@@ -251,16 +251,16 @@ class Dataset(object):
         assert(np.all(peakPValueX >= 0) & np.all(peakPValueY >= 0))
 
         if (X.shape[0], X.shape[1]) != (Y.shape[0], Y.shape[1]):
-            raise Exception, "First two dimensions of X and Y shapes (num_examples, seq_length) \
-                              need to agree."
+            raise Exception("First two dimensions of X and Y shapes (num_examples, seq_length) \
+                              need to agree.")
         if (peakPValueX.shape[0], peakPValueX.shape[1]) != (peakPValueY.shape[0], peakPValueY.shape[1]):
-            raise Exception, "First two dimensions of peakPValueX and peakPValueY shapes \
-                              (num_examples, seq_length) need to agree."
+            raise Exception("First two dimensions of peakPValueX and peakPValueY shapes \
+                              (num_examples, seq_length) need to agree.")
         if len(peakPValueX) != len(X):
-            raise Exception, "peakPValueX and X must have same length."
+            raise Exception("peakPValueX and X must have same length.")
         
         if ((seq_length != X.shape[1]) or (seq_length != peakPValueX.shape[1])):
-            raise Exception, "seq_length between model and data needs to agree"
+            raise Exception("seq_length between model and data needs to agree")
 
         return X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY
 
@@ -650,7 +650,7 @@ class Dataset(object):
 
         # If we only have one output mark, make sure the peak fraction is close. 
         if len(output_marks) == 1 and output_marks != ['INPUT']:
-            midpoint = (seq_length - 1) / 2#
+            midpoint = (seq_length - 1) // 2#
             true_peak_fraction = peakBinaryY[:, midpoint, 0].mean()
 
             assert np.abs(true_peak_fraction - peak_fraction) < 1e-2, 'Error: true peak fraction is %2.3f, desired fraction is %2.3f' % (true_peak_fraction, peak_fraction)

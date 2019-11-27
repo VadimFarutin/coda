@@ -32,7 +32,7 @@ class DataNormalizer(object):
         self.W = None
         self.mode = mode
         if mode not in ['ZCA', 'Z', '01', 'identity']:
-            raise ValueError, "mode=%s must be 'ZCA', 'Z', '01', or 'identity'" % mode
+            raise ValueError("mode=%s must be 'ZCA', 'Z', '01', or 'identity'" % mode)
 
 
     def fit(self, X_orig):
@@ -40,8 +40,8 @@ class DataNormalizer(object):
         Learns scaling parameters on the X_orig dataset. Does not modify X_orig.
         """        
         if len(X_orig.shape) != 2 and len(X_orig.shape) != 3:
-            raise ValueError, "X must be either a 3-tensor of shape num_examples x seq_length x \
-                               num_input_marks, or a 2-tensor of shape num_examples x num_input_marks"
+            raise ValueError("X must be either a 3-tensor of shape num_examples x seq_length x \
+                               num_input_marks, or a 2-tensor of shape num_examples x num_input_marks")
         if self.mode == 'identity':
             return None        
 
@@ -77,8 +77,8 @@ class DataNormalizer(object):
 
     def transform(self, X):
         if len(X.shape) != 2 and len(X.shape) != 3:
-            raise ValueError, "X must be either a 3-tensor of shape num_examples x seq_length x \
-                               num_input_marks, or a 2-tensor of shape num_examples x num_input_marks"
+            raise ValueError("X must be either a 3-tensor of shape num_examples x seq_length x \
+                               num_input_marks, or a 2-tensor of shape num_examples x num_input_marks")
 
         if self.mode == 'identity':
             return X
@@ -92,7 +92,7 @@ class DataNormalizer(object):
         if self.mode == 'ZCA':            
             X = np.reshape(X, (-1, num_input_marks))
             if self.W.shape[1] != X.shape[1]:
-                raise ValueError, "When doing a ZCA transform, X and W must have the same number of columns."
+                raise ValueError("When doing a ZCA transform, X and W must have the same number of columns.")
             X = np.dot(
                 X - self.b,
                 self.W.T)
@@ -102,7 +102,7 @@ class DataNormalizer(object):
                 print("X.shape: ", X.shape)
                 print("b.shape: ", self.b.shape)
                 print("W.shape: ", self.W.shape)
-                raise ValueError, "The shapes of X, b, and W must all share the same last dimension."                
+                raise ValueError("The shapes of X, b, and W must all share the same last dimension.")
             for idx in range(num_input_marks):
                 X[..., idx] = (X[..., idx] - self.b[idx]) / self.W[idx]
 
