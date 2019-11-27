@@ -20,6 +20,9 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.constraints import maxnorm
 from keras.regularizers import l2, activity_l2
 
+import wandb
+from wandb.keras import WandbCallback
+
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
 from dataset import DatasetEncoder
 import evaluations
@@ -325,10 +328,12 @@ class SeqModel(object):
             # of the model has not improved for [patience] epochs in a row.
             earlystopper = EarlyStopping(monitor='val_loss', patience=3, verbose=0)
 
+            wandbcallback = WandbCallback()
+
             self.hist = self.model.fit(
                 train_inputs_X,
                 train_Y,
-                callbacks=[checkpointer, earlystopper],
+                callbacks=[checkpointer, earlystopper, wandbcallback],
                 **self.model_params['train_params'])
 
             # Store training history for Keras models
