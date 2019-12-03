@@ -20,9 +20,16 @@ from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.constraints import maxnorm
 from keras.regularizers import l2, activity_l2
 
+from sklearn.model_selection import train_test_split
+import torch
+import torch.nn as nn
+from torch import optim
+from torch.utils.data.dataloader import DataLoader
+
 import wandb
 from wandb.keras import WandbCallback
 
+from dataWithLabelsDataset import DataWithLabelsDataset
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
 from dataset import DatasetEncoder
 import evaluations
@@ -162,12 +169,7 @@ class SeqModel(object):
         returns a copy of the appropriate subclass of SeqModel.
         """
         
-        if model_params['model_class'] == 'SeqToSeq':
-            m = SeqToSeq(model_params)
-        elif model_params['model_class'] == 'SeqToPoint':
-            m = SeqToPoint(model_params)
-        elif model_params['model_class'] == 'PointToPoint':
-            m = PointToPoint(model_params)
+        m = SeqToPoint(model_params)
 
         return m
 
@@ -307,9 +309,7 @@ class SeqModel(object):
             train_Y = peakBinaryY      
         else: 
             train_Y = Y
-                
-        
-        
+
         if self.model_library == 'keras':
 
             # Compiles model: this sets the optimizer and loss function
@@ -348,8 +348,87 @@ class SeqModel(object):
             with open(hist_path, 'w') as f:
                 f.write(json.dumps(self.hist.history))
 
+        elif self.model_library == 'pytorch':
+            if self.model_params['compile_params']['optimizer'] == 'adagrad':
+                optimizer = optim.Adagrad(self.model.parameters())
+            if self.model_params['compile_params']['loss'] == 'binary_crossentropy':
+                loss_function = torch.nn.modules.loss.BCELoss()
+            elif self.model_params['compile_params']['loss'] == 'MSE':
+                loss_function = torch.nn.modules.loss.MSELoss()
+
+            nb_epoch = self.model_params['train_params']['nb_epoch']
+            batch_size = self.model_params['train_params']['batch_size']
+
+            self.hist = self.fit_model(train_inputs_X, train_Y,
+                                       optimizer, loss_function,
+                                       nb_epoch, batch_size)
+
+            hist_path = os.path.join(
+                HIST_ROOT,
+                "%s.hist" % self.model_stamp)
+
+            with open(hist_path, 'w') as f:
+                f.write(json.dumps(self.hist))
+
         return None
 
+    def fit_model(self, train_inputs_X, train_Y, optimizer, loss_function, nb_epoch, batch_size):
+        assert self.model_library == 'pytorch'
+
+        train_data, val_data, train_labels, val_labels = train_test_split(
+            train_inputs_X, train_Y, test_size=self.model_params['train_params']['validation_split'])
+
+        train_dataset = DataWithLabelsDataset(train_data, train_labels)
+        val_dataset = DataWithLabelsDataset(val_data, val_labels)
+
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+        val_loader = DataLoader(val_dataset, batch_size=batch_size)
+
+        checkpoint_path = os.path.join(WEIGHTS_ROOT, '%s-weights.pt' % self.model_stamp)
+        earlystopper_patience = 3
+        hist = {'loss': [], 'val_loss': []}
+
+        for epoch in range(nb_epoch):
+            loss_values = []
+            val_loss_values = []
+
+            self.model.train()
+            for batch_data in train_loader:
+                data, labels = batch_data
+                optimizer.zero_grad()
+                output = self.model(data)
+                loss = loss_function(labels, output)
+                loss.backward()
+                optimizer.step()
+                loss_values.append(loss)
+
+            epoch_train_loss = np.mean(loss_values)
+            hist['loss'].append(epoch_train_loss)
+            wandb.log({'loss': epoch_train_loss})
+
+            self.model.eval()
+            with torch.no_grad():
+                for batch_data in val_loader:
+                    data, labels = batch_data
+                    output = self.model(data)
+                    loss = loss_function(labels, output)
+                    val_loss_values.append(loss)
+
+                epoch_val_loss = np.mean(val_loss_values)
+                hist['val_loss'].append(epoch_val_loss)
+                wandb.log({'val_loss': epoch_val_loss})
+
+                wandb.log({'epoch': epoch})
+
+                if epoch > 0 and hist['val_loss'][-2] <= epoch_val_loss:
+                    earlystopper_patience -= 1
+                else:
+                    torch.save(self.model.state_dict(), checkpoint_path)
+
+                if earlystopper_patience == 0:
+                    break
+
+        return hist
 
     def save_model_params(self):
         """
@@ -366,6 +445,9 @@ class SeqModel(object):
         assert self.model
         assert self.model_params
 
+        timeStr = datetime.datetime.now().strftime("%Y%m%d-%H%M%S%f")
+        self.model_stamp = "%s-%s" % (self.model_params['model_type'], timeStr)
+
         # If it's a Keras model, we save not only model_params but the actual
         # architecture of the model, since the code that constructs models from model_params
         # might change over time.
@@ -373,15 +455,19 @@ class SeqModel(object):
             model_JSON = self.model_params
             model_JSON['_keras_model_params'] = json.loads(self.model.to_json())
             model_JSON_str = json.dumps(model_JSON, cls=DatasetEncoder)
-        
-        timeStr = datetime.datetime.now().strftime("%Y%m%d-%H%M%S%f")
-        self.model_stamp = "%s-%s" % (self.model_params['model_type'], timeStr)
-        self.model_path = os.path.join(MODELS_ROOT, "%s.json" % self.model_stamp)
 
-        assert os.path.isfile(self.model_path) == False
+            self.model_path = os.path.join(MODELS_ROOT, "%s.json" % self.model_stamp)
 
-        with open(self.model_path, 'w') as model_file:
-            model_file.write(model_JSON_str)
+            assert os.path.isfile(self.model_path) == False
+
+            with open(self.model_path, 'w') as model_file:
+                model_file.write(model_JSON_str)
+        elif self.model_library == 'pytorch':
+            self.model_path = os.path.join(MODELS_ROOT, "%s.pt" % self.model_stamp)
+
+            assert os.path.isfile(self.model_path) == False
+
+            torch.save(self.model, self.model_path)
 
         return None
 
@@ -810,8 +896,10 @@ class SeqModel(object):
         assert signalX.shape[1] == self.dataset_params['seq_length']
         assert signalX.shape[2] == self.num_input_marks
 
-
-        Y = self.model.predict(signalX)
+        if self.model_library == 'keras':
+            Y = self.model.predict(signalX)
+        elif self.model_library == 'pytorch':
+            Y = self.model(signalX)
 
         assert Y.shape[0] == num_examples
         assert Y.shape[2] == self.num_output_marks
@@ -907,6 +995,37 @@ class SeqToPoint(SeqModel):
             if model_params['predict_binary_output']:
                 model.add(Activation('sigmoid'))
 
+        elif model_params['model_type'] == 'coda':
+            num_filters = model_params['num_filters']
+            filter_length = model_params['filter_length']
+            seq_length = self.dataset_params['seq_length']
+
+            model = nn.Sequential()
+
+            model.add(
+                nn.Conv1d(
+                    in_channels=self.num_input_marks,
+                    out_channels=num_filters,
+                    kernel_size=filter_length,
+                    padding=filter_length // 2))
+
+            model.add(nn.ReLU())
+
+            model.add(
+                nn.Conv1d(
+                    in_channels=num_filters,
+                    out_channels=self.num_output_marks,
+                    kernel_size=seq_length,
+                    padding=0))
+
+            if model_params['predict_binary_output']:
+                model.add(nn.Sigmoid())
+            else:
+                model.add(nn.ReLU())
+
+        elif model_params['model_type'] == 'atac':
+            pass
+
         else:
             raise Exception("Model type not recognized")
 
@@ -964,8 +1083,8 @@ class SeqToPoint(SeqModel):
         and passes it through the model, 
         returning an output matrix of num_bins x num_output_marks.
         """
-        if ('lrnn' not in self.model_params['model_type']) and ('cnn' not in self.model_params['model_type']):
-            raise NotImplementedError
+        # if ('lrnn' not in self.model_params['model_type']) and ('cnn' not in self.model_params['model_type']):
+        #     raise NotImplementedError
 
         # We have to do some zero-padding on the input sequences before we pass them to the 
         # convolutional models defined in SeqToPoint. 
@@ -997,7 +1116,11 @@ class SeqToPoint(SeqModel):
             signalX_pad, 
             [1, signalX_pad.shape[0], signalX_pad.shape[1]])
 
-        Y = self.model.predict(signalX)
+        if self.model_library == 'keras':
+            Y = self.model.predict(signalX)
+        elif self.model_library == 'pytorch':
+            Y = self.model(signalX)
+
         Y = Y[0]
 
         assert Y.shape[0] == num_bins

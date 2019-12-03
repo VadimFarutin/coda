@@ -30,16 +30,19 @@ def test_GM18526():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [True, False]:    
                 for output_mark in GM_MARKS:                            
+                    model_type = 'coda'
+                    loss = 'binary_crossentropy' if predict_binary_output else 'MSE'
 
                     model_params = modelTemplates.make_model_params(
-                        model_library='keras',
+                        model_library='pytorch',
                         model_class='SeqToPoint',
-                        model_type='cnn',
+                        model_type=model_type,
                         model_specific_params={
                             'num_filters': 6,
                             'filter_length': 51
                         },
-                        compile_params={            
+                        compile_params={
+                            'loss': loss,
                             'optimizer': 'adagrad'
                         },
                         dataset_params={
@@ -58,15 +61,18 @@ def test_GM18526():
                         train_params={
                             'nb_epoch': 30,
                             'batch_size': 100
+                            'validation_split': 0.2
                         },
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=True)
 
                     group = "peaks" if predict_binary_output else "signal"
+                    name = model_type + "_" + output_mark
                     # Initilize a new wandb run
-                    wandb.init(entity="vadim-farutin", project="coda",
-                               config=model_params, reinit=True, group=group)
+                    wandb.init(entity="vadim-farutin", project="coda", name=name,
+                               reinit=True,
+                               config=model_params, group=group, tags=[output_mark, model_type])
                     # wandb.watch_called = False # Re-run the model without restarting the runtime, unnecessary after our next release
 
                     results = run_model(model_params)
@@ -107,8 +113,8 @@ def test_GM18526():
                         wandb.run.summary['test_genome_dn_peaks_true_var'] = results['test_results'][0]['genome']['dn_peaks']['chr1']['true_var']
                         wandb.run.summary['test_genome_dn_peaks_pearsonR'] = results['test_results'][0]['genome']['dn_peaks']['chr1']['pearsonR']
 
-                    # wandb.join()
-                    wandb.uninit()
+                    wandb.join()
+                    # wandb.uninit()
 
 
 if __name__ == '__main__':
