@@ -332,10 +332,15 @@ class SeqModel(object):
 
             wandbcallback = WandbCallback()
 
+            if self.model_params['train_params']['wandb_log']:
+                callbacks = [checkpointer, earlystopper, wandbcallback]
+            else:
+                callbacks = [checkpointer, earlystopper]
+
             self.hist = self.model.fit(
                 train_inputs_X,
                 train_Y,
-                callbacks=[checkpointer, earlystopper, wandbcallback],
+                callbacks=callbacks,
                 **self.model_params['train_params'])
 
             # Store training history for Keras models
@@ -407,8 +412,9 @@ class SeqModel(object):
                 loss_values.append(loss.item())
 
             epoch_train_loss = np.mean(loss_values)
-            hist['loss'].append(epoch_train_loss)
-            wandb.log({'loss': epoch_train_loss})
+            hist['loss'].append(float(epoch_train_loss))
+            if self.model_params['train_params']['wandb_log']:
+                wandb.log({'loss': epoch_train_loss}, step=epoch)
 
             self.model.eval()
             with torch.no_grad():
@@ -419,10 +425,10 @@ class SeqModel(object):
                     val_loss_values.append(loss.item())
 
                 epoch_val_loss = np.mean(val_loss_values)
-                hist['val_loss'].append(epoch_val_loss)
-                wandb.log({'val_loss': epoch_val_loss})
-
-                wandb.log({'epoch': epoch})
+                hist['val_loss'].append(float(epoch_val_loss))
+                if self.model_params['train_params']['wandb_log']:
+                    wandb.log({'val_loss': epoch_val_loss}, step=epoch)
+                    wandb.log({'epoch': epoch}, step=epoch)
 
                 if epoch > 0 and hist['val_loss'][-2] <= epoch_val_loss:
                     earlystopper_patience -= 1
