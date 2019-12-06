@@ -29,6 +29,7 @@ from torch.utils.data.dataloader import DataLoader
 import wandb
 from wandb.keras import WandbCallback
 
+from atacWorksModel import AtacWorksModel
 from dataWithLabelsDataset import DataWithLabelsDataset
 from kerasFormatConverter import KerasFormatConverter
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
@@ -352,6 +353,8 @@ class SeqModel(object):
         elif self.model_library == 'pytorch':
             if self.model_params['compile_params']['optimizer'] == 'adagrad':
                 optimizer = optim.Adagrad(self.model.parameters())
+            elif self.model_params['compile_params']['optimizer'] == 'adam':
+                optimizer = optim.Adam(self.model.parameters())
             if self.model_params['compile_params']['loss'] == 'binary_crossentropy':
                 loss_function = torch.nn.modules.loss.BCELoss()
             elif self.model_params['compile_params']['loss'] == 'MSE':
@@ -1023,7 +1026,17 @@ class SeqToPoint(SeqModel):
                 KerasFormatConverter())
 
         elif model_params['model_type'] == 'atac':
-            pass
+            num_filters = model_params['num_filters']
+            filter_length = model_params['filter_length']
+            seq_length = self.dataset_params['seq_length']
+            predict_binary_output = model_params['predict_binary_output']
+
+            model = AtacWorksModel(predict_binary_output=predict_binary_output,
+                                   interval_size=seq_length,
+                                   in_channels=self.num_input_marks,
+                                   out_channels=self.num_output_marks,
+                                   num_filters=num_filters,
+                                   kernel_size=filter_length)
 
         else:
             raise Exception("Model type not recognized")
