@@ -30,6 +30,7 @@ import wandb
 from wandb.keras import WandbCallback
 
 from dataWithLabelsDataset import DataWithLabelsDataset
+from kerasFormatConverter import KerasFormatConverter
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
 from dataset import DatasetEncoder
 import evaluations
@@ -397,10 +398,10 @@ class SeqModel(object):
                 data, labels = batch_data
                 optimizer.zero_grad()
                 output = self.model(data)
-                loss = loss_function(labels, output)
+                loss = loss_function(output, labels.float())
                 loss.backward()
                 optimizer.step()
-                loss_values.append(loss)
+                loss_values.append(loss.item())
 
             epoch_train_loss = np.mean(loss_values)
             hist['loss'].append(epoch_train_loss)
@@ -411,8 +412,8 @@ class SeqModel(object):
                 for batch_data in val_loader:
                     data, labels = batch_data
                     output = self.model(data)
-                    loss = loss_function(labels, output)
-                    val_loss_values.append(loss)
+                    loss = loss_function(output, labels.float())
+                    val_loss_values.append(loss.item())
 
                 epoch_val_loss = np.mean(val_loss_values)
                 hist['val_loss'].append(epoch_val_loss)
@@ -899,7 +900,7 @@ class SeqModel(object):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
-            Y = self.model(signalX)
+            Y = self.model(torch.from_numpy(signalX).float()).detach().numpy()
 
         assert Y.shape[0] == num_examples
         assert Y.shape[2] == self.num_output_marks
@@ -1000,28 +1001,26 @@ class SeqToPoint(SeqModel):
             filter_length = model_params['filter_length']
             seq_length = self.dataset_params['seq_length']
 
-            model = nn.Sequential()
+            if model_params['predict_binary_output']:
+                last_activation = nn.Sigmoid()
+            else:
+                last_activation = nn.ReLU()
 
-            model.add(
+            model = nn.Sequential(
+                KerasFormatConverter(),
                 nn.Conv1d(
                     in_channels=self.num_input_marks,
                     out_channels=num_filters,
                     kernel_size=filter_length,
-                    padding=filter_length // 2))
-
-            model.add(nn.ReLU())
-
-            model.add(
+                    padding=filter_length // 2),
+                nn.ReLU(),
                 nn.Conv1d(
                     in_channels=num_filters,
                     out_channels=self.num_output_marks,
                     kernel_size=seq_length,
-                    padding=0))
-
-            if model_params['predict_binary_output']:
-                model.add(nn.Sigmoid())
-            else:
-                model.add(nn.ReLU())
+                    padding=0),
+                last_activation,
+                KerasFormatConverter())
 
         elif model_params['model_type'] == 'atac':
             pass
@@ -1119,7 +1118,7 @@ class SeqToPoint(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
-            Y = self.model(signalX)
+            Y = self.model(torch.from_numpy(signalX).float()).detach().numpy()
 
         Y = Y[0]
 
