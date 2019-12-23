@@ -1,4 +1,5 @@
 import os
+import torch
 
 ### Variables to set
 
@@ -100,6 +101,7 @@ MM9_CHROM_SIZES = {
 BIN_SIZE = 25
 GENOME_BATCH_SIZE = 50000
 NUM_BASES = 4
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 GM_CELL_LINES = ['GM12878', 'GM19239', 'GM10847', 'GM18505', 'GM18526', 'GM18951', 'GM2610']
 GM_FACTORS = ['H3K27AC','H3K27ME3', 'H3K36ME3','H3K4ME1', 'H3K4ME3', 'INPUT']

@@ -37,9 +37,9 @@ from dataset import DatasetEncoder
 import evaluations
 from dataNormalizer import DataNormalizer
 
-from diConstants import (BASE_ROOT, MODELS_ROOT, WEIGHTS_ROOT, 
+from diConstants import (BASE_ROOT, MODELS_ROOT, WEIGHTS_ROOT,
                          RESULTS_ROOT, LOSS_ROOT, HIST_ROOT, EVAL_ROOT, RESULTS_BIGWIG_ROOT,
-                         BIN_SIZE, GENOME_BATCH_SIZE, NUM_BASES)
+                         BIN_SIZE, GENOME_BATCH_SIZE, NUM_BASES, DEVICE)
 
 
 
@@ -356,6 +356,8 @@ class SeqModel(object):
                 f.write(json.dumps(self.hist.history))
 
         elif self.model_library == 'pytorch':
+            self.model = self.model.to(DEVICE)
+
             if self.model_params['compile_params']['optimizer'] == 'adagrad':
                 optimizer = optim.Adagrad(self.model.parameters())
             elif self.model_params['compile_params']['optimizer'] == 'adam':
@@ -403,7 +405,7 @@ class SeqModel(object):
 
             self.model.train()
             for batch_data in train_loader:
-                data, labels = batch_data
+                data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
                 optimizer.zero_grad()
                 output = self.model(data)
                 loss = loss_function(output, labels.float())
@@ -419,7 +421,7 @@ class SeqModel(object):
             self.model.eval()
             with torch.no_grad():
                 for batch_data in val_loader:
-                    data, labels = batch_data
+                    data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
                     output = self.model(data)
                     loss = loss_function(output, labels.float())
                     val_loss_values.append(loss.item())
@@ -909,7 +911,8 @@ class SeqModel(object):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
-            Y = self.model(torch.from_numpy(signalX).float()).detach().numpy()
+            X = torch.from_numpy(signalX).float().to(DEVICE)
+            Y = self.model(X).detach().cpu().numpy()
 
         assert Y.shape[0] == num_examples
         assert Y.shape[2] == self.num_output_marks
@@ -1137,7 +1140,8 @@ class SeqToPoint(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
-            Y = self.model(torch.from_numpy(signalX).float()).detach().numpy()
+            X = torch.from_numpy(signalX).float().to(DEVICE)
+            Y = self.model(X).detach().cpu().numpy()
 
         Y = Y[0]
 
