@@ -11,7 +11,7 @@ import wandb
 from diConstants import (HG19_ALL_CHROMS, MM9_ALL_CHROMS,
     HG19_TRAIN_CHROMS, MM9_TRAIN_CHROMS,
     VALID_CHROMS, TEST_CHROMS) 
-from model_preset_params import MODEL_PRESET_PARAMS
+from modelPresetParams import MODEL_PRESET_PARAMS
 
 import models
 import modelTemplates
