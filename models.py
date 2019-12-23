@@ -30,6 +30,7 @@ import wandb
 from wandb.keras import WandbCallback
 
 from atacWorksModel import AtacWorksModel
+from LSTMModel import LSTMModel
 from dataWithLabelsDataset import DataWithLabelsDataset
 from kerasFormatConverter import KerasFormatConverter
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
@@ -1165,6 +1166,28 @@ class SeqToSeq(SeqModel):
 
         super(SeqToSeq, self).__init__(model_params)
 
+        if model_params['model_type'] == 'lstm':
+            predict_binary_output = model_params['predict_binary_output']
+            hidden_size = model_params['hidden_size']
+            num_layers = model_params['num_layers']
+            bidirectional = model_params['bidirectional']
+            dropout = model_params['dropout']
+
+            model = LSTMModel(
+                predict_binary_output=predict_binary_output,
+                in_channels=self.num_input_marks,
+                out_channels=self.num_output_marks,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                bidirectional=bidirectional,
+                p_dropout=dropout
+            )
+
+        else:
+            raise Exception("Model type not recognized")
+
+        self.model = model
+        self.save_model_params()
 
     def process_X(self, X):
         """
