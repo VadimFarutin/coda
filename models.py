@@ -170,8 +170,11 @@ class SeqModel(object):
         Given model_params, looks at the model_class in it and 
         returns a copy of the appropriate subclass of SeqModel.
         """
-        
-        m = SeqToPoint(model_params)
+
+        if model_params['model_class'] == 'SeqToSeq':
+            m = SeqToSeq(model_params)
+        elif model_params['model_class'] == 'SeqToPoint':
+            m = SeqToPoint(model_params)
 
         return m
 
@@ -1148,7 +1151,72 @@ class SeqToPoint(SeqModel):
         assert Y.shape[0] == num_bins
         assert Y.shape[1] == self.num_output_marks
 
-        return Y 
+        return Y
+
+
+
+
+class SeqToSeq(SeqModel):
+
+    def __init__(self, model_params):
+        """
+        Initializes the correct model based on model_params.
+        """
+
+        super(SeqToSeq, self).__init__(model_params)
+
+
+    def process_X(self, X):
+        """
+        See documentation in SeqModel.
+        Takes in a matrix X of shape num_examples x seq_length x num_histone_marks,
+        returned from extractDataset.load_seq_dataset, and processes it as necessary
+        for the type of model. X should be the input data that is fed to the model.
+        """
+
+        return X
+
+    def process_Y(self, Y):
+        """
+        See documentation in SeqModel.
+        Takes in a matrix Y of shape num_examples x seq_length x num_histone_marks,
+        returned from extractDataset.load_seq_dataset, and processes it as necessary
+        for the type of model. Y should represent the desired output of the model.
+        """
+
+        return Y
+
+    def predict_samples(self, signalX):
+        """
+        Takes in input signalX of whatever dimensions are needed for the model, which
+        is subclass-dependent. It passes it through the model and returns the output matrix.
+        """
+        Y = self.SeqToX_predict_samples(signalX)
+
+        return Y
+
+
+    def predict_sequence(self, signalX):
+        """
+        Takes in input matrix signalX of dimensions num_bins x num_input_marks
+        and passes it through the model,
+        returning an output matrix of num_bins x num_output_marks.
+        """
+        num_bins = signalX.shape[0]
+        num_input_marks = signalX.shape[1]
+
+        if self.model_library == 'keras':
+            Y = self.model.predict(signalX)
+        elif self.model_library == 'pytorch':
+            X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(DEVICE)
+            Y = self.model(X).detach().cpu().numpy()
+
+        Y = Y[0]
+
+        assert Y.shape[0] == num_bins
+        assert Y.shape[1] == self.num_output_marks
+
+        return Y
 
 
 
