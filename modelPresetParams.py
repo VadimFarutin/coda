@@ -41,4 +41,20 @@ MODEL_PRESET_PARAMS = {
             'optimizer': 'adam'
         },
     },
+    'lstm': {
+        'model_library': 'pytorch',
+        'model_class': 'SeqToSeq',
+        'model_type': 'lstm',
+        'model_specific_params': {
+            'hidden_size': 64,
+            'num_layers': 1,
+            'bidirectional': True,
+            'dropout': 0.0
+        },
+        'compile_params': {
+            'regression_loss': 'MSE',
+            'class_loss': 'binary_crossentropy',
+            'optimizer': 'adam'
+        },
+    },
 }
