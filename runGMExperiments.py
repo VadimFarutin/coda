@@ -32,7 +32,7 @@ def test_GM18526():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [True, False]:
                 for output_mark in GM_MARKS:                            
-                    model_type = 'atac'
+                    model_type = 'encoder-decoder'
                     wandb_log = False
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \

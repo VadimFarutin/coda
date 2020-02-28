@@ -57,4 +57,21 @@ MODEL_PRESET_PARAMS = {
             'optimizer': 'adam'
         },
     },
+    'encoder-decoder': {
+        'model_library': 'pytorch',
+        'model_class': 'SeqToSeq',
+        'model_type': 'encoder-decoder',
+        'model_specific_params': {
+            'hidden_size': 64,
+            'num_layers': 1,
+            'bidirectional': False,
+            'teacher_forcing': True,
+            'dropout': 0.0
+        },
+        'compile_params': {
+            'regression_loss': 'MSE',
+            'class_loss': 'binary_crossentropy',
+            'optimizer': 'adam'
+        },
+    },
 }

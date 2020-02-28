@@ -31,6 +31,7 @@ from wandb.keras import WandbCallback
 
 from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
+from EncoderDecoder import EncoderDecoder
 from dataWithLabelsDataset import DataWithLabelsDataset
 from kerasFormatConverter import KerasFormatConverter
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
@@ -411,8 +412,14 @@ class SeqModel(object):
             for batch_data in train_loader:
                 data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
                 optimizer.zero_grad()
-                output = self.model(data)
+
+                if self.model_params['model_type'] == 'encoder-decoder':
+                    output = self.model(data, labels)
+                else:
+                    output = self.model(data)
+
                 loss = loss_function(output, labels.float())
+
                 loss.backward()
                 optimizer.step()
                 loss_values.append(loss.item())
@@ -1182,7 +1189,26 @@ class SeqToSeq(SeqModel):
                 bidirectional=bidirectional,
                 p_dropout=dropout
             )
+        elif model_params['model_type'] == 'encoder-decoder':
+            predict_binary_output = model_params['predict_binary_output']
+            hidden_size = model_params['hidden_size']
+            num_layers = model_params['num_layers']
+            bidirectional = model_params['bidirectional']
+            dropout = model_params['dropout']
+            teacher_forcing = model_params['teacher_forcing']
+            seq_length = self.dataset_params['seq_length']
 
+            model = EncoderDecoder(
+                predict_binary_output=predict_binary_output,
+                in_channels=self.num_input_marks,
+                out_channels=self.num_output_marks,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                bidirectional=bidirectional,
+                p_dropout=dropout,
+                teacher_forcing=teacher_forcing,
+                seq_length=seq_length
+            )
         else:
             raise Exception("Model type not recognized")
 
