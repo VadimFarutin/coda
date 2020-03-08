@@ -28,6 +28,7 @@ from torch.utils.data.dataloader import DataLoader
 
 import wandb
 from wandb.keras import WandbCallback
+from tqdm.auto import tqdm
 
 from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
@@ -404,7 +405,7 @@ class SeqModel(object):
         earlystopper_patience = 3
         hist = {'loss': [], 'val_loss': []}
 
-        for epoch in range(nb_epoch):
+        for epoch in tqdm(range(nb_epoch)):
             loss_values = []
             val_loss_values = []
 
@@ -751,7 +752,7 @@ class SeqModel(object):
             test_Y_pred = np.empty(test_Y.shape)
             test_X = self.normalizer.transform(test_X)        
 
-            for batch in range(num_batches):
+            for batch in tqdm(range(num_batches)):
                 start_idx = batch * GENOME_BATCH_SIZE
                 end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
                 test_Y_pred[start_idx : end_idx] = self.predict_sequence(
