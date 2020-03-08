@@ -922,8 +922,10 @@ class SeqModel(object):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
-            X = torch.from_numpy(signalX).float().to(DEVICE)
-            Y = self.model(X).detach().cpu().numpy()
+            self.model.eval()
+            with torch.no_grad():
+                X = torch.from_numpy(signalX).float().to(DEVICE)
+                Y = self.model(X).detach().cpu().numpy()
 
         assert Y.shape[0] == num_examples
         assert Y.shape[2] == self.num_output_marks
@@ -1151,8 +1153,10 @@ class SeqToPoint(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
-            X = torch.from_numpy(signalX).float().to(DEVICE)
-            Y = self.model(X).detach().cpu().numpy()
+            self.model.eval()
+            with torch.no_grad():
+                X = torch.from_numpy(signalX).float().to(DEVICE)
+                Y = self.model(X).detach().cpu().numpy()
 
         Y = Y[0]
 
@@ -1257,8 +1261,10 @@ class SeqToSeq(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
-            X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(DEVICE)
-            Y = self.model(X).detach().cpu().numpy()
+            self.model.eval()
+            with torch.no_grad():
+                X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(DEVICE)
+                Y = self.model(X).detach().cpu().numpy()
 
         Y = Y[0]
 
