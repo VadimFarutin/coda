@@ -10,9 +10,9 @@ class Encoder(nn.Module):
                  hidden_size, num_layers, bidirectional, dropout):
         super(Encoder, self).__init__()
 
-        self.embedding = nn.Embedding(in_channels, hidden_size)
+        # self.embedding = nn.Embedding(in_channels, hidden_size)
 
-        self.lstm = nn.LSTM(input_size=hidden_size,
+        self.lstm = nn.LSTM(input_size=in_channels,
                             hidden_size=hidden_size,
                             num_layers=num_layers,
                             bidirectional=bidirectional,
@@ -20,7 +20,9 @@ class Encoder(nn.Module):
                             dropout=dropout)
 
     def forward(self, x):
-        output = self.embedding(x)
-        output, final_hidden = self.lstm(output)
+        # output = self.embedding(x)
+        # print("encoder input ", x.shape)
+        output, final_hidden = self.lstm(x)
+        # print("encoder output ", output.shape, final_hidden[0].shape, final_hidden[1].shape)
 
         return output, final_hidden

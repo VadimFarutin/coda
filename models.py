@@ -1196,7 +1196,7 @@ class SeqToSeq(SeqModel):
             bidirectional = model_params['bidirectional']
             dropout = model_params['dropout']
             teacher_forcing = model_params['teacher_forcing']
-            seq_length = self.dataset_params['seq_length']
+            # seq_length = self.dataset_params['seq_length']
 
             model = EncoderDecoder(
                 predict_binary_output=predict_binary_output,
@@ -1207,7 +1207,7 @@ class SeqToSeq(SeqModel):
                 bidirectional=bidirectional,
                 p_dropout=dropout,
                 teacher_forcing=teacher_forcing,
-                seq_length=seq_length
+                # seq_length=seq_length
             )
         else:
             raise Exception("Model type not recognized")
