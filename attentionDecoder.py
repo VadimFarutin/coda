@@ -1,0 +1,107 @@
+import numpy as np
+
+import torch
+import torch.nn as nn
+
+from kerasFormatConverter import KerasFormatConverter
+from diConstants import DEVICE
+
+from attention import Attention
+
+
+class AttentionDecoder(nn.Module):
+    def __init__(self, predict_binary_output,
+                 in_channels, out_channels,
+                 hidden_size, num_layers, bidirectional, p_dropout,
+                 teacher_forcing):
+        super(AttentionDecoder, self).__init__()
+
+        # peak calls in [0..1], signal in [-1..1] after DataNormalizer in mode "01"
+        SOS_value = -1.0 if predict_binary_output else -2
+        EOS_value = 2.0 if predict_binary_output else 2
+
+        self.SOS = torch.tensor([SOS_value]).repeat(out_channels).to(DEVICE)
+        self.EOS = torch.tensor([EOS_value]).repeat(out_channels).to(DEVICE)
+
+        self.teacher_forcing = teacher_forcing
+        self.out_channels = out_channels
+        self.hidden_size = hidden_size
+        self.bidirectional = bidirectional
+        self.D = 10
+
+        # self.embedding = nn.Embedding(out_channels, hidden_size)
+        self.attention = Attention(hidden_size=hidden_size,
+                                   key_size=hidden_size * 2 if bidirectional else hidden_size,
+                                   query_size=hidden_size)
+
+        self.lstm = nn.LSTM(input_size=out_channels + hidden_size * 2 if bidirectional else hidden_size,
+                            hidden_size=hidden_size,
+                            num_layers=num_layers,
+                            bidirectional=bidirectional,
+                            batch_first=True,
+                            dropout=p_dropout)
+
+        self.fc = nn.Linear(in_features=hidden_size * 2 if bidirectional else hidden_size,
+                            out_features=out_channels)
+
+        if predict_binary_output:
+            self.last_activation = nn.Sigmoid()
+        else:
+            self.last_activation = nn.ReLU()
+
+
+    def forward_step(self, input, hidden, encoder_output, projection_key, projection_key_mask, encoder_output_mask):
+        query = hidden[0][-1].unsqueeze(1)
+        projection_key_masked = projection_key.gather(1, projection_key_mask)
+        encoder_output_masked = encoder_output.gather(1, encoder_output_mask)
+        # print(encoder_output_masked.shape)
+        context = self.attention(query=query, proj_key=projection_key_masked, value=encoder_output_masked, mask=None)
+        lstm_input = torch.cat([input, context], dim=2)
+
+        y_hat, last_hidden = self.lstm(lstm_input, hidden)
+        y_hat = self.fc(y_hat)
+        y_hat = self.last_activation(y_hat)
+
+        return y_hat, last_hidden
+
+    def forward(self, encoder_output, hidden, target=None, seq_length=0):
+        last_hidden = hidden
+        batch_size = hidden[0].shape[1]
+        y_hat = torch.tensor([]).to(DEVICE)
+        y = self.SOS.repeat(batch_size, 1, 1).float()
+        projection_key = self.attention.key_layer(encoder_output)
+
+        if target is None or not self.teacher_forcing:
+            for i in range(seq_length):
+                projection_key_mask2 = torch.from_numpy(np.arange(i - self.D, i + self.D + 1)).to(DEVICE)\
+                    .repeat(self.hidden_size, 1)\
+                    .transpose(0, 1)\
+                    .repeat(batch_size, 1, 1).clamp(0, seq_length - 1).long()
+
+                encoder_output_mask2 = torch.from_numpy(np.arange(i - self.D, i + self.D + 1)).to(DEVICE)\
+                    .repeat(self.hidden_size * 2 if self.bidirectional else self.hidden_size, 1)\
+                    .transpose(0, 1)\
+                    .repeat(batch_size, 1, 1).clamp(0, seq_length - 1).long()
+
+                y_hat_i, last_hidden = self.forward_step(y, last_hidden, encoder_output, projection_key, projection_key_mask2, encoder_output_mask2)
+                y_hat = torch.cat((y_hat, y_hat_i), dim=1)
+
+                y = y_hat_i  # .detach()
+        else:
+            for i in range(seq_length):
+                projection_key_mask2 = torch.from_numpy(np.arange(i - self.D, i + self.D + 1)).to(DEVICE) \
+                    .repeat(self.hidden_size, 1) \
+                    .transpose(0, 1) \
+                    .repeat(batch_size, 1, 1).clamp(0, seq_length - 1).long()
+
+                encoder_output_mask2 = torch.from_numpy(np.arange(i - self.D, i + self.D + 1)).to(DEVICE) \
+                    .repeat(self.hidden_size * 2 if self.bidirectional else self.hidden_size, 1) \
+                    .transpose(0, 1) \
+                    .repeat(batch_size, 1, 1).clamp(0, seq_length - 1).long()
+
+                y_hat_i, last_hidden = self.forward_step(y, last_hidden, encoder_output, projection_key, projection_key_mask2, encoder_output_mask2)
+                y_hat = torch.cat((y_hat, y_hat_i), dim=1)
+
+                y = target.gather(1, torch.tensor([i] * batch_size).view(-1, 1, 1).to(DEVICE))
+
+        return y_hat

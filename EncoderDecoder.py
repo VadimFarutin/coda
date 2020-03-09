@@ -4,6 +4,7 @@ import torch.nn as nn
 from kerasFormatConverter import KerasFormatConverter
 from Encoder import Encoder
 from Decoder import Decoder
+from attentionDecoder import AttentionDecoder
 
 
 class EncoderDecoder(nn.Module):
@@ -17,10 +18,10 @@ class EncoderDecoder(nn.Module):
 
         self.encoder = Encoder(in_channels, out_channels,
                                hidden_size, num_layers, bidirectional, p_dropout)
-        self.decoder = Decoder(predict_binary_output,
-                               in_channels, out_channels,
-                               hidden_size, num_layers, bidirectional, p_dropout,
-                               teacher_forcing)
+        self.decoder = AttentionDecoder(predict_binary_output,
+                                        in_channels, out_channels,
+                                        hidden_size, num_layers, bidirectional, p_dropout,
+                                        teacher_forcing)
 
         # self.dropout = nn.Dropout(p_dropout)
         # self.fc = nn.Linear(in_features=hidden_size,
@@ -37,8 +38,11 @@ class EncoderDecoder(nn.Module):
         # x = self.converter(x)
         # print(x.shape)
 
-        _, encoder_final_hidden = self.encoder(x)
-        decoder_output = self.decoder(hidden=encoder_final_hidden, target=y, seq_length=x.shape[1])
+        encoder_output, encoder_final_hidden = self.encoder(x)
+        decoder_output = self.decoder(encoder_output=encoder_output,
+                                      hidden=encoder_final_hidden,
+                                      target=y,
+                                      seq_length=x.shape[1])
 
         # x = self.dropout(x)
         # output = self.fc(decoder_output)
@@ -51,6 +55,9 @@ class EncoderDecoder(nn.Module):
         encoder_out = self.encoder(x)
         return encoder_out
 
-    def decode(self, x):
-        decoder_out = self.decoder(hidden=x, target=None, seq_length=x.shape[1])
+    def decode(self, encoder_output, x):
+        decoder_out = self.decoder(encoder_output=encoder_output,
+                                   hidden=x,
+                                   target=None,
+                                   seq_length=x.shape[1])
         return decoder_out

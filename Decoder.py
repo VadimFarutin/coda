@@ -47,7 +47,7 @@ class Decoder(nn.Module):
 
         return y_hat, last_hidden
 
-    def forward(self, hidden, target=None, seq_length=0):
+    def forward(self, encoder_output, hidden, target=None, seq_length=0):
         # print("decoder input ", hidden[0].shape, hidden[1].shape, target.shape)
 
         last_hidden = hidden
@@ -62,7 +62,7 @@ class Decoder(nn.Module):
             y_hat = torch.cat((y_hat, y_hat_i), dim=1)
 
             if target is None or not self.teacher_forcing:
-                y = y_hat_i.detach()
+                y = y_hat_i  # .detach()
             else:
                 y = target.gather(1, torch.tensor([i] * batch_size).view(-1, 1, 1))
 
