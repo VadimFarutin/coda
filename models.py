@@ -411,6 +411,7 @@ class SeqModel(object):
 
         checkpoint_path = os.path.join(WEIGHTS_ROOT, '%s-weights.pt' % self.model_stamp)
         earlystopper_patience = 3
+        best_epoch_val_loss = None
         hist = {'loss': [], 'val_loss': []}
 
         for epoch in tqdm(range(nb_epoch)):
@@ -452,13 +453,12 @@ class SeqModel(object):
                     wandb.log({'val_loss': epoch_val_loss}, step=epoch)
                     wandb.log({'epoch': epoch}, step=epoch)
 
-                if epoch > 0 and hist['val_loss'][-2] <= epoch_val_loss:
-                    earlystopper_patience -= 1
-                else:
+                if best_epoch_val_loss is None or best_epoch_val_loss > epoch_val_loss:
+                    best_epoch_val_loss = epoch_val_loss
                     torch.save(self.model.state_dict(), checkpoint_path)
 
-                if earlystopper_patience == 0:
-                    break
+                # if earlystopper_patience == 0:
+                #     break
 
         return hist
 
