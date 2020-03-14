@@ -568,6 +568,7 @@ class SeqModel(object):
             start_idx = batch * batch_size
             end_idx = min((batch + 1) * batch_size, num_examples)
             Y_pred[start_idx : end_idx] = self.predict_samples(X[start_idx : end_idx])
+            # Y_pred[start_idx : end_idx] = self.predict_samples(X[start_idx : end_idx], torch.device('cpu'))
 
         if self.model_params['predict_binary_output']:
             print("%s samples - Predicted peaks vs. true peaks:" % train_or_test)
@@ -757,7 +758,9 @@ class SeqModel(object):
                 end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
                 test_Y_pred[start_idx : end_idx] = self.predict_sequence(
                     test_X[start_idx : end_idx])
-            
+                # test_Y_pred[start_idx : end_idx] = self.predict_sequence(
+                #     test_X[start_idx : end_idx], torch.device('cpu'))
+
             print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
             denoised_results_all[chrom] = evaluations.compare(
                 test_Y_pred, 
@@ -908,7 +911,7 @@ class SeqModel(object):
         raise NotImplementedError
 
 
-    def SeqToX_predict_samples(self, signalX):
+    def SeqToX_predict_samples(self, signalX, device=None):
         """
         Common code used in the predict_samples() method defined in SeqToSeq and SeqToPoint subclasses.
         """
@@ -923,9 +926,12 @@ class SeqModel(object):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
+            if device is None:
+                device = DEVICE
+            self.model = self.model.to(device)
             self.model.eval()
             with torch.no_grad():
-                X = torch.from_numpy(signalX).float().to(DEVICE)
+                X = torch.from_numpy(signalX).float().to(device)
                 Y = self.model(X).detach().cpu().numpy()
 
         assert Y.shape[0] == num_examples
@@ -934,7 +940,7 @@ class SeqModel(object):
         return Y
 
 
-    def predict_samples(self, signalX):
+    def predict_samples(self, signalX, device=None):
         """
         Takes in input signalX of whatever dimensions are needed for the model, which
         is subclass-dependent. It passes it through the model and returns the output matrix.
@@ -943,7 +949,7 @@ class SeqModel(object):
         raise NotImplementedError
 
 
-    def predict_sequence(self, signalX):
+    def predict_sequence(self, signalX, device=None):
         """
         Takes in input matrix signalX of dimensions num_bins x num_input_marks 
         and passes it through the model, 
@@ -1100,19 +1106,19 @@ class SeqToPoint(SeqModel):
         return Y[:, mid:mid+1, :]
 
 
-    def predict_samples(self, signalX):
+    def predict_samples(self, signalX, device=None):
         """
         Takes in input matrix signalX, of shape num_examples x seq_length x num_input_marks             
         and feeds it through the model, returning an output matrix of shape
         num_examples x 1 x num_output_marks.
         """
-        Y = self.SeqToX_predict_samples(signalX)
+        Y = self.SeqToX_predict_samples(signalX, device=device)
         assert Y.shape[1] == 1
 
         return Y        
 
 
-    def predict_sequence(self, signalX):
+    def predict_sequence(self, signalX, device=None):
         """
         Takes in input matrix signalX of dimensions num_bins x num_input_marks 
         and passes it through the model, 
@@ -1154,9 +1160,12 @@ class SeqToPoint(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
+            if device is None:
+                device = DEVICE
+            self.model = self.model.to(device)
             self.model.eval()
             with torch.no_grad():
-                X = torch.from_numpy(signalX).float().to(DEVICE)
+                X = torch.from_numpy(signalX).float().to(device)
                 Y = self.model(X).detach().cpu().numpy()
 
         Y = Y[0]
@@ -1240,17 +1249,17 @@ class SeqToSeq(SeqModel):
 
         return Y
 
-    def predict_samples(self, signalX):
+    def predict_samples(self, signalX, device=None):
         """
         Takes in input signalX of whatever dimensions are needed for the model, which
         is subclass-dependent. It passes it through the model and returns the output matrix.
         """
-        Y = self.SeqToX_predict_samples(signalX)
+        Y = self.SeqToX_predict_samples(signalX, device=device)
 
         return Y
 
 
-    def predict_sequence(self, signalX):
+    def predict_sequence(self, signalX, device=None):
         """
         Takes in input matrix signalX of dimensions num_bins x num_input_marks
         and passes it through the model,
@@ -1262,10 +1271,18 @@ class SeqToSeq(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
+            if True:
+                device = DEVICE
+            self.model = self.model.to(device)
+            self.model.decoder.device = device
             self.model.eval()
             with torch.no_grad():
-                X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(DEVICE)
-                Y = self.model(X).detach().cpu().numpy()
+                if num_bins == 10000:
+                    X = torch.from_numpy(signalX).float().view(100, 100, num_input_marks).to(device)
+                else:
+                    X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
+                # X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
+                Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
 
         Y = Y[0]
 
