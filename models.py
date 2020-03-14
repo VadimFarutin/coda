@@ -419,9 +419,9 @@ class SeqModel(object):
             val_loss_values = []
 
             self.model.train()
-            for batch_data in train_loader:
-                data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
+            for batch_data in tqdm(train_loader):
                 optimizer.zero_grad()
+                data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
 
                 if self.model_params['model_type'] == 'encoder-decoder':
                     output = self.model(data, labels)
@@ -441,9 +441,11 @@ class SeqModel(object):
 
             self.model.eval()
             with torch.no_grad():
-                for batch_data in val_loader:
+                for batch_data in tqdm(val_loader):
                     data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
+
                     output = self.model(data)
+
                     loss = loss_function(output, labels.float())
                     val_loss_values.append(loss.item())
 
@@ -572,7 +574,7 @@ class SeqModel(object):
         # if predict_binary_output is true.
         Y_pred = np.empty(Y.shape)
 
-        for batch in range(num_batches):
+        for batch in tqdm(range(num_batches)):
             start_idx = batch * batch_size
             end_idx = min((batch + 1) * batch_size, num_examples)
             Y_pred[start_idx : end_idx] = self.predict_samples(X[start_idx : end_idx])
