@@ -8,6 +8,7 @@ import datetime
 import json
 import copy
 import math
+import random
 
 import numpy as np
 import pandas as pd
@@ -110,7 +111,10 @@ class SeqModel(object):
         # also sets the numpy random seed, so we need to reset it after loading the data.
         # We set a random seed of model_params['random_seed'] here 
         # and a random seed of model_params['random_seed'] + 42 right after loading the data.
+        os.environ['PYTHONHASHSEED'] = str(model_params['random_seed'])
+        random.seed(model_params['random_seed'])
         np.random.seed(model_params['random_seed'])
+        torch.manual_seed(model_params['random_seed'])
 
         self.model_library = model_params['model_library']
         if not (self.model_library in ['keras']):
@@ -254,7 +258,10 @@ class SeqModel(object):
             raise Exception("num_output_marks between model and data needs to agree")
 
         # See comment in __init__ about random seeds
+        os.environ['PYTHONHASHSEED'] = str(self.model_params['random_seed'] + 42)
+        random.seed(self.model_params['random_seed'] + 42)
         np.random.seed(self.model_params['random_seed'] + 42)
+        torch.manual_seed(self.model_params['random_seed'] + 42)
 
         return (X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY)
 
