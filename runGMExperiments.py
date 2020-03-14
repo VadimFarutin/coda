@@ -3,6 +3,7 @@
 # Map all scRNA stuff
 
 import os
+import time
 import copy
 import tempfile
 import json
@@ -16,10 +17,20 @@ from modelPresetParams import MODEL_PRESET_PARAMS
 import models
 import modelTemplates
 
-def run_model(model_params):
+
+def run_model(model_params, evaluate):
+    start = time.time()
     m = models.SeqModel.instantiate_model(model_params)
+    print("init done")
+    t1 = time.time()
     m.compile_and_train_model()
-    results = m.evaluate_model()
+    t2 = time.time()
+    results = None
+    if evaluate:
+        results = m.evaluate_model()
+    t3 = time.time()
+    print(f"Init: {t1 - start}, Train: {t2 - t1}, Evaluate: {t3 - t2}")
+
     return results
 
 # GM_MARKS = ['H3K27AC', 'H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
@@ -34,6 +45,7 @@ def test_GM18526():
                 for output_mark in GM_MARKS:                            
                     model_type = 'encoder-decoder'
                     wandb_log = False
+                    evaluate = True
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \
                            if predict_binary_output \
@@ -80,7 +92,7 @@ def test_GM18526():
                                    config=model_params, group=group, tags=[output_mark, model_type])
                         # wandb.watch_called = False # Re-run the model without restarting the runtime, unnecessary after our next release
 
-                    results = run_model(model_params)
+                    results = run_model(model_params, evaluate)
 
                     if wandb_log:
                         if predict_binary_output:
