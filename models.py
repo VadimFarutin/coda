@@ -343,9 +343,8 @@ class SeqModel(object):
             # of the model has not improved for [patience] epochs in a row.
             earlystopper = EarlyStopping(monitor='val_loss', patience=3, verbose=0)
 
-            wandbcallback = WandbCallback()
-
             if self.model_params['train_params']['wandb_log']:
+                wandbcallback = WandbCallback()
                 callbacks = [checkpointer, earlystopper, wandbcallback]
             else:
                 callbacks = [checkpointer, earlystopper]
@@ -354,7 +353,9 @@ class SeqModel(object):
                 train_inputs_X,
                 train_Y,
                 callbacks=callbacks,
-                **self.model_params['train_params'])
+                nb_epoch=self.model_params['train_params']['nb_epoch'],
+                batch_size=self.model_params['train_params']['batch_size'],
+                validation_split=self.model_params['train_params']['validation_split'])
 
             # Store training history for Keras models
             # Note that the "final training error" in self.hist.history is only approximate: 
