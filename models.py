@@ -1,7 +1,7 @@
 from __future__ import division
 from __future__ import print_function
 from __future__ import absolute_import
-from __future__ import unicode_literals  
+from __future__ import unicode_literals
 
 import os
 import datetime
@@ -147,15 +147,15 @@ class SeqModel(object):
 
         self.input_marks = model_params['input_marks']
         self.num_input_marks = len(self.input_marks)
-        
+
         self.output_marks = model_params['output_marks']
         self.num_output_marks = len(self.output_marks)
 
         assert(input_not_before_end(model_params['output_marks']))
         assert(input_not_before_end(model_params['input_marks']))
-        
+
         self.is_output_in_input = True
-        
+
 
         for output_mark in self.output_marks:
             if output_mark not in self.input_marks:
@@ -164,13 +164,12 @@ class SeqModel(object):
 
         if (self.model_params['predict_binary_output']) and ('INPUT' in self.output_marks):
             raise ValueError("Cannot predict peaks on INPUT.")
-            
+
         self.verbose = True
 
         print("Initialized model with parameters:")
         print(json.dumps(model_params, indent=4, cls=DatasetEncoder))
 
-        
     @staticmethod
     def instantiate_model(model_params):
         """
@@ -241,19 +240,19 @@ class SeqModel(object):
 
         This function resets the random seed.
         """
-        X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = dataset.load_seq_dataset(     
+        X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = dataset.load_seq_dataset(
             seq_length=self.dataset_params['seq_length'],
             input_marks=self.input_marks,
             output_marks=self.output_marks)
 
         if self.model_params['zero_out_non_bins']:
             peakPValueX = peakPValueX * peakBinaryX
-            peakPValueY = peakPValueY * peakBinaryY            
+            peakPValueY = peakPValueY * peakBinaryY
 
-        if ((self.num_input_marks != X.shape[2]) or 
+        if ((self.num_input_marks != X.shape[2]) or
             (self.num_input_marks != peakPValueX.shape[2] + ('INPUT' in self.input_marks))):
             raise Exception("num_input_marks between model and data needs to agree")
-        if ((self.num_output_marks != Y.shape[2]) or 
+        if ((self.num_output_marks != Y.shape[2]) or
             (self.num_output_marks != peakPValueY.shape[2] + ('INPUT' in self.output_marks))):
             raise Exception("num_output_marks between model and data needs to agree")
 
@@ -308,7 +307,7 @@ class SeqModel(object):
         If self.model is a Keras model, it also writes out model weights and 
         training history to disk.
         """
-        
+
         assert self.model
         assert self.model_params
 
@@ -321,8 +320,8 @@ class SeqModel(object):
         train_inputs_X = train_X
 
         if self.model_params['predict_binary_output']:
-            train_Y = peakBinaryY      
-        else: 
+            train_Y = peakBinaryY
+        else:
             train_Y = Y
 
         if self.model_library == 'keras':
@@ -335,8 +334,8 @@ class SeqModel(object):
             # save_best_only means that the model weights will be saved after every epoch
             # in which the validation error improves.
             checkpointer = ModelCheckpoint(
-                filepath=os.path.join(WEIGHTS_ROOT, '%s-weights.hdf5' % self.model_stamp), 
-                verbose=1, 
+                filepath=os.path.join(WEIGHTS_ROOT, '%s-weights.hdf5' % self.model_stamp),
+                verbose=1,
                 save_best_only=True)
 
             # EarlyStopping() is a Keras callback that stops training once the validation loss
@@ -506,7 +505,7 @@ class SeqModel(object):
         return None
 
 
-    def test_model_on_samples(self, dataset, train_or_test): 
+    def test_model_on_samples(self, dataset, train_or_test):
         """
         Evaluates the model on samples drawn from dataset.
         Returns a dictionary with keys orig_results and denoised_results, with values obtained
@@ -544,14 +543,14 @@ class SeqModel(object):
             if self.model_params['predict_binary_output']:
                 print("%s samples - Original peaks vs. true peaks:" % train_or_test)
                 orig_results = evaluations.compare(
-                    self.process_Y(peakPValueX[..., output_marks_idx]), 
-                    binaryY, 
+                    self.process_Y(peakPValueX[..., output_marks_idx]),
+                    binaryY,
                     predict_binary_output=True)
             else:
                 print("%s samples - Original:" % train_or_test)
                 orig_results = evaluations.compare(
-                    self.process_Y(X[..., output_marks_idx]), 
-                    Y, 
+                    self.process_Y(X[..., output_marks_idx]),
+                    Y,
                     predict_binary_output=False)
 
         # Then compare the true data with the output of the model
@@ -561,12 +560,12 @@ class SeqModel(object):
 
         # We have to batch the prediction so that the GPU doesn't run out of memory
         if 'batch_size' in self.model_params['train_params']:
-            batch_size = self.model_params['train_params']['batch_size'] 
+            batch_size = self.model_params['train_params']['batch_size']
         else:
             batch_size = 10000
         num_examples = X.shape[0]
         num_batches = int(math.ceil(1.0 * num_examples / batch_size))
-        
+
         # If predict_binary_output is true, then INPUT cannot be in output_marks, so
         # Y will have the same shape as binaryY. 
         # This is not necessarily true if predict_binary_output is false.
@@ -583,14 +582,14 @@ class SeqModel(object):
         if self.model_params['predict_binary_output']:
             print("%s samples - Predicted peaks vs. true peaks:" % train_or_test)
             denoised_results = evaluations.compare(Y_pred, binaryY, predict_binary_output=True)
-        else:            
+        else:
             print("%s samples - Denoised:" % train_or_test)
-            denoised_results = evaluations.compare(Y_pred, Y, predict_binary_output=False)        
+            denoised_results = evaluations.compare(Y_pred, Y, predict_binary_output=False)
 
         samples_results = {
             'orig': orig_results,
             'dn': denoised_results
-        }       
+        }
         return samples_results
 
 
@@ -604,35 +603,35 @@ class SeqModel(object):
         test dataset. Blacklisted regions have previously been zero-ed out in prepData.
         """
 
-        assert self.model        
+        assert self.model
 
         # only_chr1 controls whether genome-wide prediction is done on the whole genome, or just
         # on chr1 for speed.
         only_chr1 = self.dataset_params['only_chr1']
         # Load data   
-        test_X_all = dataset.load_genome(            
+        test_X_all = dataset.load_genome(
             "X",
             marks=self.input_marks,
-            only_chr1=only_chr1, 
+            only_chr1=only_chr1,
             peaks=False)
 
         if self.model_params['predict_binary_output']:
-            #if binary, want to use binary peak matrix as Y. 
-            #and noisy peak p-values as baseline. 
+            #if binary, want to use binary peak matrix as Y.
+            #and noisy peak p-values as baseline.
             assert('INPUT' not in self.output_marks)
-            test_Y_all, _ = dataset.load_binary_genome(                
+            test_Y_all, _ = dataset.load_binary_genome(
                 "Y",
                 marks=self.output_marks,
                 only_chr1=only_chr1)
 
-            noisy_peak_pvals_all = dataset.load_genome(                
+            noisy_peak_pvals_all = dataset.load_genome(
                 "X",
                 marks=self.output_marks,
-                only_chr1=only_chr1, 
+                only_chr1=only_chr1,
                 peaks=True)
 
             if self.model_params['zero_out_non_bins']:
-                noisy_peaks_all, _ = dataset.load_binary_genome(                    
+                noisy_peaks_all, _ = dataset.load_binary_genome(
                     "X",
                     marks=self.output_marks,
                     only_chr1=only_chr1)
@@ -641,11 +640,11 @@ class SeqModel(object):
                     noisy_peak_pvals_all[chrom] = noisy_peak_pvals_all[chrom] * noisy_peaks_all[chrom]
 
         else:
-            #otherwise, use continuous non-subsampled signal as Y. 
-            test_Y_all = dataset.load_genome(                
+            #otherwise, use continuous non-subsampled signal as Y.
+            test_Y_all = dataset.load_genome(
                 "Y",
                 marks=self.output_marks,
-                only_chr1=only_chr1, 
+                only_chr1=only_chr1,
                 peaks=False)
 
             # Load peaks from test cell line
@@ -653,8 +652,8 @@ class SeqModel(object):
             for factor in dataset.marks_in_dataset:
                 if factor == 'INPUT': continue
                 peak_locs, _ = get_peaks(
-                    dataset.cell_line, 
-                    factor, 
+                    dataset.cell_line,
+                    factor,
                     subsample_target_string=dataset.Y_subsample_target_string)
                 peak_locs_all[factor] = peak_locs
 
@@ -681,7 +680,7 @@ class SeqModel(object):
         if only_chr1:
             chroms = ['chr1']
 
-        for chrom in chroms:            
+        for chrom in chroms:
             test_X = test_X_all[chrom]
             test_Y = test_Y_all[chrom]
             if self.model_params['predict_binary_output']:
@@ -695,7 +694,7 @@ class SeqModel(object):
                 test_Y = test_Y[:num_bins_to_test]
                 if self.model_params['predict_binary_output']:
                     noisy_peak_pvals = noisy_peak_pvals[:num_bins_to_test]
-            
+
             assert test_X.shape[0] == test_Y.shape[0], \
                 "Subsampled and full data must have the same length"
 
@@ -705,53 +704,53 @@ class SeqModel(object):
             assert test_X.shape[1] == self.num_input_marks
             assert test_Y.shape[1] == self.num_output_marks
 
-            chrom_length = test_X.shape[0] 
+            chrom_length = test_X.shape[0]
 
             ### Get a list of peaks for this chromosome            
-            peaks = []       
-            if not self.model_params['predict_binary_output']:     
+            peaks = []
+            if not self.model_params['predict_binary_output']:
                 for factor in self.output_marks:
                 # For INPUT, we calculate MSE across peaks of all other marks in the test dataset,
                 # since we want to get INPUT right whenever there's a peak in some other mark.
                 # Note that we're purely concatenating peaks from different marks here,
                 # so there'll be some overlapping peaks.
-                # This is fine right now but might break later depending on what evaluation code we 
+                # This is fine right now but might break later depending on what evaluation code we
                 # write, so watch out.
                     if factor == 'INPUT':
                         peak_factor = []
                         for other_factor in dataset.marks_in_dataset:
                             if other_factor == 'INPUT': continue
-                            peak_factor.extend(peak_locs_all[other_factor][chrom])                        
+                            peak_factor.extend(peak_locs_all[other_factor][chrom])
                         peak_factor = np.array(peak_factor)
-                    else:                    
+                    else:
                         peak_factor = peak_locs_all[factor][chrom]
-                    peaks.append(peak_factor)        
-            
+                    peaks.append(peak_factor)
+
             ### Do comparisons between original (subsampled) and full data
             # The original comparison is only done if the output mark is actually in the input data
             if self.is_output_in_input:
-                if not self.model_params['predict_binary_output']:     
+                if not self.model_params['predict_binary_output']:
 
                     output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
-                    
+
                     print("Test %s, %.2E bins - Original, all signal:" % (chrom, chrom_length))
                     orig_results_all[chrom] = evaluations.compare(
-                        test_X[:, output_marks_idx], 
-                        test_Y, 
+                        test_X[:, output_marks_idx],
+                        test_Y,
                         predict_binary_output=False)
 
                     print("Test %s, %.2E bins - Original, only peaks:" % (chrom, chrom_length))
                     orig_results_peaks[chrom] = evaluations.compare(
-                        test_X[:, output_marks_idx], 
-                        test_Y, 
+                        test_X[:, output_marks_idx],
+                        test_Y,
                         predict_binary_output=False,
                         peaks=peaks)
 
                 elif self.model_params['predict_binary_output']:
                     print("Test %s, %.2E bins - Original:" % (chrom, chrom_length))
                     orig_results_all[chrom] = evaluations.compare(
-                        noisy_peak_pvals, 
-                        test_Y, 
+                        noisy_peak_pvals,
+                        test_Y,
                         predict_binary_output=True)
 
 
@@ -759,7 +758,7 @@ class SeqModel(object):
             # We have to batch this up so that the GPU doesn't run out of memory
             # Assume a fixed batch size of 5M bins
             num_batches = int(math.ceil(1.0 * chrom_length / GENOME_BATCH_SIZE))
-            
+
             test_Y_pred = np.empty(test_Y.shape)
             test_X = self.normalizer.transform(test_X)        
 
@@ -773,19 +772,19 @@ class SeqModel(object):
 
             print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
             denoised_results_all[chrom] = evaluations.compare(
-                test_Y_pred, 
+                test_Y_pred,
                 test_Y,
                 predict_binary_output=self.model_params['predict_binary_output'])
 
             if not self.model_params['predict_binary_output']:
                 print("Test %s, %.2E bins - Denoised, only peaks:" % (chrom, chrom_length))
                 denoised_results_peaks[chrom] = evaluations.compare(
-                    test_Y_pred, 
+                    test_Y_pred,
                     test_Y,
                     predict_binary_output=False,
                     peaks=peaks)
 
-            
+
 
             # If we're generating a bigWig file from the output, we need to save the results
             # If we're doing regression, we first denormalize the outputs so that it can be viewed v
@@ -796,7 +795,7 @@ class SeqModel(object):
                     preds[chrom] = test_Y_pred
                 else:
                     preds[chrom] = perform_denormalization(
-                        test_Y_pred, 
+                        test_Y_pred,
                         dataset.normalization)
 
         # Write bigWig file to disk
@@ -807,7 +806,7 @@ class SeqModel(object):
                 suffix = 'signal'
 
             generate_bigWig(
-                preds, 
+                preds,
                 self.output_marks,
                 '%s_%s_subsample-%s_%s' % (
                     self.model_stamp,
@@ -821,15 +820,16 @@ class SeqModel(object):
             test_genome_results = {
                 'orig_all': orig_results_all,
                 'dn_all': denoised_results_all
-            }  
+            }
         else:
             test_genome_results = {
                 'orig_all': orig_results_all,
                 'dn_all': denoised_results_all,
                 'orig_peaks': orig_results_peaks,
                 'dn_peaks': denoised_results_peaks,
-            }        
-         
+            }
+
+
 
         
         print('final results', test_genome_results)
@@ -844,7 +844,7 @@ class SeqModel(object):
         # We need to write our own JSON encoder for numpy.float32s
         # because the built-in JSON encoder only knows how to encode normal floats
         class NumpyEncoder(json.JSONEncoder):
-            def default(self, obj):        
+            def default(self, obj):
                 if isinstance(obj, np.floating):
                     return float(obj)
                 else:
@@ -864,7 +864,7 @@ class SeqModel(object):
             f.write(json.dumps(train_results, cls=NumpyEncoder))
 
         # Evaluate model on testing data
-        all_test_results = []        
+        all_test_results = []
         for dataset_idx, test_dataset in enumerate(self.test_datasets):
             test_samples_results = self.test_model_on_samples(test_dataset, 'test')
 
@@ -874,7 +874,7 @@ class SeqModel(object):
                 print("Genome-wide prediction hasn't been implemented for this type of model. Skipping...")
                 test_genome_results = None
 
-            test_results = {            
+            test_results = {
                 'samples': test_samples_results,
                 'genome': test_genome_results
             }
@@ -912,7 +912,7 @@ class SeqModel(object):
         """
         Takes in a matrix Y of shape num_examples x seq_length x num_histone_marks,
         returned from extractDataset.load_seq_dataset, and processes it as necessary 
-        for the type of model. Y should represet the desired output of the model.
+        for the type of model. Y should represent the desired output of the model.
         
         This is implemented in subclasses because different models need differently
         formatted data, e.g., seq-to-seq vs. seq-to-point.
@@ -973,7 +973,7 @@ class SeqModel(object):
 
 class SeqToPoint(SeqModel):
 
-    def __init__(self, model_params):            
+    def __init__(self, model_params):
         """
         Initializes the correct model based on model_params.
         """
@@ -993,12 +993,12 @@ class SeqToPoint(SeqModel):
             # the same size as the length of the input
             # by adding just the right amount of zero padding to each side.
             model.add(
-                Convolution1D(                    
-                    num_filters, 
+                Convolution1D(
+                    num_filters,
                     filter_length,
                     input_dim=self.num_input_marks,
-                    init='uniform', 
-                    border_mode='same')) 
+                    init='uniform',
+                    border_mode='same'))
 
             model.add(Activation('relu'))
 
@@ -1007,14 +1007,14 @@ class SeqToPoint(SeqModel):
             # so that later we can do genome-wide prediction.
             model.add(
                 Convolution1D(
-                    self.num_output_marks, # output_dim,                    
+                    self.num_output_marks, # output_dim,
                     self.dataset_params['seq_length'],
                     init='uniform',
                     border_mode='valid'))
-            
+
             if model_params['predict_binary_output']:
                 model.add(Activation('sigmoid'))
-            else: 
+            else:
                 model.add(Activation('relu'))
 
         # 'lrnn' stands for linear regression neural network
@@ -1029,7 +1029,7 @@ class SeqToPoint(SeqModel):
             model = Sequential()
 
             model.add(
-                Convolution1D(                    
+                Convolution1D(
                     self.num_output_marks, # nb_filter: one filter per histone mark
                     self.dataset_params['seq_length'], # filter_length
                     input_dim=self.num_input_marks,
@@ -1109,7 +1109,7 @@ class SeqToPoint(SeqModel):
         # then the array goes from 0 to 100
         # and we want to pick mid = 50        
         mid = (self.dataset_params['seq_length'] - 1) // 2
-        
+
         # Y = np.squeeze(Y[:, mid, :]) 
         # return Y
 
@@ -1125,7 +1125,7 @@ class SeqToPoint(SeqModel):
         Y = self.SeqToX_predict_samples(signalX, device=device)
         assert Y.shape[1] == 1
 
-        return Y        
+        return Y
 
 
     def predict_sequence(self, signalX, device=None):
@@ -1164,7 +1164,7 @@ class SeqToPoint(SeqModel):
         # which requires a 3-tensor where the first dimension is the number of examples.
         # In our case, the number of examples is always 1 when doing genome-wide prediction.
         signalX = np.reshape(
-            signalX_pad, 
+            signalX_pad,
             [1, signalX_pad.shape[0], signalX_pad.shape[1]])
 
         if self.model_library == 'keras':
