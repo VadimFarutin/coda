@@ -88,7 +88,8 @@ def make_model_params(model_library,
                       random_seed=0,
                       generate_bigWig=False,
                       predict_binary_output=False, 
-                      zero_out_non_bins=False):    
+                      zero_out_non_bins=False,
+                      pretrained_model_path=None):
     """
     input_marks is a list of histone marks that the model will take in as input.
     
@@ -113,7 +114,8 @@ def make_model_params(model_library,
         'random_seed': random_seed,
         'generate_bigWig': generate_bigWig,
         'predict_binary_output': predict_binary_output,
-        'zero_out_non_bins': zero_out_non_bins
+        'zero_out_non_bins': zero_out_non_bins,
+        'pretrained_model_path': pretrained_model_path
     }
 
     params['dataset_params'] = make_dataset_params(**dataset_params)

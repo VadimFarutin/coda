@@ -496,6 +496,9 @@ class SeqModel(object):
             with open(self.model_path, 'w') as model_file:
                 model_file.write(model_JSON_str)
         elif self.model_library == 'pytorch':
+            if self.model_params['pretrained_model_path'] is not None:
+                self.model.load_state_dict(torch.load(self.model_params['pretrained_model_path']))
+
             self.model_path = os.path.join(MODELS_ROOT, "%s.pt" % self.model_stamp)
 
             assert os.path.isfile(self.model_path) == False

@@ -81,7 +81,8 @@ def test_GM18526():
                         },
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
-                        generate_bigWig=False)
+                        generate_bigWig=False,
+                        pretrained_model_path='./models/weights/encoder-decoder-20200315-003140919280-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
