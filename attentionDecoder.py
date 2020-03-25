@@ -60,8 +60,8 @@ class AttentionDecoder(nn.Module):
         encoder_output_masked = encoder_output
         # print(encoder_output_masked.shape)
         context = self.attention(query=query, proj_key=projection_key_masked, value=encoder_output_masked, mask=None)
-        lstm_input = torch.cat([input, context], dim=2)
-
+        lstm_input = torch.cat([input.float(), context], dim=2)
+        # print("lstm_input", lstm_input.shape)
         y_hat, last_hidden = self.lstm(lstm_input, hidden)
         y_hat = self.fc(y_hat)
         y_hat = self.last_activation(y_hat)
