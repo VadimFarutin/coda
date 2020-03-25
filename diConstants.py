@@ -13,15 +13,15 @@ PIPELINE_ROOT = "/users/pangwei/TF_chipseq_pipeline/"
 CODE_ROOT = "/users/pangwei/deepimpute_pub"
 
 # Where the bulk of the storage will be (intermediate/processed files, etc.)
-DISK_ROOT = "/srv/scratch/pangwei/deepimpute_pub/"
+DISK_ROOT = "."
 
 # Where output bigwigs will be written to
-RESULTS_BIGWIG_ROOT = "/srv/www/kundaje/deepimpute/model-bw"
+RESULTS_BIGWIG_ROOT = os.path.join(DISK_ROOT, 'data', 'model-bw')
 
-HG19_BLACKLIST_FILE = '/srv/www/kundaje/pangwei/coda_denoising/hg19_blacklist.bed'
-MM9_BLACKLIST_FILE = '/srv/www/kundaje/pangwei/coda_denoising/mm9_blacklist.bed'
-HG19_CHROM_SIZES_PATH = '/srv/www/kundaje/pangwei/coda_denoising/hg19.chrom.sizes'
-MM9_CHROM_SIZES_PATH = '/srv/www/kundaje/pangwei/coda_denoising/mm9.male.chrom.sizes'
+HG19_BLACKLIST_FILE = os.path.join(DISK_ROOT, 'data', 'hg19_blacklist.bed')
+MM9_BLACKLIST_FILE = os.path.join(DISK_ROOT, 'data', 'mm9_blacklist.bed')
+HG19_CHROM_SIZES_PATH = os.path.join(DISK_ROOT, 'data', 'hg19.chrom.sizes')
+MM9_CHROM_SIZES_PATH = os.path.join(DISK_ROOT, 'data', 'mm9.male.chrom.sizes')
 
 MAPQ_THRESHOLD = 30
 
