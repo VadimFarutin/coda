@@ -14,12 +14,13 @@ import numpy as np
 import pandas as pd
 
 from keras.models import Sequential, model_from_json
-from keras.layers.core import TimeDistributedDense, Activation, Dense, Flatten, Merge
+#from keras.layers.core import TimeDistributedDense, Activation, Dense, Flatten, Merge
+from keras.layers.core import Activation, Dense, Flatten
 from keras.layers.convolutional import Convolution1D, MaxPooling1D
 from keras.layers.recurrent import SimpleRNN, GRU, LSTM
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.constraints import maxnorm
-from keras.regularizers import l2, activity_l2
+from keras.regularizers import l2 #, activity_l2
 
 from sklearn.model_selection import train_test_split
 import torch
@@ -117,8 +118,8 @@ class SeqModel(object):
         torch.manual_seed(model_params['random_seed'])
 
         self.model_library = model_params['model_library']
-        if not (self.model_library in ['keras']):
-            raise ValueError("model_library must be 'keras'")
+        # if not (self.model_library in ['keras']):
+        #     raise ValueError("model_library must be 'keras'")
 
         self.model = None
         self.model_params = model_params
@@ -167,8 +168,9 @@ class SeqModel(object):
 
         self.verbose = True
 
-        print("Initialized model with parameters:")
-        print(json.dumps(model_params, indent=4, cls=DatasetEncoder))
+        # print("Initialized model with parameters:")
+        # print(json.dumps(model_params, indent=4, cls=DatasetEncoder))
+
 
     @staticmethod
     def instantiate_model(model_params):
@@ -435,8 +437,6 @@ class SeqModel(object):
 
             epoch_train_loss = np.mean(loss_values)
             hist['loss'].append(float(epoch_train_loss))
-            if self.model_params['train_params']['wandb_log']:
-                wandb.log({'loss': epoch_train_loss}, step=epoch)
 
             self.model.eval()
             with torch.no_grad():
@@ -451,6 +451,7 @@ class SeqModel(object):
                 epoch_val_loss = np.mean(val_loss_values)
                 hist['val_loss'].append(float(epoch_val_loss))
                 if self.model_params['train_params']['wandb_log']:
+                    wandb.log({'loss': epoch_train_loss}, step=epoch)
                     wandb.log({'val_loss': epoch_val_loss}, step=epoch)
                     wandb.log({'epoch': epoch}, step=epoch)
 

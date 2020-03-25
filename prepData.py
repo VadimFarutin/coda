@@ -13,7 +13,7 @@ import pandas as pd
 from time import time, sleep
 import numpy as np
 import multiprocessing
-import thread
+# import thread
 import gzip
 
 import IPython
@@ -23,7 +23,7 @@ from diConstants import (PIPELINE_ROOT, CODE_ROOT, DATA_ROOT, RAW_ROOT, MERGED_R
     RESULTS_BIGWIG_ROOT, MODELS_ROOT,
     HG19_BLACKLIST_FILE, MM9_BLACKLIST_FILE,
     BIN_SIZE, HG19_CHROM_SIZES, HG19_CHROM_SIZES_PATH, MM9_CHROM_SIZES, MM9_CHROM_SIZES_PATH,
-    PEAK_BASE_DIR, COMBINED_PEAK_DIR, SUBSAMPLE_TARGETS,
+    PEAK_BASE_DIR, #COMBINED_PEAK_DIR, SUBSAMPLE_TARGETS,
     GM_CELL_LINES, GM_FACTORS, GM_DATASET_NAME_TEMPLATE,        
     HG19_ALL_CHROMS, MM9_ALL_CHROMS,
     MAPQ_THRESHOLD)
@@ -124,7 +124,7 @@ def generate_bigWig(data, marks, bigWig_prefix, bigWig_folder):
     one for each factor in FACTORS_TO_INCLUDE
     """
 
-    assert data[data.keys()[0]].shape[1] == len(marks)
+    # assert data[data.keys()[0]].shape[1] == len(marks)
     chrom_sizes_path = HG19_CHROM_SIZES_PATH
 
     for (factorIdx, factor) in enumerate(marks):
@@ -883,8 +883,8 @@ def fork_and_wait(n_proc, target, args=[]):
                     os._exit(os.EX_OK)
                 except Exception as inst:
                     print_exc()
-                    config.log_statement( "Uncaught exception in subprocess\n" 
-                                          + traceback.format_exc(), log=True)
+                    # config.log_statement( "Uncaught exception in subprocess\n"
+                    #                       + traceback.format_exc(), log=True)
                     os._exit(os.EX_SOFTWARE)
             else:
                 pids.append(pid)
