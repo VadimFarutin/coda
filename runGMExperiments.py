@@ -19,6 +19,7 @@ import modelTemplates
 
 
 def run_model(model_params, evaluate):
+    print("pre init")
     start = time.time()
     m = models.SeqModel.instantiate_model(model_params)
     print("init done")
@@ -41,10 +42,10 @@ def test_GM18526():
 
     for test_cell_line in ['GM18526']:
         for subsample_target_string in ['0.5e6']:
-            for predict_binary_output in [True, False]:
+            for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     model_type = 'encoder-decoder'
-                    wandb_log = False
+                    wandb_log = True
                     evaluate = True
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \
@@ -63,7 +64,7 @@ def test_GM18526():
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
-                            'num_train_examples': 1000,
+                            'num_train_examples': 100000,
                             'seq_length': 1001,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
@@ -74,8 +75,8 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 1,
-                            'batch_size': 64,
+                            'nb_epoch': 20,
+                            'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
                         },
