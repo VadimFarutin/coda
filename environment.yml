@@ -6,55 +6,31 @@ channels:
   - conda-canary
 dependencies:
   - cudatoolkit=10.0.130
-  - h5py=2.7.1
-  - keras=2.2.4
-  - keras-applications=1.0.8
-  - keras-base=2.2.4
-  - keras-preprocessing=1.1.0
-  - numpy=1.17.3
-  - numpy-base=1.17.3
-  - pandas=0.25.1
-  - pandoc=2.2.3.2
-  - pandocfilters=1.4.2
+  - h5py
+  - keras
+  - keras-applications
+  - keras-base
+  - keras-preprocessing
+  - numpy
+  - numpy-base
+  - pandas
+  - pandoc
+  - pandocfilters
   - pip=19.3.1
   - python=3.6.7
-  - python-dateutil=2.8.1
   - pytorch=1.2.0
-  - scikit-learn=0.21.3
-  - scipy=1.2.1
-  - tensorboard=2.0.0
-  - tensorflow=1.15.0
-  - tensorflow-base=1.15.0
-  - tensorflow-estimator=1.15.1
+  - scikit-learn
+  - scipy
+  - tensorboard
+  - tensorflow
+  - tensorflow-base
+  - tensorflow-estimator
   - torchvision=0.4.0
-  - tqdm=4.42.1
-  - yaml=0.1.7
+  - tqdm
   - pip:
-    - argh==0.26.2
-    - chardet==3.0.4
-    - click==7.0
-    - configparser==4.0.2
-    - docker-pycreds==0.4.0
-    - gitdb2==2.0.6
-    - gitpython==3.0.5
-    - gql==0.1.0
-    - graphql-core==2.2.1
-    - idna==2.8
     - nvidia-ml-py3==7.352.0
-    - pathtools==0.1.2
-    - promise==2.2.1
-    - psutil==5.6.7
-    - pypiwin32==223
-    - pywin32==227
-    - requests==2.22.0
-    - rpy2==2.9.5
-    - rx==1.6.1
-    - sentry-sdk==0.13.4
-    - shortuuid==0.5.0
-    - smmap2==2.0.5
-    - subprocess32==3.5.4
-    - urllib3==1.25.7
-    - wandb==0.8.16
-    - watchdog==0.9.0
+    - pathtools
+    - rpy2
+    - wandb
 prefix: C:\Users\Vadim\anaconda3\envs\coda
 
