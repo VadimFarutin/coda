@@ -77,7 +77,7 @@ class AttentionDecoder(nn.Module):
         y = self.SOS.repeat(batch_size, 1, 1).float()
         projection_key = self.attention.key_layer(encoder_output)
 
-        self.teacher_forcing = np.random.uniform(0.0, 1.0) < 0.5
+        self.teacher_forcing = np.random.uniform(0.0, 1.0) < 1.0
 
         if target is None or not self.teacher_forcing:
             for i in range(seq_length):
