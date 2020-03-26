@@ -35,6 +35,7 @@ def run_model(model_params, evaluate):
     return results
 
 # GM_MARKS = ['H3K27AC', 'H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
+# GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
 GM_MARKS = ['H3K27AC']
 
 
@@ -83,7 +84,7 @@ def test_GM18526():
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        pretrained_model_path=None)
+                        pretrained_model_path='./models/weights/encoder-decoder-20200325-194357397955-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
