@@ -454,6 +454,7 @@ class SeqModel(object):
                     wandb.log({'loss': epoch_train_loss}, step=epoch)
                     wandb.log({'val_loss': epoch_val_loss}, step=epoch)
                     wandb.log({'epoch': epoch}, step=epoch)
+                print(f"Epoch: {epoch} Loss: {epoch_train_loss} Val loss: {epoch_val_loss}")
 
                 if best_epoch_val_loss is None or best_epoch_val_loss > epoch_val_loss:
                     best_epoch_val_loss = epoch_val_loss
