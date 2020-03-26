@@ -9,6 +9,7 @@ import json
 import copy
 import math
 import random
+import psutil
 
 import numpy as np
 import pandas as pd
@@ -410,6 +411,11 @@ class SeqModel(object):
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         val_loader = DataLoader(val_dataset, batch_size=batch_size)
 
+        # pid = os.getpid()
+        # py = psutil.Process(pid)
+        # memoryUse = py.memory_info()[0] / 2.0 ** 30
+        # print("before train loop ", memoryUse)
+
         checkpoint_path = os.path.join(WEIGHTS_ROOT, '%s-weights.pt' % self.model_stamp)
         earlystopper_patience = 3
         best_epoch_val_loss = None
@@ -431,8 +437,20 @@ class SeqModel(object):
 
                 loss = loss_function(output, labels.float())
 
+                # pid = os.getpid()
+                # py = psutil.Process(pid)
+                # memoryUse = py.memory_info()[0] / 2.0 ** 30
+                # print("before backward ", memoryUse)
                 loss.backward()
+                # pid = os.getpid()
+                # py = psutil.Process(pid)
+                # memoryUse = py.memory_info()[0] / 2.0 ** 30
+                # print("before step ", memoryUse)
                 optimizer.step()
+                # pid = os.getpid()
+                # py = psutil.Process(pid)
+                # memoryUse = py.memory_info()[0] / 2.0 ** 30
+                # print("after step", memoryUse)
                 loss_values.append(loss.item())
 
             epoch_train_loss = np.mean(loss_values)
@@ -765,7 +783,9 @@ class SeqModel(object):
             num_batches = int(math.ceil(1.0 * chrom_length / GENOME_BATCH_SIZE))
 
             test_Y_pred = np.empty(test_Y.shape)
-            test_X = self.normalizer.transform(test_X)        
+            test_X = self.normalizer.transform(test_X)
+
+            print(num_batches, GENOME_BATCH_SIZE)
 
             for batch in tqdm(range(num_batches)):
                 start_idx = batch * GENOME_BATCH_SIZE
@@ -836,7 +856,6 @@ class SeqModel(object):
 
 
 
-        
         print('final results', test_genome_results)
         return test_genome_results
 
@@ -1280,6 +1299,8 @@ class SeqToSeq(SeqModel):
         and passes it through the model,
         returning an output matrix of num_bins x num_output_marks.
         """
+        # print(signalX.shape)
+        # print(signalX[0], signalX[1])
         num_bins = signalX.shape[0]
         num_input_marks = signalX.shape[1]
 
@@ -1296,9 +1317,12 @@ class SeqToSeq(SeqModel):
                     X = torch.from_numpy(signalX).float().view(100, 100, num_input_marks).to(device)
                 else:
                     X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
+                # print(X[0][0], X[0][1])
                 # X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
                 Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
 
+        # print("signalX ", signalX.shape)
+        # print("Y ", Y.shape, num_bins, self.num_output_marks)
         Y = Y[0]
 
         assert Y.shape[0] == num_bins
