@@ -41,6 +41,8 @@ class AttentionDecoder(nn.Module):
                             batch_first=True,
                             dropout=p_dropout)
 
+        self.dropout = nn.Dropout(p_dropout)
+
         self.fc = nn.Linear(in_features=hidden_size,
                             out_features=out_channels)
 
@@ -63,6 +65,7 @@ class AttentionDecoder(nn.Module):
         lstm_input = torch.cat([input.float(), context], dim=2)
         # print("lstm_input", lstm_input.shape)
         y_hat, last_hidden = self.lstm(lstm_input, hidden)
+        y_hat = self.dropout(y_hat)
         y_hat = self.fc(y_hat)
         y_hat = self.last_activation(y_hat)
 
