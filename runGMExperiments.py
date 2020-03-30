@@ -76,8 +76,8 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 10,
-                            'batch_size': 40,
+                            'nb_epoch': 20,
+                            'batch_size': 80,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
                         },
