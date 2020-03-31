@@ -66,7 +66,7 @@ MODEL_PRESET_PARAMS = {
             'num_layers': 1,
             'bidirectional': True,
             'teacher_forcing': 0.8,
-            'dropout': 0.2
+            'dropout': 0.4
         },
         'compile_params': {
             'regression_loss': 'MSE',
