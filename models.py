@@ -380,7 +380,7 @@ class SeqModel(object):
             if self.model_params['compile_params']['optimizer'] == 'adagrad':
                 optimizer = optim.Adagrad(self.model.parameters())
             elif self.model_params['compile_params']['optimizer'] == 'adam':
-                optimizer = optim.Adam(self.model.parameters())
+                optimizer = optim.Adam(self.model.parameters(), lr=5e-4)
             if self.model_params['compile_params']['loss'] == 'binary_crossentropy':
                 loss_function = torch.nn.modules.loss.BCELoss()
             elif self.model_params['compile_params']['loss'] == 'MSE':
