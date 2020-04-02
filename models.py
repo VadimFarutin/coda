@@ -1310,7 +1310,8 @@ class SeqToSeq(SeqModel):
             if True:
                 device = DEVICE
             self.model = self.model.to(device)
-            self.model.decoder.device = device
+            if self.model_params['model_type'] == 'encoder-decoder':
+                self.model.decoder.device = device
             self.model.eval()
             with torch.no_grad():
                 if num_bins == 10000:
