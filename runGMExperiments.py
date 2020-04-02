@@ -77,7 +77,7 @@ def test_GM18526():
                         output_marks=[output_mark],
                         train_params={
                             'nb_epoch': 30,
-                            'batch_size': 128,
+                            'batch_size': 120,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
                         },
@@ -85,6 +85,7 @@ def test_GM18526():
                         zero_out_non_bins=True,
                         generate_bigWig=False,
                         pretrained_model_path=None)
+                        # pretrained_model_path='./models/weights/encoder-decoder-20200326-100105075198-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
