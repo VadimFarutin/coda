@@ -34,7 +34,7 @@ class AttentionDecoder(nn.Module):
                                    key_size=hidden_size * 2 if bidirectional else hidden_size,
                                    query_size=hidden_size)
 
-        self.lstm = nn.LSTM(input_size=out_channels + hidden_size * 2 if bidirectional else hidden_size,
+        self.lstm = nn.LSTM(input_size=out_channels + (hidden_size * 2 if bidirectional else hidden_size),
                             hidden_size=hidden_size,
                             num_layers=num_layers,
                             bidirectional=False,
@@ -64,6 +64,7 @@ class AttentionDecoder(nn.Module):
         context = self.attention(query=query, proj_key=projection_key_masked, value=encoder_output_masked, mask=None)
         lstm_input = torch.cat([input.float(), context], dim=2)
         # print("lstm_input", lstm_input.shape)
+        # print("hidden", hidden[0].shape)
         y_hat, last_hidden = self.lstm(lstm_input, hidden)
         y_hat = self.dropout(y_hat)
         y_hat = self.fc(y_hat)
