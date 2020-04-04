@@ -20,8 +20,8 @@ class AttentionDecoder(nn.Module):
         SOS_value = -1.0 if predict_binary_output else -2
         EOS_value = 2.0 if predict_binary_output else 2
 
-        self.SOS = torch.tensor([SOS_value]).repeat(out_channels).to(DEVICE)
-        self.EOS = torch.tensor([EOS_value]).repeat(out_channels).to(DEVICE)
+        self.SOS = torch.tensor([SOS_value]).expand(out_channels).to(DEVICE)
+        self.EOS = torch.tensor([EOS_value]).expand(out_channels).to(DEVICE)
 
         self.teacher_forcing_p = teacher_forcing
         self.out_channels = out_channels
@@ -79,7 +79,7 @@ class AttentionDecoder(nn.Module):
 
         batch_size = hidden[0].shape[1]
         y_hat = torch.tensor([]).to(self.device)
-        y = self.SOS.repeat(batch_size, 1, 1).float()
+        y = self.SOS.view(1, 1, -1).expand(batch_size, -1, -1).float()
         projection_key = self.attention.key_layer(encoder_output)
 
         teacher_forcing = np.random.uniform(0.0, 1.0) <= self.teacher_forcing_p

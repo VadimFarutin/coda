@@ -18,7 +18,7 @@ class Attention(nn.Module):
         # print("query", query.repeat(1, proj_key.shape[1], 1).shape)
         # print("proj_key", proj_key.shape)
         # print("query + proj_key", torch.cat([query.repeat(1, proj_key.shape[1], 1), proj_key], dim=2).shape)
-        scores = self.energy_layer(torch.tanh(torch.cat([query.repeat(1, proj_key.shape[1], 1), proj_key], dim=2)))
+        scores = self.energy_layer(torch.tanh(torch.cat([query.expand(-1, proj_key.shape[1], -1), proj_key], dim=2)))
         scores = scores.squeeze(2).unsqueeze(1)
         # scores.data.masked_fill_(mask == 0, -float('inf'))
         scores = F.softmax(scores, dim=-1)
