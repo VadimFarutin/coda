@@ -46,9 +46,9 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'lstm',
         'model_specific_params': {
-            'hidden_size': 16,
+            'hidden_size': 64,
             'num_layers': 1,
-            'bidirectional': True,
+            'bidirectional': False,
             'dropout': 0.0
         },
         'compile_params': {
