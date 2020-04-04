@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats.stats import pearsonr
-from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import precision_recall_curve, roc_auc_score
+from sklearn.metrics import auc as metrics_auc
 import rpy2.robjects as robjects
 from rpy2.robjects.packages import STAP
 import datetime
@@ -200,6 +201,13 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
             auc.append(float(r_auc_results.rx('auc')[0][0]))
             Y_pos_frac.append(test_Y_mark.mean())        
             print("AUC %2.3f; AUPRC %2.3f" % (auc[mark_idx], auprc[mark_idx]))
+
+            # print("==============================", auprc[-1], auc[-1])
+            # my_precisions, my_recalls, _ = precision_recall_curve(test_Y_mark[downsample_idxs], pred_Y_mark[downsample_idxs])
+            # my_precisions, my_recalls = compute_recalls_at_precision(my_precisions, my_recalls)
+            # my_auprc = metrics_auc(my_recalls, my_precisions)
+            # my_auc = roc_auc_score(test_Y_mark[downsample_idxs], pred_Y_mark[downsample_idxs])
+            # print("==============================", my_auprc, my_auc)
         else:
             true_var.append(np.var(test_Y_mark))
             MSE.append(get_MSE(pred_Y_mark, test_Y_mark))
