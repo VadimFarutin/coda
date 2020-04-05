@@ -76,7 +76,7 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 20,
+                            'nb_epoch': 40,
                             'batch_size': 256,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
@@ -84,7 +84,6 @@ def test_GM18526():
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        # pretrained_model_path=None)
                         pretrained_model_path=None)
                         # pretrained_model_path='./models/weights/encoder-decoder-20200405-141502309478-weights.pt')
 
