@@ -65,7 +65,7 @@ MODEL_PRESET_PARAMS = {
             'hidden_size': 32,
             'num_layers': 1,
             'bidirectional': False,
-            'teacher_forcing': 0.2,
+            'teacher_forcing': 0.0,
             'dropout': 0.5
         },
         'compile_params': {
