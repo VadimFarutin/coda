@@ -65,13 +65,14 @@ MODEL_PRESET_PARAMS = {
             'hidden_size': 8,
             'num_layers': 1,
             'bidirectional': False,
-            'teacher_forcing': 0.95,
+            'teacher_forcing': 0.6,
             'dropout': 0.5
         },
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
-            'optimizer': 'adam'
+            'optimizer': 'adam',
+            'lr': 5e-4
         },
     },
 }
