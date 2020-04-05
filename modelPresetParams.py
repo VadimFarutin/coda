@@ -64,7 +64,7 @@ MODEL_PRESET_PARAMS = {
         'model_specific_params': {
             'hidden_size': 64,
             'num_layers': 1,
-            'bidirectional': False,
+            'bidirectional': True,
             'teacher_forcing': 0.0,
             'dropout': 0.5
         },
