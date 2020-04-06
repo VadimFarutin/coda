@@ -82,10 +82,8 @@ class AttentionDecoder(nn.Module):
         batch_size = hidden[0].shape[1]
         y_hat = []
         y = self.SOS.view(1, 1, -1).expand(batch_size, -1, -1).float()
-        # key = self.attention.key_layer(encoder_output)
-        # value = self.attention.value_layer(encoder_output)
-        key = encoder_output
-        value = encoder_output
+        key = self.attention.key_layer(encoder_output)
+        value = self.attention.value_layer(encoder_output)
 
         teacher_forcing = np.random.uniform(0.0, 1.0) <= self.teacher_forcing_p
         one = torch.tensor([1.0]).to(self.device)
