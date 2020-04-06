@@ -483,7 +483,9 @@ class SeqModel(object):
 
                 # if earlystopper_patience == 0:
                 #     break
-
+        
+        self.model.load_state_dict(torch.load(checkpoint_path)
+        self.model.eval()
         return hist
 
     def save_model_params(self):
