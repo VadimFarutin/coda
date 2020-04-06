@@ -50,6 +50,7 @@ class AttentionDecoder(nn.Module):
         if predict_binary_output:
             self.last_activation = nn.Sigmoid()
         else:
+            nn.init.kaiming_normal_(self.fc.weight, mode='fan_in', nonlinearity='relu')
             self.last_activation = nn.ReLU()
 
         self.device = DEVICE
