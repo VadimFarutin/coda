@@ -64,8 +64,8 @@ def test_GM18526():
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
-                            'num_train_examples': 100000,
-                            'seq_length': 1001,
+                            'num_train_examples': 1000000,
+                            'seq_length': 101,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,

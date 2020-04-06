@@ -30,7 +30,7 @@ class AttentionDecoder(nn.Module):
         self.D = 50
 
         # self.embedding = nn.Embedding(out_channels, hidden_size)
-        self.attention = Attention(hidden_size=hidden_size,
+        self.attention = Attention(hidden_size=hidden_size * 2 if bidirectional else hidden_size,
                                    key_size=hidden_size * 2 if bidirectional else hidden_size,
                                    query_size=hidden_size,
                                    value_size=hidden_size * 2 if bidirectional else hidden_size)
