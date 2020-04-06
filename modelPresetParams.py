@@ -62,11 +62,11 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 64,
+            'hidden_size': 100,
             'num_layers': 1,
             'bidirectional': False,
             'teacher_forcing': 0.0,
-            'dropout': 0.6
+            'dropout': 0.7
         },
         'compile_params': {
             'regression_loss': 'MSE',
