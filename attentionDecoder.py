@@ -35,7 +35,7 @@ class AttentionDecoder(nn.Module):
                                    query_size=hidden_size,
                                    value_size=hidden_size * 2 if bidirectional else hidden_size)
 
-        self.lstm = nn.LSTM(input_size=out_channels + hidden_size,
+        self.lstm = nn.LSTM(input_size=out_channels + (hidden_size * 2 if bidirectional else hidden_size),
                             hidden_size=hidden_size,
                             num_layers=num_layers,
                             bidirectional=False,
