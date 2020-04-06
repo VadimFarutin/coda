@@ -64,9 +64,9 @@ MODEL_PRESET_PARAMS = {
         'model_specific_params': {
             'hidden_size': 100,
             'num_layers': 1,
-            'bidirectional': False,
+            'bidirectional': True,
             'teacher_forcing': 0.0,
-            'dropout': 0.7
+            'dropout': 0.6
         },
         'compile_params': {
             'regression_loss': 'MSE',
