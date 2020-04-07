@@ -1320,7 +1320,7 @@ class SeqToSeq(SeqModel):
             self.model.eval()
             with torch.no_grad():
                 if num_bins == 10000:
-                    X = torch.from_numpy(signalX).float().view(50, 200, num_input_marks).to(device)
+                    X = torch.from_numpy(signalX).float().view(200, 50, num_input_marks).to(device)
                 else:
                     X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
                 # print(X[0][0], X[0][1])
