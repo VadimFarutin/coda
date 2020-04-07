@@ -43,7 +43,7 @@ def test_GM18526():
 
     for test_cell_line in ['GM18526']:
         for subsample_target_string in ['0.5e6']:
-            for predict_binary_output in [True]:
+            for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     model_type = 'encoder-decoder'
                     wandb_log = True
@@ -65,7 +65,7 @@ def test_GM18526():
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
-                            'num_train_examples': 1000000,
+                            'num_train_examples': 100000,
                             'seq_length': 101,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
@@ -76,7 +76,7 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 20,
+                            'nb_epoch': 0,
                             'batch_size': 256,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
