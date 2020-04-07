@@ -63,7 +63,7 @@ MODEL_PRESET_PARAMS = {
         'model_type': 'encoder-decoder',
         'model_specific_params': {
             'hidden_size': 100,
-            'num_layers': 4,
+            'num_layers': 3,
             'bidirectional': False,
             'teacher_forcing': 0.0,
             'dropout': 0.6
@@ -72,7 +72,7 @@ MODEL_PRESET_PARAMS = {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
             'optimizer': 'adam',
-            'lr': 1e-3
+            'lr': 5e-4
         },
     },
 }

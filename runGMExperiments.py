@@ -65,7 +65,7 @@ def test_GM18526():
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
-                            'num_train_examples': 1000000,
+                            'num_train_examples': 100000,
                             'seq_length': 101,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
@@ -76,7 +76,7 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 10,
+                            'nb_epoch': 20,
                             'batch_size': 256,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
