@@ -799,7 +799,13 @@ class SeqModel(object):
                     test_X[start_idx : end_idx])
                 # test_Y_pred[start_idx : end_idx] = self.predict_sequence(
                 #     test_X[start_idx : end_idx], torch.device('cpu'))
-
+                with np.printoptions(precision=3):
+                    print('###########')
+                    #print(test_X[end_idx - 50 : end_idx])
+                    print(test_Y[end_idx - 50 : end_idx].flatten())
+                    print(test_Y_pred[end_idx - 50 : end_idx].flatten())
+                
+                
             print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
             denoised_results_all[chrom] = evaluations.compare(
                 test_Y_pred,
