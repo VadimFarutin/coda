@@ -15,7 +15,7 @@ class LSTMModel(nn.Module):
                             bidirectional=bidirectional,
                             batch_first=True)
         self.dropout = nn.Dropout(p_dropout)
-        self.fc = nn.Linear(in_features=hidden_size * 2 if bidirectional else hidden_size,
+        self.fc = nn.Linear(in_features=hidden_size * num_layers * 2 if bidirectional else hidden_size * num_layers,
                             out_features=out_channels)
         if predict_binary_output:
             self.last_activation = nn.Sigmoid()
