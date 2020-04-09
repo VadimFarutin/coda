@@ -47,7 +47,7 @@ MODEL_PRESET_PARAMS = {
         'model_type': 'lstm',
         'model_specific_params': {
             'hidden_size': 64,
-            'num_layers': 2,
+            'num_layers': 3,
             'bidirectional': True,
             'dropout': 0.0
         },

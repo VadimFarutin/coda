@@ -46,7 +46,7 @@ def test_GM18526():
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     wandb_log = True
-                    model_type = 'encoder-decoder'
+                    model_type = 'lstm'
                     evaluate = True
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \
@@ -76,8 +76,8 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 10,
-                            'batch_size': 256,
+                            'nb_epoch': 3,
+                            'batch_size': 128,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
                         },
