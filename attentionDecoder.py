@@ -76,8 +76,8 @@ class AttentionDecoder(nn.Module):
 
     def forward(self, encoder_output, hidden, target=None, seq_length=0):
         # last_hidden = ((hidden[0][0] + hidden[0][1]).unsqueeze(0), (hidden[1][0] + hidden[1][1]).unsqueeze(0))
-        # last_hidden = ((hidden[0][-1]).unsqueeze(0), (hidden[1][-1]).unsqueeze(0))
-        last_hidden = hidden
+        last_hidden = ((hidden[0][-1]).unsqueeze(0), (hidden[1][-1]).unsqueeze(0))
+        # last_hidden = hidden
 
         batch_size = hidden[0].shape[1]
         y_hat = []

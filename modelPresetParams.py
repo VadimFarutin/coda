@@ -63,8 +63,8 @@ MODEL_PRESET_PARAMS = {
         'model_type': 'encoder-decoder',
         'model_specific_params': {
             'hidden_size': 128,
-            'num_layers': 4,
-            'bidirectional': False,
+            'num_layers': 1,
+            'bidirectional': True,
             'teacher_forcing': 0.0,
             'dropout': 0.6
         },
