@@ -340,7 +340,7 @@ class SeqModel(object):
             # save_best_only means that the model weights will be saved after every epoch
             # in which the validation error improves.
             checkpointer = ModelCheckpoint(
-                filepath=os.path.join(WEIGHTS_ROOT, '%s-weights.hdf5' % self.model_stamp),
+                filepath=os.path.join(WEIGHTS_ROOT, '%s-weights.tf' % self.model_stamp),
                 verbose=1,
                 save_best_only=True)
 
