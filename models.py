@@ -1319,18 +1319,33 @@ class SeqToSeq(SeqModel):
                 self.model.decoder.device = device
             self.model.eval()
             with torch.no_grad():
-                if num_bins == 10000:
-                    X = torch.from_numpy(signalX).float().view(10, 1000, num_input_marks).to(device)
+                if (num_bins % 1000) == 0:
+                    # Y = torch.zeros((num_bins, self.num_output_marks)).numpy()
+                    # return Y
+                    pass
                 else:
-                    X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
+                    print("num_bins", num_bins)
+                if (num_bins % 1000) == 0:
+                    start_X = torch.from_numpy(signalX).float().view(-1, 1000, num_input_marks).to(device)                    
+                else:
+                    start_X = torch.from_numpy(signalX[:-(num_bins % 1000)]).float().view(-1, 1000, num_input_marks).to(device)
+                    end_X = torch.from_numpy(signalX[-(num_bins % 1000):]).float().view(-1, (num_bins % 1000), num_input_marks).to(device)
                 # print(X[0][0], X[0][1])
                 # X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
-                Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
+                start_Y = self.model(start_X).detach().cpu().view(1, -1, self.num_output_marks).numpy()
+                if (num_bins % 1000) != 0:
+                    end_Y = self.model(end_X).detach().cpu().view(1, -1, self.num_output_marks).numpy()
 
         # print("signalX ", signalX.shape)
         # print("Y ", Y.shape, num_bins, self.num_output_marks)
-        Y = Y[0]
-
+        start_Y = start_Y[0]
+        if (num_bins % 1000) != 0:
+            end_Y = end_Y[0]
+        if (num_bins % 1000) != 0:
+            Y = np.append(start_Y, end_Y, axis=0)
+        else:
+            Y = start_Y
+            
         assert Y.shape[0] == num_bins
         assert Y.shape[1] == self.num_output_marks
 
