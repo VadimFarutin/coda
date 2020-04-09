@@ -1319,6 +1319,15 @@ class SeqToSeq(SeqModel):
                 self.model.decoder.device = device
             self.model.eval()
             with torch.no_grad():
+                if num_bins == 10000:
+                    X = torch.from_numpy(signalX).float().view(10, 1000, num_input_marks).to(device)
+                else:
+                    print("num_bins", num_bins)
+                    X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
+                Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
+                Y = Y[0]
+                return Y
+                
                 if (num_bins % 1000) == 0:
                     # Y = torch.zeros((num_bins, self.num_output_marks)).numpy()
                     # return Y
