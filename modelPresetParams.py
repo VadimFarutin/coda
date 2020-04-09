@@ -46,10 +46,10 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'lstm',
         'model_specific_params': {
-            'hidden_size': 64,
+            'hidden_size': 128,
             'num_layers': 4,
             'bidirectional': True,
-            'dropout': 0.0
+            'dropout': 0.5
         },
         'compile_params': {
             'regression_loss': 'MSE',
