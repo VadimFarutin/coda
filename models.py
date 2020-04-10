@@ -481,7 +481,8 @@ class SeqModel(object):
                     best_epoch_val_loss = epoch_val_loss
                     torch.save(self.model.state_dict(), checkpoint_path)
 
-                if epoch == 1 and (hist['val_loss'][1] - hist['val_loss'][0]) <= 1e-9:
+                if epoch == 1 and abs(hist['val_loss'][1] - hist['val_loss'][0]) <= 1e-9:
+                    print(f"Did not improve from {hist['val_loss'][0]} to {hist['val_loss'][1]}, breaking")
                     break
                 # if earlystopper_patience == 0:
                 #     break
