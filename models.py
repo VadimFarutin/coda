@@ -377,10 +377,12 @@ class SeqModel(object):
         elif self.model_library == 'pytorch':
             self.model = self.model.to(DEVICE)
 
+            lr = self.model_params['compile_params']['lr']
+            
             if self.model_params['compile_params']['optimizer'] == 'adagrad':
-                optimizer = optim.Adagrad(self.model.parameters())
+                optimizer = optim.Adagrad(self.model.parameters(), lr=lr)
             elif self.model_params['compile_params']['optimizer'] == 'adam':
-                optimizer = optim.Adam(self.model.parameters(), lr=5e-4)
+                optimizer = optim.Adam(self.model.parameters(), lr=lr)
             if self.model_params['compile_params']['loss'] == 'binary_crossentropy':
                 loss_function = torch.nn.modules.loss.BCELoss()
             elif self.model_params['compile_params']['loss'] == 'MSE':

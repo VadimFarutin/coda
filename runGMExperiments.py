@@ -45,8 +45,8 @@ def test_GM18526():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
-                    wandb_log = True
                     model_type = 'encoder-decoder'
+                    wandb_log = True
                     evaluate = True
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \
@@ -60,7 +60,8 @@ def test_GM18526():
                         model_specific_params=preset_params['model_specific_params'],
                         compile_params={
                             'loss': loss,
-                            'optimizer': preset_params['compile_params']['optimizer']
+                            'optimizer': preset_params['compile_params']['optimizer'],
+                            'lr': preset_params['compile_params']['lr']
                         },
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
@@ -84,8 +85,8 @@ def test_GM18526():
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        #pretrained_model_path=None)
-                        pretrained_model_path='./models/weights/encoder-decoder-20200410-164212869646-weights.pt')
+                        pretrained_model_path=None)
+                        #pretrained_model_path='./models/weights/encoder-decoder-20200410-164212869646-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
