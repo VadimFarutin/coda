@@ -340,7 +340,7 @@ class SeqModel(object):
             # save_best_only means that the model weights will be saved after every epoch
             # in which the validation error improves.
             checkpointer = ModelCheckpoint(
-                filepath=os.path.join(WEIGHTS_ROOT, '%s-weights.hdf5' % self.model_stamp),
+                filepath=os.path.join(WEIGHTS_ROOT, '%s-weights.tf' % self.model_stamp),
                 verbose=1,
                 save_best_only=True)
 
@@ -380,7 +380,7 @@ class SeqModel(object):
             if self.model_params['compile_params']['optimizer'] == 'adagrad':
                 optimizer = optim.Adagrad(self.model.parameters())
             elif self.model_params['compile_params']['optimizer'] == 'adam':
-                optimizer = optim.Adam(self.model.parameters())
+                optimizer = optim.Adam(self.model.parameters(), lr=5e-4)
             if self.model_params['compile_params']['loss'] == 'binary_crossentropy':
                 loss_function = torch.nn.modules.loss.BCELoss()
             elif self.model_params['compile_params']['loss'] == 'MSE':
@@ -481,9 +481,14 @@ class SeqModel(object):
                     best_epoch_val_loss = epoch_val_loss
                     torch.save(self.model.state_dict(), checkpoint_path)
 
+                if epoch == 1 and abs(hist['val_loss'][1] - hist['val_loss'][0]) <= 1e-9:
+                    print(f"Did not improve from {hist['val_loss'][0]} to {hist['val_loss'][1]}, breaking")
+                    break
                 # if earlystopper_patience == 0:
                 #     break
-
+        
+        self.model.load_state_dict(torch.load(checkpoint_path))
+        self.model.eval()
         return hist
 
     def save_model_params(self):
@@ -797,7 +802,13 @@ class SeqModel(object):
                     test_X[start_idx : end_idx])
                 # test_Y_pred[start_idx : end_idx] = self.predict_sequence(
                 #     test_X[start_idx : end_idx], torch.device('cpu'))
-
+                # with np.printoptions(precision=3):
+                #     print('###########')
+                #     #print(test_X[end_idx - 50 : end_idx])
+                #     print(test_Y[end_idx - 50 : end_idx].flatten())
+                #     print(test_Y_pred[end_idx - 50 : end_idx].flatten())
+                
+                
             print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
             denoised_results_all[chrom] = evaluations.compare(
                 test_Y_pred,
@@ -1318,17 +1329,41 @@ class SeqToSeq(SeqModel):
             self.model.eval()
             with torch.no_grad():
                 if num_bins == 10000:
-                    X = torch.from_numpy(signalX).float().view(100, 100, num_input_marks).to(device)
+                    X = torch.from_numpy(signalX).float().view(10, 1000, num_input_marks).to(device)
                 else:
+                    print("num_bins", num_bins)
                     X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
+                Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
+                Y = Y[0]
+                return Y
+                
+                if (num_bins % 1000) == 0:
+                    # Y = torch.zeros((num_bins, self.num_output_marks)).numpy()
+                    # return Y
+                    pass
+                else:
+                    print("num_bins", num_bins)
+                if (num_bins % 1000) == 0:
+                    start_X = torch.from_numpy(signalX).float().view(-1, 1000, num_input_marks).to(device)                    
+                else:
+                    start_X = torch.from_numpy(signalX[:-(num_bins % 1000)]).float().view(-1, 1000, num_input_marks).to(device)
+                    end_X = torch.from_numpy(signalX[-(num_bins % 1000):]).float().view(-1, (num_bins % 1000), num_input_marks).to(device)
                 # print(X[0][0], X[0][1])
                 # X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
-                Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
+                start_Y = self.model(start_X).detach().cpu().view(1, -1, self.num_output_marks).numpy()
+                if (num_bins % 1000) != 0:
+                    end_Y = self.model(end_X).detach().cpu().view(1, -1, self.num_output_marks).numpy()
 
         # print("signalX ", signalX.shape)
         # print("Y ", Y.shape, num_bins, self.num_output_marks)
-        Y = Y[0]
-
+        start_Y = start_Y[0]
+        if (num_bins % 1000) != 0:
+            end_Y = end_Y[0]
+        if (num_bins % 1000) != 0:
+            Y = np.append(start_Y, end_Y, axis=0)
+        else:
+            Y = start_Y
+            
         assert Y.shape[0] == num_bins
         assert Y.shape[1] == self.num_output_marks
 

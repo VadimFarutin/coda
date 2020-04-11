@@ -35,6 +35,7 @@ def run_model(model_params, evaluate):
     return results
 
 # GM_MARKS = ['H3K27AC', 'H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
+# GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
 GM_MARKS = ['H3K27AC']
 
 
@@ -44,8 +45,8 @@ def test_GM18526():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
-                    model_type = 'encoder-decoder'
                     wandb_log = True
+                    model_type = 'encoder-decoder'
                     evaluate = True
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \
@@ -64,8 +65,8 @@ def test_GM18526():
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
-                            'num_train_examples': 1000000,
-                            'seq_length': 101,
+                            'num_train_examples': 100000,
+                            'seq_length': 1001,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
@@ -75,15 +76,16 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 20,
-                            'batch_size': 100,
+                            'nb_epoch': 6,
+                            'batch_size': 200,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
                         },
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        pretrained_model_path=None)
+                        #pretrained_model_path=None)
+                        pretrained_model_path='./models/weights/encoder-decoder-20200410-164212869646-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"

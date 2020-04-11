@@ -12,6 +12,10 @@ class Attention(nn.Module):
         self.key_layer = nn.Linear(key_size, hidden_size, bias=False)
         self.query_layer = nn.Linear(query_size, hidden_size, bias=False)
         self.value_layer = nn.Linear(value_size, hidden_size, bias=False)
+        
+        nn.init.xavier_normal_(self.key_layer.weight)
+        nn.init.xavier_normal_(self.query_layer.weight)
+        nn.init.xavier_normal_(self.value_layer.weight)
 
     def forward(self, query, key, value, mask):
         # print("query", query.repeat(1, proj_key.shape[1], 1).shape)

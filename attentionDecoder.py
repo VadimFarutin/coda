@@ -17,7 +17,7 @@ class AttentionDecoder(nn.Module):
         super(AttentionDecoder, self).__init__()
 
         # peak calls in [0..1], signal in [-1..1] after DataNormalizer in mode "01"
-        SOS_value = -1.0 if predict_binary_output else -2
+        SOS_value = 0.0 if predict_binary_output else 0.0
         EOS_value = 2.0 if predict_binary_output else 2
 
         self.SOS = torch.tensor([SOS_value]).expand(out_channels).to(DEVICE)
@@ -50,6 +50,7 @@ class AttentionDecoder(nn.Module):
         if predict_binary_output:
             self.last_activation = nn.Sigmoid()
         else:
+            nn.init.kaiming_normal_(self.fc.weight, mode='fan_in', nonlinearity='relu')
             self.last_activation = nn.ReLU()
 
         self.device = DEVICE
@@ -85,7 +86,8 @@ class AttentionDecoder(nn.Module):
         value = self.attention.value_layer(encoder_output)
 
         teacher_forcing = np.random.uniform(0.0, 1.0) <= self.teacher_forcing_p
-
+        one = torch.tensor([1.0]).to(self.device)
+        
         if target is None or not teacher_forcing:
             for i in range(seq_length):
                 # projection_key_mask2 = torch.from_numpy(np.arange(i - self.D, i + self.D + 1)).to(DEVICE)\
@@ -102,7 +104,7 @@ class AttentionDecoder(nn.Module):
                 # y_hat = torch.cat((y_hat, y_hat_i), dim=1)
                 y_hat.append(y_hat_i)
                 
-                y = y_hat_i  # .detach()
+                y = one + y_hat_i  # .detach()
         else:
             for i in range(seq_length):
                 # projection_key_mask2 = torch.from_numpy(np.arange(i - self.D, i + self.D + 1)).to(DEVICE) \
@@ -119,7 +121,7 @@ class AttentionDecoder(nn.Module):
                 # y_hat = torch.cat((y_hat, y_hat_i), dim=1)
                 y_hat.append(y_hat_i)
 
-                y = target.gather(1, torch.tensor([i] * batch_size).view(-1, 1, 1).to(self.device))
+                y = one + target.gather(1, torch.tensor([i] * batch_size).view(-1, 1, 1).to(self.device))
 
         y_hat = torch.cat(y_hat, dim=1)
         return y_hat
