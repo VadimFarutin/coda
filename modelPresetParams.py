@@ -24,7 +24,8 @@ MODEL_PRESET_PARAMS = {
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
-            'optimizer': 'adagrad'
+            'optimizer': 'adagrad',
+            'lr': 1e-3
         },
     },
     'atac': {
@@ -38,7 +39,8 @@ MODEL_PRESET_PARAMS = {
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
-            'optimizer': 'adam'
+            'optimizer': 'adam',
+            'lr': 1e-3
         },
     },
     'lstm': {
@@ -54,7 +56,8 @@ MODEL_PRESET_PARAMS = {
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
-            'optimizer': 'adam'
+            'optimizer': 'adam',
+            'lr': 1e-3            
         },
     },
     'encoder-decoder': {
@@ -67,6 +70,26 @@ MODEL_PRESET_PARAMS = {
             'bidirectional': True,
             'teacher_forcing': 0.0,
             'dropout': 0.6
+        },
+        'compile_params': {
+            'regression_loss': 'MSE',
+            'class_loss': 'binary_crossentropy',
+            'optimizer': 'adam',
+            'lr': 5e-4
+        },
+    },
+    'cnn-encoder-decoder': {
+        'model_library': 'pytorch',
+        'model_class': 'SeqToSeq',
+        'model_type': 'cnn-encoder-decoder',
+        'model_specific_params': {
+            'hidden_size': 8,
+            'kernel_size': 3,
+            'stride': 1,
+            'dilation': 3,
+            'num_layers': 3,
+            'residual': True,
+            'dropout': 0.0
         },
         'compile_params': {
             'regression_loss': 'MSE',

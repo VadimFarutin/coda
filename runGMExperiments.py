@@ -46,8 +46,8 @@ def test_GM18526():
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     wandb_log = True
-                    model_type = 'encoder-decoder'
                     evaluate = True
+                    model_type = 'cnn-encoder-decoder'
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \
                            if predict_binary_output \
@@ -60,7 +60,8 @@ def test_GM18526():
                         model_specific_params=preset_params['model_specific_params'],
                         compile_params={
                             'loss': loss,
-                            'optimizer': preset_params['compile_params']['optimizer']
+                            'optimizer': preset_params['compile_params']['optimizer'],
+                            'lr': preset_params['compile_params']['lr']
                         },
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
@@ -76,8 +77,8 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 20,
-                            'batch_size': 200,
+                            'nb_epoch': 10,
+                            'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
                         },

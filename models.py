@@ -36,6 +36,7 @@ from tqdm.auto import tqdm
 from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
 from EncoderDecoder import EncoderDecoder
+from CnnEncoderDecoder import CnnEncoderDecoder
 from dataWithLabelsDataset import DataWithLabelsDataset
 from kerasFormatConverter import KerasFormatConverter
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
@@ -377,10 +378,12 @@ class SeqModel(object):
         elif self.model_library == 'pytorch':
             self.model = self.model.to(DEVICE)
 
+            lr = self.model_params['compile_params']['lr']
+            
             if self.model_params['compile_params']['optimizer'] == 'adagrad':
-                optimizer = optim.Adagrad(self.model.parameters())
+                optimizer = optim.Adagrad(self.model.parameters(), lr=lr)
             elif self.model_params['compile_params']['optimizer'] == 'adam':
-                optimizer = optim.Adam(self.model.parameters(), lr=5e-4)
+                optimizer = optim.Adam(self.model.parameters(), lr=lr)
             if self.model_params['compile_params']['loss'] == 'binary_crossentropy':
                 loss_function = torch.nn.modules.loss.BCELoss()
             elif self.model_params['compile_params']['loss'] == 'MSE':
@@ -455,7 +458,7 @@ class SeqModel(object):
                 # memoryUse = py.memory_info()[0] / 2.0 ** 30
                 # print("after step", memoryUse)
                 loss_values.append(loss.item())
-
+                
             epoch_train_loss = np.mean(loss_values)
             hist['loss'].append(float(epoch_train_loss))
 
@@ -1269,6 +1272,30 @@ class SeqToSeq(SeqModel):
                 bidirectional=bidirectional,
                 p_dropout=dropout,
                 teacher_forcing=teacher_forcing,
+                # seq_length=seq_length
+            )
+        elif model_params['model_type'] == 'cnn-encoder-decoder':
+            predict_binary_output = model_params['predict_binary_output']
+            hidden_size = model_params['hidden_size']
+            kernel_size = model_params['kernel_size']
+            stride = model_params['stride']
+            dilation = model_params['dilation']
+            num_layers = model_params['num_layers']
+            residual = model_params['residual']
+            dropout = model_params['dropout']
+            # seq_length = self.dataset_params['seq_length']
+
+            model = CnnEncoderDecoder(
+                predict_binary_output=predict_binary_output,
+                in_channels=self.num_input_marks,
+                out_channels=self.num_output_marks,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                kernel_size=kernel_size,
+                stride=stride,
+                dilation=dilation,
+                residual=residual,
+                p_dropout=dropout
                 # seq_length=seq_length
             )
         else:
