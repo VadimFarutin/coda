@@ -78,4 +78,24 @@ MODEL_PRESET_PARAMS = {
             'lr': 5e-4
         },
     },
+    'cnn-encoder-decoder': {
+        'model_library': 'pytorch',
+        'model_class': 'SeqToSeq',
+        'model_type': 'cnn-encoder-decoder',
+        'model_specific_params': {
+            'hidden_size': 8,
+            'kernel_size': 3,
+            'stride': 1,
+            'dilation': 3,
+            'num_layers': 3,
+            'residual': True,
+            'dropout': 0.0
+        },
+        'compile_params': {
+            'regression_loss': 'MSE',
+            'class_loss': 'binary_crossentropy',
+            'optimizer': 'adam',
+            'lr': 5e-4
+        },
+    },
 }
