@@ -26,6 +26,19 @@ def get_pearsonR(pred_Y, test_Y):
     
     return pearsonr(pred_Y, test_Y)[0]
 
+def get_SNR(pred_Y):
+    """
+    Returns signal-to-noise ratio (SNR) for a single mark.
+    """
+
+    assert len(pred_Y.shape) == 1
+    
+    Q1 = 0.1
+    Q2 = 0.9
+    snr = np.quantile(pred_Y[pred_Y >= 1], Q2) / np.quantile(pred_Y[pred_Y >= 1], Q1)
+    
+    return snr
+
 def is_binary(M):
     unique_elements = list(set(M.flatten()))
     return all([elem in [0, 1] for elem in unique_elements])
@@ -129,6 +142,7 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
     true_var = []
     MSE = []
     pearsonR = []
+    SNR = []
 
     precision_curves = []
     recall_curves = [] 
@@ -157,6 +171,7 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
                     true_var.append(None)
                     MSE.append(None)
                     pearsonR.append(None)
+                    SNR.append(None)
                 continue
 
             # Initialize peak_idxs to all False
@@ -212,9 +227,10 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
             true_var.append(np.var(test_Y_mark))
             MSE.append(get_MSE(pred_Y_mark, test_Y_mark))
             pearsonR.append(get_pearsonR(pred_Y_mark, test_Y_mark))
-
-            print("MSE %2.3f (true var %2.3f), pearsonR %2.3f" % 
-                (MSE[mark_idx], true_var[mark_idx], pearsonR[mark_idx]))      
+            SNR.append(get_SNR(pred_Y_mark))
+            
+            print("MSE %2.3f (true var %2.3f), pearsonR %2.3f, SNR %2.3f" % 
+                (MSE[mark_idx], true_var[mark_idx], pearsonR[mark_idx], SNR[mark_idx]))      
 
     if predict_binary_output:
         assert((len(precisions) > 0) and (len(recalls) > 0))
@@ -230,7 +246,8 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
         results = {
             'MSE': MSE,
             'true_var': true_var,
-            'pearsonR': pearsonR
+            'pearsonR': pearsonR,
+            'SNR': SNR
         }
 
     if save_data: 

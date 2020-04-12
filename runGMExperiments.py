@@ -124,18 +124,22 @@ def test_GM18526():
                             wandb.run.summary['train_samples_dn_MSE']      = results['train_samples']['dn']['MSE']
                             wandb.run.summary['train_samples_dn_true_var'] = results['train_samples']['dn']['true_var']
                             wandb.run.summary['train_samples_dn_pearsonR'] = results['train_samples']['dn']['pearsonR']
+                            wandb.run.summary['train_samples_dn_SNR']      = results['train_samples']['dn']['SNR']
 
                             wandb.run.summary['test_samples_dn_MSE']      = results['test_results'][0]['samples']['dn']['MSE']
                             wandb.run.summary['test_samples_dn_true_var'] = results['test_results'][0]['samples']['dn']['true_var']
                             wandb.run.summary['test_samples_dn_pearsonR'] = results['test_results'][0]['samples']['dn']['pearsonR']
+                            wandb.run.summary['test_samples_dn_SNR']      = results['test_results'][0]['samples']['dn']['SNR']
 
                             wandb.run.summary['test_genome_dn_all_MSE']      = results['test_results'][0]['genome']['dn_all']['chr1']['MSE']
                             wandb.run.summary['test_genome_dn_all_true_var'] = results['test_results'][0]['genome']['dn_all']['chr1']['true_var']
                             wandb.run.summary['test_genome_dn_all_pearsonR'] = results['test_results'][0]['genome']['dn_all']['chr1']['pearsonR']
+                            wandb.run.summary['test_genome_dn_all_SNR']      = results['test_results'][0]['genome']['dn_all']['chr1']['SNR']
 
                             wandb.run.summary['test_genome_dn_peaks_MSE']      = results['test_results'][0]['genome']['dn_peaks']['chr1']['MSE']
                             wandb.run.summary['test_genome_dn_peaks_true_var'] = results['test_results'][0]['genome']['dn_peaks']['chr1']['true_var']
                             wandb.run.summary['test_genome_dn_peaks_pearsonR'] = results['test_results'][0]['genome']['dn_peaks']['chr1']['pearsonR']
+                            wandb.run.summary['test_genome_dn_peaks_SNR']      = results['test_results'][0]['genome']['dn_peaks']['chr1']['SNR']
 
                         wandb.join()
                         # wandb.uninit()
