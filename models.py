@@ -316,9 +316,6 @@ class SeqModel(object):
         assert self.model
         assert self.model_params
 
-        if self.model_params['train_params']['nb_epoch'] == 0:
-            return None
-
         # Train model
         (train_X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY) = self.get_processed_data(
             self.train_dataset)
@@ -331,6 +328,9 @@ class SeqModel(object):
             train_Y = peakBinaryY
         else:
             train_Y = Y
+
+        if self.model_params['train_params']['nb_epoch'] == 0:
+            return None
 
         if self.model_library == 'keras':
 
