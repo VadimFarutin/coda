@@ -82,6 +82,7 @@ def test_GM18526():
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log
+                            'eval_batch_size': 1000,
                         },
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,

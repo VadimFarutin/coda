@@ -24,13 +24,13 @@ class CnnDecoder(nn.Module):
                                                          out_channels=hidden_size,
                                                          kernel_size=kernel_size,
                                                          stride=stride,
-                                                         padding=kernel_size // 2,
+                                                         padding=dilation * (kernel_size - 1) // 2,
                                                          dilation=dilation).to(DEVICE))
             self.conv_layers.append(nn.Conv1d(in_channels=hidden_size, 
                                               out_channels=hidden_size,
                                               kernel_size=kernel_size,
                                               stride=stride,
-                                              padding=kernel_size // 2).to(DEVICE))
+                                              padding=(kernel_size - 1) // 2).to(DEVICE))
                                
         #self.last_conv = nn.Conv1d(in_channels=hidden_size, 
         #                           out_channels=out_channels,

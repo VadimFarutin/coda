@@ -37,6 +37,7 @@ from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
 from EncoderDecoder import EncoderDecoder
 from CnnEncoderDecoder import CnnEncoderDecoder
+from AdvCnnEncoderDecoder import AdvCnnEncoderDecoder
 from dataWithLabelsDataset import DataWithLabelsDataset
 from kerasFormatConverter import KerasFormatConverter
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
@@ -490,6 +491,7 @@ class SeqModel(object):
                 # if earlystopper_patience == 0:
                 #     break
         
+        print(f"Model checkpoint path: {checkpoint_path}")
         self.model.load_state_dict(torch.load(checkpoint_path))
         self.model.eval()
         return hist
@@ -593,8 +595,8 @@ class SeqModel(object):
         X = self.normalizer.transform(X)
 
         # We have to batch the prediction so that the GPU doesn't run out of memory
-        if 'batch_size' in self.model_params['train_params']:
-            batch_size = self.model_params['train_params']['batch_size']
+        if 'eval_batch_size' in self.model_params['train_params']:
+            batch_size = self.model_params['train_params']['eval_batch_size']
         else:
             batch_size = 10000
         num_examples = X.shape[0]
