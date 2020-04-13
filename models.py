@@ -37,6 +37,7 @@ from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
 from EncoderDecoder import EncoderDecoder
 from CnnEncoderDecoder import CnnEncoderDecoder
+from AdvCnnEncoderDecoder import AdvCnnEncoderDecoder
 from dataWithLabelsDataset import DataWithLabelsDataset
 from kerasFormatConverter import KerasFormatConverter
 from prepData import generate_bigWig, get_peaks, perform_denormalization, input_not_before_end
