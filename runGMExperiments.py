@@ -18,7 +18,7 @@ import models
 import modelTemplates
 
 
-def run_model(model_params, evaluate):
+def run_model(model_params, evaluate, evaluate_genome_only):
     print("pre init")
     start = time.time()
     m = models.SeqModel.instantiate_model(model_params)
@@ -28,7 +28,7 @@ def run_model(model_params, evaluate):
     t2 = time.time()
     results = None
     if evaluate:
-        results = m.evaluate_model()
+        results = m.evaluate_model(evaluate_genome_only)
     t3 = time.time()
     print(f"Init: {t1 - start}, Train: {t2 - t1}, Evaluate: {t3 - t2}")
 
@@ -48,7 +48,8 @@ def test_GM18526():
                     model_type = 'cnn-encoder-decoder'
                     wandb_log = True
                     evaluate = True
-
+                    evaluate_genome_only = True
+                    
                     preset_params = MODEL_PRESET_PARAMS[model_type]
                     loss = preset_params['compile_params']['class_loss'] \
                            if predict_binary_output \
@@ -99,21 +100,22 @@ def test_GM18526():
                                    config=model_params, group=group, tags=[output_mark, model_type])
                         # wandb.watch_called = False # Re-run the model without restarting the runtime, unnecessary after our next release
 
-                    results = run_model(model_params, evaluate)
+                    results = run_model(model_params, evaluate, evaluate_genome_only)
 
                     if wandb_log:
                         if predict_binary_output:
-                            wandb.run.summary['train_samples_dn_AUC']              = results['train_samples']['dn']['AUC']
-                            wandb.run.summary['train_samples_dn_AUPRC']            = results['train_samples']['dn']['AUPRC']
-                            wandb.run.summary['train_samples_dn_Y_pos_frac']       = results['train_samples']['dn']['Y_pos_frac']
-                            wandb.run.summary['train_samples_dn_precision_curves'] = results['train_samples']['dn']['precision_curves']
-                            wandb.run.summary['train_samples_dn_recall_curves']    = results['train_samples']['dn']['recall_curves']
+                            if not evaluate_genome_only:
+                                wandb.run.summary['train_samples_dn_AUC']              = results['train_samples']['dn']['AUC']
+                                wandb.run.summary['train_samples_dn_AUPRC']            = results['train_samples']['dn']['AUPRC']
+                                wandb.run.summary['train_samples_dn_Y_pos_frac']       = results['train_samples']['dn']['Y_pos_frac']
+                                wandb.run.summary['train_samples_dn_precision_curves'] = results['train_samples']['dn']['precision_curves']
+                                wandb.run.summary['train_samples_dn_recall_curves']    = results['train_samples']['dn']['recall_curves']
 
-                            wandb.run.summary['test_samples_dn_AUC']              = results['test_results'][0]['samples']['dn']['AUC']
-                            wandb.run.summary['test_samples_dn_AUPRC']            = results['test_results'][0]['samples']['dn']['AUPRC']
-                            wandb.run.summary['test_samples_dn_Y_pos_frac']       = results['test_results'][0]['samples']['dn']['Y_pos_frac']
-                            wandb.run.summary['test_samples_dn_precision_curves'] = results['test_results'][0]['samples']['dn']['precision_curves']
-                            wandb.run.summary['test_samples_dn_recall_curves']    = results['test_results'][0]['samples']['dn']['recall_curves']
+                                wandb.run.summary['test_samples_dn_AUC']              = results['test_results'][0]['samples']['dn']['AUC']
+                                wandb.run.summary['test_samples_dn_AUPRC']            = results['test_results'][0]['samples']['dn']['AUPRC']
+                                wandb.run.summary['test_samples_dn_Y_pos_frac']       = results['test_results'][0]['samples']['dn']['Y_pos_frac']
+                                wandb.run.summary['test_samples_dn_precision_curves'] = results['test_results'][0]['samples']['dn']['precision_curves']
+                                wandb.run.summary['test_samples_dn_recall_curves']    = results['test_results'][0]['samples']['dn']['recall_curves']
 
                             wandb.run.summary['test_genome_dn_AUC']              = results['test_results'][0]['genome']['dn_all']['chr1']['AUC']
                             wandb.run.summary['test_genome_dn_AUPRC']            = results['test_results'][0]['genome']['dn_all']['chr1']['AUPRC']
@@ -122,15 +124,16 @@ def test_GM18526():
                             wandb.run.summary['test_genome_dn_recall_curves']    = results['test_results'][0]['genome']['dn_all']['chr1']['recall_curves']
 
                         else:
-                            wandb.run.summary['train_samples_dn_MSE']      = results['train_samples']['dn']['MSE']
-                            wandb.run.summary['train_samples_dn_true_var'] = results['train_samples']['dn']['true_var']
-                            wandb.run.summary['train_samples_dn_pearsonR'] = results['train_samples']['dn']['pearsonR']
-                            wandb.run.summary['train_samples_dn_SNR']      = results['train_samples']['dn']['SNR']
+                            if not evaluate_genome_only:
+                                wandb.run.summary['train_samples_dn_MSE']      = results['train_samples']['dn']['MSE']
+                                wandb.run.summary['train_samples_dn_true_var'] = results['train_samples']['dn']['true_var']
+                                wandb.run.summary['train_samples_dn_pearsonR'] = results['train_samples']['dn']['pearsonR']
+                                wandb.run.summary['train_samples_dn_SNR']      = results['train_samples']['dn']['SNR']
 
-                            wandb.run.summary['test_samples_dn_MSE']      = results['test_results'][0]['samples']['dn']['MSE']
-                            wandb.run.summary['test_samples_dn_true_var'] = results['test_results'][0]['samples']['dn']['true_var']
-                            wandb.run.summary['test_samples_dn_pearsonR'] = results['test_results'][0]['samples']['dn']['pearsonR']
-                            wandb.run.summary['test_samples_dn_SNR']      = results['test_results'][0]['samples']['dn']['SNR']
+                                wandb.run.summary['test_samples_dn_MSE']      = results['test_results'][0]['samples']['dn']['MSE']
+                                wandb.run.summary['test_samples_dn_true_var'] = results['test_results'][0]['samples']['dn']['true_var']
+                                wandb.run.summary['test_samples_dn_pearsonR'] = results['test_results'][0]['samples']['dn']['pearsonR']
+                                wandb.run.summary['test_samples_dn_SNR']      = results['test_results'][0]['samples']['dn']['SNR']
 
                             wandb.run.summary['test_genome_dn_all_MSE']      = results['test_results'][0]['genome']['dn_all']['chr1']['MSE']
                             wandb.run.summary['test_genome_dn_all_true_var'] = results['test_results'][0]['genome']['dn_all']['chr1']['true_var']

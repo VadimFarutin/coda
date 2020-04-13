@@ -316,9 +316,6 @@ class SeqModel(object):
         assert self.model
         assert self.model_params
 
-        if self.model_params['train_params']['nb_epoch'] == 0:
-            return None
-
         # Train model
         (train_X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY) = self.get_processed_data(
             self.train_dataset)
@@ -331,6 +328,9 @@ class SeqModel(object):
             train_Y = peakBinaryY
         else:
             train_Y = Y
+
+        if self.model_params['train_params']['nb_epoch'] == 0:
+            return None
 
         if self.model_library == 'keras':
 
@@ -879,7 +879,7 @@ class SeqModel(object):
         return test_genome_results
 
 
-    def evaluate_model(self):
+    def evaluate_model(self, evaluate_genome_only):
         """
         Evaluates the model on the train and test datasets specified in self.dataset_params.
         Writes the results to disk in EVAL_ROOT.        
@@ -893,23 +893,25 @@ class SeqModel(object):
                 else:
                     return super(NumpyEncoder, self).default(obj)
 
-        # Evaluate model on training data        
-        train_samples_results = self.test_model_on_samples(self.train_dataset, 'train')
-        train_results = {
-            'samples': train_samples_results
-        }
+        if not evaluate_genome_only:
+            # Evaluate model on training data        
+            train_samples_results = self.test_model_on_samples(self.train_dataset, 'train')
+            train_results = {
+                'samples': train_samples_results
+            }
 
-        train_eval_path = os.path.join(
-            EVAL_ROOT,
-            "%s-train.eval" % self.model_stamp)
+            train_eval_path = os.path.join(
+                EVAL_ROOT,
+                "%s-train.eval" % self.model_stamp)
 
-        with open(train_eval_path, 'w') as f:
-            f.write(json.dumps(train_results, cls=NumpyEncoder))
+            with open(train_eval_path, 'w') as f:
+                f.write(json.dumps(train_results, cls=NumpyEncoder))
 
         # Evaluate model on testing data
         all_test_results = []
         for dataset_idx, test_dataset in enumerate(self.test_datasets):
-            test_samples_results = self.test_model_on_samples(test_dataset, 'test')
+            if not evaluate_genome_only:
+                test_samples_results = self.test_model_on_samples(test_dataset, 'test')
 
             try:
                 test_genome_results = self.test_model_on_genome(test_dataset)
@@ -917,11 +919,16 @@ class SeqModel(object):
                 print("Genome-wide prediction hasn't been implemented for this type of model. Skipping...")
                 test_genome_results = None
 
-            test_results = {
-                'samples': test_samples_results,
-                'genome': test_genome_results
-            }
-
+            if not evaluate_genome_only:
+                test_results = {
+                    'samples': test_samples_results,
+                    'genome': test_genome_results
+                }
+            else:
+                test_results = {
+                    'genome': test_genome_results
+                }
+                
             test_eval_path = os.path.join(
                 EVAL_ROOT,
                 "%s-test-%s.eval" % (self.model_stamp, dataset_idx))
@@ -930,11 +937,16 @@ class SeqModel(object):
 
             all_test_results.append(test_results)
 
-        results = {
-            'train_samples': train_samples_results,
-            'test_results': all_test_results
-        }
-
+        if not evaluate_genome_only:
+            results = {
+                'train_samples': train_samples_results,
+                'test_results': all_test_results
+            }
+        else:
+            results = {
+                'test_results': all_test_results
+            }
+            
         return results
 
 
