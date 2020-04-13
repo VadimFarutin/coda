@@ -593,8 +593,8 @@ class SeqModel(object):
         X = self.normalizer.transform(X)
 
         # We have to batch the prediction so that the GPU doesn't run out of memory
-        if 'batch_size' in self.model_params['train_params']:
-            batch_size = self.model_params['train_params']['batch_size']
+        if 'eval_batch_size' in self.model_params['train_params']:
+            batch_size = self.model_params['train_params']['eval_batch_size']
         else:
             batch_size = 10000
         num_examples = X.shape[0]
