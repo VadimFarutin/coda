@@ -490,6 +490,7 @@ class SeqModel(object):
                 # if earlystopper_patience == 0:
                 #     break
         
+        print(f"Model checkpoint path: {checkpoint_path}")
         self.model.load_state_dict(torch.load(checkpoint_path))
         self.model.eval()
         return hist
