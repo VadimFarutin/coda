@@ -16,14 +16,14 @@ class CnnEncoder(nn.Module):
                                  out_channels=hidden_size,
                                  kernel_size=kernel_size,
                                  stride=stride,
-                                 padding=kernel_size // 2).to(DEVICE)]
+                                 padding=(kernel_size - 1) // 2).to(DEVICE)]
         
         for _ in range(num_layers):
             self.layers.append(nn.Conv1d(in_channels=hidden_size, 
                                          out_channels=hidden_size,
                                          kernel_size=kernel_size,
                                          stride=stride,
-                                         padding=kernel_size // 2,
+                                         padding=dilation * (kernel_size - 1) // 2,
                                          dilation=dilation).to(DEVICE))
 
     def forward(self, x):
