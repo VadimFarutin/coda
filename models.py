@@ -427,6 +427,7 @@ class SeqModel(object):
         earlystopper_patience = 3
         best_epoch_val_loss = None
         hist = {'loss': [], 'val_loss': []}
+        print(f"Model checkpoint path: {checkpoint_path}")
 
         for epoch in tqdm(range(nb_epoch)):
             loss_values = []
