@@ -10,8 +10,8 @@ class CnnEncoderDecoder(nn.Module):
                 in_channels, out_channels,
                 hidden_size, num_layers,
                 kernel_size, stride, dilation,
-                residual,
-                p_dropout):
+                residual, p_dropout,
+                seq_length, seq2seq):
         super(CnnEncoderDecoder, self).__init__()
 
         self.encoder = CnnEncoder(in_channels, out_channels,
@@ -23,8 +23,8 @@ class CnnEncoderDecoder(nn.Module):
                                   in_channels, out_channels,
                                   hidden_size, num_layers,
                                   kernel_size, stride, dilation,
-                                  residual,
-                                  p_dropout)
+                                  residual, p_dropout,
+                                  seq_length, seq2seq)
 
     def __call__(self, x, y=None):
         return self.forward(x, y)

@@ -1297,7 +1297,7 @@ class SeqToSeq(SeqModel):
             num_layers = model_params['num_layers']
             residual = model_params['residual']
             dropout = model_params['dropout']
-            # seq_length = self.dataset_params['seq_length']
+            seq_length = self.dataset_params['seq_length']
 
             model = CnnEncoderDecoder(
                 predict_binary_output=predict_binary_output,
@@ -1309,8 +1309,9 @@ class SeqToSeq(SeqModel):
                 stride=stride,
                 dilation=dilation,
                 residual=residual,
-                p_dropout=dropout
-                # seq_length=seq_length
+                p_dropout=dropout,
+                seq_length=seq_length,
+                seq2seq=True
             )
         else:
             raise Exception("Model type not recognized")

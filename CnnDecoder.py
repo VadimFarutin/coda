@@ -10,8 +10,8 @@ class CnnDecoder(nn.Module):
                  in_channels, out_channels,
                  hidden_size, num_layers,
                  kernel_size, stride, dilation,
-                 residual,
-                 p_dropout):
+                 residual, p_dropout,
+                 seq_length, seq2seq):
         super(CnnDecoder, self).__init__()
 
         self.residual = residual
@@ -32,14 +32,15 @@ class CnnDecoder(nn.Module):
                                               stride=stride,
                                               padding=(kernel_size - 1) // 2).to(DEVICE))
                                
-        #self.last_conv = nn.Conv1d(in_channels=hidden_size, 
-        #                           out_channels=out_channels,
-        #                           kernel_size=kernel_size, #1
-        #                           stride=stride, #1
-        #                           padding=kernel_size // 2).to(DEVICE) #0
+        padding = (seq_length - 1) // 2 if seq2seq else 0
+        self.fc = nn.Conv1d(in_channels=hidden_size, 
+                            out_channels=out_channels,
+                            kernel_size=seq_length,
+                            stride=1,
+                            padding=padding).to(DEVICE)
         
-        self.fc = nn.Linear(in_features=hidden_size,
-                            out_features=out_channels)
+        # self.fc = nn.Linear(in_features=hidden_size,
+        #                     out_features=out_channels)
 
         if predict_binary_output:
             self.last_activation = nn.Sigmoid()
