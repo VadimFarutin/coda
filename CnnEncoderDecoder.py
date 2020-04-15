@@ -26,14 +26,16 @@ class CnnEncoderDecoder(nn.Module):
                                   residual, p_dropout,
                                   seq_length, seq2seq)
 
-    def __call__(self, x, y=None):
-        return self.forward(x, y)
+    def __call__(self, x, return_latent=False):
+        return self.forward(x, return_latent)
 
-    def forward(self, x, y=None):
+    def forward(self, x, return_latent):
         encoder_output, residual_output = self.encoder(x)
         decoder_output = self.decoder(encoder_output=encoder_output,
                                       residual_output=residual_output)
 
+        if return_latent:
+            return decoder_output, encoder_output
         return decoder_output
 
     def encode(self, x):

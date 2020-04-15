@@ -428,37 +428,70 @@ class SeqModel(object):
         best_epoch_val_loss = None
         hist = {'loss': [], 'val_loss': []}
 
+        if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
+            lr = self.model_params['compile_params']['lr']
+            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr)
+            disc_loss_function = torch.nn.modules.loss.BCELoss()
+
         for epoch in tqdm(range(nb_epoch)):
             loss_values = []
             val_loss_values = []
 
             self.model.train()
-            for batch_data in tqdm(train_loader):
-                optimizer.zero_grad()
-                data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
+            if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
+                for batch_data in tqdm(train_loader):
+                    optimizer.zero_grad()
+                    data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
+                    output, latent_noisy = self.model(data, return_latent=True)
+                    loss = loss_function(output, labels.float())
+                    loss.backward()
+                    
+                    gen_noisy_output = self.model.discriminator(latent_noisy)
+                    gen_noisy_loss = disc_loss_function(gen_noisy_output, 1)
+                    gen_noisy_loss.backward()
 
-                if self.model_params['model_type'] == 'encoder-decoder':
-                    output = self.model(data, labels)
-                else:
-                    output = self.model(data)
+                    labels = self.normalizer.transform(labels.copy().float())
+                    _, latent_clean = self.model(labels.float(), return_latent=True)
 
-                loss = loss_function(output, labels.float())
+                    optimizer.step()
+                    loss_values.append(loss.item())
+                    
+                    disc_optimizer.zero_grad()
+                    disc_clean_output = self.model.discriminator(latent_clean.detach())
+                    disc_clean_loss = disc_loss_function(disc_clean_output, 1)
+                    disc_clean_loss.backward()
+                    disc_noisy_output = self.model.discriminator(latent_noisy.detach())
+                    disc_noisy_loss = disc_loss_function(disc_noisy_output, 0)
+                    disc_noisy_loss.backward()
+                    disc_optimizer.step()
+                    
+            else:
+                for batch_data in tqdm(train_loader):
+                    optimizer.zero_grad()
+                    data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
 
-                # pid = os.getpid()
-                # py = psutil.Process(pid)
-                # memoryUse = py.memory_info()[0] / 2.0 ** 30
-                # print("before backward ", memoryUse)
-                loss.backward()
-                # pid = os.getpid()
-                # py = psutil.Process(pid)
-                # memoryUse = py.memory_info()[0] / 2.0 ** 30
-                # print("before step ", memoryUse)
-                optimizer.step()
-                # pid = os.getpid()
-                # py = psutil.Process(pid)
-                # memoryUse = py.memory_info()[0] / 2.0 ** 30
-                # print("after step", memoryUse)
-                loss_values.append(loss.item())
+                    if self.model_params['model_type'] == 'encoder-decoder':
+                        output = self.model(data, labels)
+                    else:
+                        output = self.model(data)
+
+                    loss = loss_function(output, labels.float())
+
+                    # pid = os.getpid()
+                    # py = psutil.Process(pid)
+                    # memoryUse = py.memory_info()[0] / 2.0 ** 30
+                    # print("before backward ", memoryUse)
+                    loss.backward()
+                    # pid = os.getpid()
+                    # py = psutil.Process(pid)
+                    # memoryUse = py.memory_info()[0] / 2.0 ** 30
+                    # print("before step ", memoryUse)
+                    optimizer.step()
+                    # pid = os.getpid()
+                    # py = psutil.Process(pid)
+                    # memoryUse = py.memory_info()[0] / 2.0 ** 30
+                    # print("after step", memoryUse)
+                    loss_values.append(loss.item())
                 
             epoch_train_loss = np.mean(loss_values)
             hist['loss'].append(float(epoch_train_loss))
