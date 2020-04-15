@@ -64,12 +64,12 @@ class CnnDecoder(nn.Module):
                 out = out + residual_output[self.num_layers - 1 - i]             
                 out = nn.functional.relu(self.conv_layers[i](out))
             
-        out = torch.transpose(out, 1, 2)
         #print("##############")
         #print(f"Last layer input  {out.shape}")
         out = self.fc(out)
         out = self.last_activation(out)
         #print(f"Last layer output {out.shape}")
         #print("##############")
+        out = torch.transpose(out, 1, 2)
 
         return out
