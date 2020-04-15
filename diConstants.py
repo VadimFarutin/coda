@@ -99,7 +99,7 @@ MM9_CHROM_SIZES = {
     'chr19': 61342430
 }
 BIN_SIZE = 25
-GENOME_BATCH_SIZE = 10000
+GENOME_BATCH_SIZE = 50000
 NUM_BASES = 4
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
