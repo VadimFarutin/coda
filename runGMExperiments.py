@@ -46,7 +46,7 @@ def test_GM18526():
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     model_type = 'cnn-encoder-decoder'
-                    wandb_log = True
+                    wandb_log = False
                     evaluate = True
                     evaluate_genome_only = True
                     
@@ -68,8 +68,8 @@ def test_GM18526():
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
-                            'num_train_examples': 100000,
-                            'seq_length': 1001,
+                            'num_train_examples': 1000,
+                            'seq_length': 101,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
@@ -79,7 +79,7 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 3,
+                            'nb_epoch': 1,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,

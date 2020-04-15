@@ -1166,6 +1166,32 @@ class SeqToPoint(SeqModel):
                                    num_filters=num_filters,
                                    kernel_size=filter_length)
 
+        elif model_params['model_type'] == 'cnn-encoder-decoder':
+            predict_binary_output = model_params['predict_binary_output']
+            hidden_size = model_params['hidden_size']
+            kernel_size = model_params['kernel_size']
+            stride = model_params['stride']
+            dilation = model_params['dilation']
+            num_layers = model_params['num_layers']
+            residual = model_params['residual']
+            dropout = model_params['dropout']
+            seq_length = self.dataset_params['seq_length']
+
+            model = CnnEncoderDecoder(
+                predict_binary_output=predict_binary_output,
+                in_channels=self.num_input_marks,
+                out_channels=self.num_output_marks,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                kernel_size=kernel_size,
+                stride=stride,
+                dilation=dilation,
+                residual=residual,
+                p_dropout=dropout,
+                seq_length=seq_length,
+                seq2seq=False
+            )
+
         else:
             raise Exception("Model type not recognized")
 

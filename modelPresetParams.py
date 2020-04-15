@@ -80,13 +80,13 @@ MODEL_PRESET_PARAMS = {
     },
     'cnn-encoder-decoder': {
         'model_library': 'pytorch',
-        'model_class': 'SeqToSeq',
+        'model_class': 'SeqToPoint',
         'model_type': 'cnn-encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 64,
+            'hidden_size': 32,
             'kernel_size': 51,
             'stride': 1,
-            'dilation': 3,
+            'dilation': 2,
             'num_layers': 5,
             'residual': True,
             'dropout': 0.4
