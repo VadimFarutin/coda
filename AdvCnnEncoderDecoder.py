@@ -5,6 +5,7 @@ from CnnEncoder import CnnEncoder
 from CnnDecoder import CnnDecoder
 from CnnEncoderDecoder import CnnEncoderDecoder
 
+from diConstants import DEVICE
 
 class Discriminator(nn.Module):
     def __init__(self,
