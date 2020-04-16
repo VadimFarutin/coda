@@ -42,7 +42,7 @@ class Discriminator(nn.Module):
     def forward(self, x):
         print(x.shape)
         x = self.conv(x)
-        x = x.unsqueeze(2)
+        x = x.squeeze(2)
         
         for layer in self.layers:
             print(x.shape)
@@ -50,7 +50,7 @@ class Discriminator(nn.Module):
             
         return x
 
-
+ 
 class AdvCnnEncoderDecoder(nn.Module):
     def __init__(self, predict_binary_output,
                 in_channels, out_channels,
