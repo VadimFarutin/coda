@@ -14,21 +14,22 @@ class Discriminator(nn.Module):
                 p_dropout):
         super(Discriminator, self).__init__()
 
-        self.layers = [nn.Conv1d(in_channels=in_channels, 
+        layers = [nn.Conv1d(in_channels=in_channels, 
                                  out_channels=in_channels,
                                  kernel_size=kernel_size,
                                  stride=1,
                                  padding=0).to(DEVICE)]
 
         for _ in range(num_layers):
-            self.layers.append(nn.Linear(in_features=hidden_size, 
+            layers.append(nn.Linear(in_features=hidden_size, 
                                          out_features=hidden_size).to(DEVICE))
-            self.layers.append(nn.ReLU().to(DEVICE))
+            layers.append(nn.ReLU().to(DEVICE))
 
-        self.layers.append(nn.Linear(in_features=hidden_size, 
+        layers.append(nn.Linear(in_features=hidden_size, 
                                      out_features=1).to(DEVICE))
-        self.layers.append(nn.Sigmoid().to(DEVICE))
+        layers.append(nn.Sigmoid().to(DEVICE))
 
+        self.layers = nn.ModuleList(layers)
                                  
     def __call__(self, x):
         return self.forward(x)
@@ -67,3 +68,6 @@ class AdvCnnEncoderDecoder(nn.Module):
 
     def forward(self, x, return_latent):
         return self.model(x, return_latent)
+
+    def parameters(self):
+        return self.model.parameters()

@@ -16,22 +16,25 @@ class CnnDecoder(nn.Module):
 
         self.residual = residual
         self.num_layers = num_layers
-        self.deconv_layers = []
-        self.conv_layers = []
+        deconv_layers = []
+        conv_layers = []
         
         for _ in range(num_layers):
-            self.deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size, 
+            deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size, 
                                                          out_channels=hidden_size,
                                                          kernel_size=kernel_size,
                                                          stride=stride,
                                                          padding=dilation * (kernel_size - 1) // 2,
                                                          dilation=dilation).to(DEVICE))
-            self.conv_layers.append(nn.Conv1d(in_channels=hidden_size, 
+            conv_layers.append(nn.Conv1d(in_channels=hidden_size, 
                                               out_channels=hidden_size,
                                               kernel_size=kernel_size,
                                               stride=stride,
                                               padding=(kernel_size - 1) // 2).to(DEVICE))
-                               
+
+        self.deconv_layers = nn.ModuleList(deconv_layers)
+        self.conv_layers = nn.ModuleList(conv_layers)
+                                              
         padding = (seq_length - 1) // 2 if seq2seq else 0
         self.fc = nn.Conv1d(in_channels=hidden_size, 
                             out_channels=out_channels,
