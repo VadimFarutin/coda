@@ -84,10 +84,10 @@ MODEL_PRESET_PARAMS = {
         'model_type': 'cnn-encoder-decoder',
         'model_specific_params': {
             'hidden_size': 64,
-            'kernel_size': 71,
+            'kernel_size': 51,
             'stride': 1,
             'dilation': 2,
-            'num_layers': 7,
+            'num_layers': 5,
             'residual': True,
             'dropout': 0.5
         },
@@ -104,14 +104,14 @@ MODEL_PRESET_PARAMS = {
         'model_type': 'adv-cnn-encoder-decoder',
         'model_specific_params': {
             'hidden_size': 64,
-            'kernel_size': 17,
+            'kernel_size': 51,
             'stride': 1,
             'dilation': 2,
-            'num_layers': 4,
+            'num_layers': 5,
             'residual': True,
             'dropout': 0.0,
 
-            'disc_hidden_size': 128,
+            'disc_hidden_size': 64,
             'disc_kernel_size': 17,
             'disc_dilation': 1,
             'disc_num_layers': 2            

@@ -433,6 +433,7 @@ class SeqModel(object):
             lr = self.model_params['compile_params']['lr']
             disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr)
             disc_loss_function = torch.nn.modules.loss.BCELoss()
+            output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
 
         for epoch in tqdm(range(nb_epoch)):
             loss_values = []
@@ -447,22 +448,32 @@ class SeqModel(object):
                     loss = loss_function(output, labels.float())
                     loss.backward()
                     
+                    batch_data_size = data.shape[0]
                     gen_noisy_output = self.model.discriminator(latent_noisy)
-                    gen_noisy_loss = disc_loss_function(gen_noisy_output, 1)
+                    gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
                     gen_noisy_loss.backward()
 
+                    # TODO (batch_data_size, seq_length, 6)
+
                     labels = self.normalizer.transform(labels.copy().float())
-                    _, latent_clean = self.model(labels.float(), return_latent=True)
+                    clean_data = data.copy()
+                    print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
+                    clean_data.gather(2, 
+                                      torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])) \
+                                        .view(data.shape[0], data.shape[1], 1).to(DEVICE)) \ 
+                                     = labels
+                    print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
+                    _, latent_clean = self.model(clean_data, return_latent=True)
 
                     optimizer.step()
                     loss_values.append(loss.item())
                     
                     disc_optimizer.zero_grad()
                     disc_clean_output = self.model.discriminator(latent_clean.detach())
-                    disc_clean_loss = disc_loss_function(disc_clean_output, 1)
+                    disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
                     disc_clean_loss.backward()
                     disc_noisy_output = self.model.discriminator(latent_noisy.detach())
-                    disc_noisy_loss = disc_loss_function(disc_noisy_output, 0)
+                    disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
                     disc_noisy_loss.backward()
                     disc_optimizer.step()
                     
