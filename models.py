@@ -448,7 +448,7 @@ class SeqModel(object):
                     data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
                     output, latent_noisy = self.model(data, return_latent=True)
                     loss = loss_function(output, labels.float())
-                    loss.backward()
+                    loss.backward(retain_graph=True)
                     
                     batch_data_size = data.shape[0]
                     gen_noisy_output = self.model.discriminator(latent_noisy)

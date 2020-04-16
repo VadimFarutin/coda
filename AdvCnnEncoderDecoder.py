@@ -40,12 +40,12 @@ class Discriminator(nn.Module):
         return self.forward(x)
 
     def forward(self, x):
-        print(x.shape)
+        #print(x.shape)
         x = self.conv(x)
         x = x.squeeze(2)
         
         for layer in self.layers:
-            print(x.shape)
+            #print(x.shape)
             x = layer(x)
             
         return x
