@@ -21,12 +21,12 @@ class Discriminator(nn.Module):
                                  padding=0).to(DEVICE)]
 
         for _ in range(num_layers):
-            self.layers.append(nn.Linear(in_channels=hidden_size, 
-                                         out_channels=hidden_size).to(DEVICE))
+            self.layers.append(nn.Linear(in_features=hidden_size, 
+                                         out_features=hidden_size).to(DEVICE))
             self.layers.append(nn.ReLU().to(DEVICE))
 
-        self.layers.append(nn.Linear(in_channels=hidden_size, 
-                                     out_channels=1).to(DEVICE))
+        self.layers.append(nn.Linear(in_features=hidden_size, 
+                                     out_features=1).to(DEVICE))
         self.layers.append(nn.Sigmoid().to(DEVICE))
 
                                  
