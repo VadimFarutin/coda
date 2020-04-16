@@ -82,7 +82,7 @@ class CnnDecoder(nn.Module):
             if self.residual:
                 out = out + residual_output[self.num_layers - 1 - i]
                 out = self.conv_layers[i](out)
-                out = self.bn_layers[i](out)
+                #out = self.bn_layers[i](out)
                 out = nn.functional.relu(out)
             
         #print("##############")
