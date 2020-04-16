@@ -14,12 +14,13 @@ class Discriminator(nn.Module):
                 p_dropout):
         super(Discriminator, self).__init__()
 
-        layers = [nn.Conv1d(in_channels=in_channels, 
-                            out_channels=in_channels,
-                            kernel_size=kernel_size,
-                            stride=1,
-                            padding=0).to(DEVICE)]
+        self.conv = nn.Conv1d(in_channels=in_channels, 
+                              out_channels=in_channels,
+                              kernel_size=kernel_size,
+                              stride=1,
+                              padding=0).to(DEVICE)
 
+        layers = []
         layers.append(nn.Linear(in_features=in_channels, 
                                 out_features=hidden_size).to(DEVICE))
         layers.append(nn.ReLU().to(DEVICE))
@@ -39,6 +40,10 @@ class Discriminator(nn.Module):
         return self.forward(x)
 
     def forward(self, x):
+        print(x.shape)
+        x = self.conv(x)
+        x = x.unsqueeze(2)
+        
         for layer in self.layers:
             print(x.shape)
             x = layer(x)
