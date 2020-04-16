@@ -46,7 +46,7 @@ def test_GM18526():
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     model_type = 'cnn-encoder-decoder'
-                    wandb_log = True
+                    wandb_log = False
                     evaluate = True
                     evaluate_genome_only = True
                     
