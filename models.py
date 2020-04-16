@@ -1411,10 +1411,10 @@ class SeqToSeq(SeqModel):
                 dilation=dilation,
                 residual=residual,
                 p_dropout=dropout,
-                disc_hidden_size, 
-                disc_num_layers,
-                disc_kernel_size, 
-                disc_dilation            
+                disc_hidden_size=disc_hidden_size, 
+                disc_num_layers=disc_num_layers,
+                disc_kernel_size=disc_kernel_size, 
+                disc_dilation=disc_dilation
             )
         else:
             raise Exception("Model type not recognized")
