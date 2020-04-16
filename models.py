@@ -427,8 +427,8 @@ class SeqModel(object):
         earlystopper_patience = 3
         best_epoch_val_loss = None
         hist = {'loss': [], 'val_loss': []}
-        #params_num = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        #print(f"Model parameters: {params_num}")
+        params_num = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        print(f"Model parameters: {params_num}")
         print(f"Model checkpoint path: {checkpoint_path}")
 
         if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
@@ -457,14 +457,15 @@ class SeqModel(object):
 
                     # TODO (batch_data_size, seq_length, 6)
 
-                    labels = self.normalizer.transform(copy.deepcopy(labels).float())
                     clean_data = copy.deepcopy(data)
                     print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
                     original = clean_data.gather(2, 
                                                  torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])) \
                                                  .view(data.shape[0], data.shape[1], 1).to(DEVICE))
-                    original = labels
+                    original = copy.deepcopy(labels).float()
                     print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
+                    clean_data = self.normalizer.transform(clean_data)
+
                     _, latent_clean = self.model(clean_data, return_latent=True)
 
                     optimizer.step()
