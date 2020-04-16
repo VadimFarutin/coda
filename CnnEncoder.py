@@ -26,8 +26,7 @@ class CnnEncoder(nn.Module):
                                          padding=dilation * (kernel_size - 1) // 2,
                                          dilation=dilation).to(DEVICE))
 
-        #self.layers = nn.ModuleList(layers)
-        self.layers = layers
+        self.layers = nn.ModuleList(layers)
         
     def forward(self, x):
         #print("############################")

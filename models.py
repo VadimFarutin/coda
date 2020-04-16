@@ -1483,7 +1483,7 @@ class SeqToSeq(SeqModel):
                     #X = torch.from_numpy(signalX).float().view(10, 1000, num_input_marks).to(device)
                     X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
                 else:
-                    print("num_bins", num_bins)
+                    #print("num_bins", num_bins)
                     X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
                 Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
                 Y = Y[0]

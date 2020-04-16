@@ -32,10 +32,8 @@ class CnnDecoder(nn.Module):
                                               stride=stride,
                                               padding=(kernel_size - 1) // 2).to(DEVICE))
 
-        #self.deconv_layers = nn.ModuleList(deconv_layers)
-        #self.conv_layers = nn.ModuleList(conv_layers)
-        self.deconv_layers = deconv_layers
-        self.conv_layers = conv_layers
+        self.deconv_layers = nn.ModuleList(deconv_layers)
+        self.conv_layers = nn.ModuleList(conv_layers)
                                               
         padding = (seq_length - 1) // 2 if seq2seq else 0
         self.fc = nn.Conv1d(in_channels=hidden_size, 
