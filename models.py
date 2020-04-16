@@ -457,8 +457,8 @@ class SeqModel(object):
 
                     # TODO (batch_data_size, seq_length, 6)
 
-                    labels = self.normalizer.transform(labels.copy().float())
-                    clean_data = data.copy()
+                    labels = self.normalizer.transform(copy.deepcopy(labels).float())
+                    clean_data = copy.deepcopy(data)
                     print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
                     original = clean_data.gather(2, 
                                                  torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])) \
