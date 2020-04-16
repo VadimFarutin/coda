@@ -45,6 +45,7 @@ class AdvCnnEncoderDecoder(nn.Module):
                 hidden_size, num_layers,
                 kernel_size, stride, dilation,
                 residual, p_dropout,
+                seq_length, seq2seq,
                 disc_hidden_size, disc_num_layers,
                 disc_kernel_size, disc_dilation):
         super(AdvCnnEncoderDecoder, self).__init__()
@@ -53,7 +54,8 @@ class AdvCnnEncoderDecoder(nn.Module):
                                        in_channels, out_channels,
                                        hidden_size, num_layers,
                                        kernel_size, stride, dilation,
-                                       residual, p_dropout)
+                                       residual, p_dropout,
+                                       seq_length, seq2seq)
 
         self.discriminator = Discriminator(hidden_size, disc_hidden_size, disc_num_layers,
                                            disc_kernel_size, disc_dilation,

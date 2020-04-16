@@ -1394,6 +1394,7 @@ class SeqToSeq(SeqModel):
             num_layers = model_params['num_layers']
             residual = model_params['residual']
             dropout = model_params['dropout']
+            seq_length = self.dataset_params['seq_length']
 
             disc_hidden_size = model_params['disc_hidden_size'] 
             disc_num_layers = model_params['disc_num_layers']
@@ -1411,6 +1412,8 @@ class SeqToSeq(SeqModel):
                 dilation=dilation,
                 residual=residual,
                 p_dropout=dropout,
+                seq_length=seq_length, 
+                seq2seq=True,
                 disc_hidden_size=disc_hidden_size, 
                 disc_num_layers=disc_num_layers,
                 disc_kernel_size=disc_kernel_size, 
