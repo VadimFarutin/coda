@@ -427,8 +427,8 @@ class SeqModel(object):
         earlystopper_patience = 3
         best_epoch_val_loss = None
         hist = {'loss': [], 'val_loss': []}
-        params_num = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-        print(f"Model parameters: {params_num}")
+        #params_num = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        #print(f"Model parameters: {params_num}")
         print(f"Model checkpoint path: {checkpoint_path}")
 
         if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
