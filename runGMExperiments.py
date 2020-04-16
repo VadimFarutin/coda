@@ -46,7 +46,7 @@ def test_GM18526():
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     model_type = 'cnn-encoder-decoder'
-                    wandb_log = False
+                    wandb_log = True
                     evaluate = True
                     evaluate_genome_only = True
                     
@@ -79,7 +79,7 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 1,
+                            'nb_epoch': 15,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
