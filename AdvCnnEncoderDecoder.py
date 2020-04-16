@@ -40,6 +40,7 @@ class Discriminator(nn.Module):
 
     def forward(self, x):
         for layer in self.layers:
+            print(x.shape)
             x = layer(x)
             
         return x
