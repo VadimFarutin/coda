@@ -458,10 +458,10 @@ class SeqModel(object):
                     labels = self.normalizer.transform(labels.copy().float())
                     clean_data = data.copy()
                     print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
-                    clean_data.gather(2, 
-                                      torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])) \
-                                        .view(data.shape[0], data.shape[1], 1).to(DEVICE)) \
-                                     = labels
+                    original = clean_data.gather(2, 
+                                                 torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])) \
+                                                 .view(data.shape[0], data.shape[1], 1).to(DEVICE))
+                    original = labels
                     print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
                     _, latent_clean = self.model(clean_data, return_latent=True)
 
