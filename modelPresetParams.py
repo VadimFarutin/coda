@@ -112,9 +112,9 @@ MODEL_PRESET_PARAMS = {
             'dropout': 0.0,
 
             'disc_hidden_size': 64,
-            'disc_kernel_size': 17,
+            'disc_kernel_size': 1001,
             'disc_dilation': 1,
-            'disc_num_layers': 2            
+            'disc_num_layers': 1            
         },
         'compile_params': {
             'regression_loss': 'MSE',

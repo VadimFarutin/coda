@@ -15,18 +15,22 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
 
         layers = [nn.Conv1d(in_channels=in_channels, 
-                                 out_channels=in_channels,
-                                 kernel_size=kernel_size,
-                                 stride=1,
-                                 padding=0).to(DEVICE)]
+                            out_channels=in_channels,
+                            kernel_size=kernel_size,
+                            stride=1,
+                            padding=0).to(DEVICE)]
+
+        layers.append(nn.Linear(in_features=in_channels, 
+                                out_features=hidden_size).to(DEVICE))
+        layers.append(nn.ReLU().to(DEVICE))
 
         for _ in range(num_layers):
             layers.append(nn.Linear(in_features=hidden_size, 
-                                         out_features=hidden_size).to(DEVICE))
+                                    out_features=hidden_size).to(DEVICE))
             layers.append(nn.ReLU().to(DEVICE))
 
         layers.append(nn.Linear(in_features=hidden_size, 
-                                     out_features=1).to(DEVICE))
+                                out_features=1).to(DEVICE))
         layers.append(nn.Sigmoid().to(DEVICE))
 
         self.layers = nn.ModuleList(layers)
