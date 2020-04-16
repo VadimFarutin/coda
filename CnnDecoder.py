@@ -18,22 +18,38 @@ class CnnDecoder(nn.Module):
         self.num_layers = num_layers
         deconv_layers = []
         conv_layers = []
+        bn_layers = []
         
-        for _ in range(num_layers):
+        deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size // 2, 
+                                                out_channels=hidden_size,
+                                                kernel_size=kernel_size,
+                                                stride=stride,
+                                                padding=dilation * (kernel_size - 1) // 2,
+                                                dilation=dilation).to(DEVICE))
+        conv_layers.append(nn.Conv1d(in_channels=hidden_size, 
+                                     out_channels=hidden_size,
+                                     kernel_size=kernel_size,
+                                     stride=stride,
+                                     padding=(kernel_size - 1) // 2).to(DEVICE))
+        bn_layers.append(nn.BatchNorm1d(num_features=hidden_size).to(DEVICE))
+                                     
+        for _ in range(num_layers - 1):
             deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size, 
-                                                         out_channels=hidden_size,
-                                                         kernel_size=kernel_size,
-                                                         stride=stride,
-                                                         padding=dilation * (kernel_size - 1) // 2,
-                                                         dilation=dilation).to(DEVICE))
+                                                    out_channels=hidden_size,
+                                                    kernel_size=kernel_size,
+                                                    stride=stride,
+                                                    padding=dilation * (kernel_size - 1) // 2,
+                                                    dilation=dilation).to(DEVICE))
             conv_layers.append(nn.Conv1d(in_channels=hidden_size, 
-                                              out_channels=hidden_size,
-                                              kernel_size=kernel_size,
-                                              stride=stride,
-                                              padding=(kernel_size - 1) // 2).to(DEVICE))
+                                         out_channels=hidden_size,
+                                         kernel_size=kernel_size,
+                                         stride=stride,
+                                         padding=(kernel_size - 1) // 2).to(DEVICE))
+            bn_layers.append(nn.BatchNorm1d(num_features=hidden_size).to(DEVICE))
 
         self.deconv_layers = nn.ModuleList(deconv_layers)
         self.conv_layers = nn.ModuleList(conv_layers)
+        self.bn_layers = nn.ModuleList(bn_layers)
                                               
         padding = (seq_length - 1) // 2 if seq2seq else 0
         self.fc = nn.Conv1d(in_channels=hidden_size, 
@@ -64,8 +80,11 @@ class CnnDecoder(nn.Module):
             #print(f"Layer output {out.shape}")
             #print("##############")
             if self.residual:
-                out = out + residual_output[self.num_layers - 1 - i]             
-                out = nn.functional.relu(self.conv_layers[i](out))
+                print("residual true")
+                out = out + residual_output[self.num_layers - 1 - i]
+                out = self.conv_layers[i](out)
+                out = self.bn_layers[i](out)
+                out = nn.functional.relu(out)
             
         #print("##############")
         #print(f"Last layer input  {out.shape}")

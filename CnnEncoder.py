@@ -13,18 +13,25 @@ class CnnEncoder(nn.Module):
         super(CnnEncoder, self).__init__()
 
         layers = [nn.Conv1d(in_channels=in_channels, 
-                                 out_channels=hidden_size,
-                                 kernel_size=kernel_size,
-                                 stride=stride,
-                                 padding=(kernel_size - 1) // 2).to(DEVICE)]
+                            out_channels=hidden_size,
+                            kernel_size=kernel_size,
+                            stride=stride,
+                            padding=(kernel_size - 1) // 2).to(DEVICE)]
         
-        for _ in range(num_layers):
+        for _ in range(num_layers - 1):
             layers.append(nn.Conv1d(in_channels=hidden_size, 
-                                         out_channels=hidden_size,
-                                         kernel_size=kernel_size,
-                                         stride=stride,
-                                         padding=dilation * (kernel_size - 1) // 2,
-                                         dilation=dilation).to(DEVICE))
+                                    out_channels=hidden_size,
+                                    kernel_size=kernel_size,
+                                    stride=stride,
+                                    padding=dilation * (kernel_size - 1) // 2,
+                                    dilation=dilation).to(DEVICE))
+
+        layers.append(nn.Conv1d(in_channels=hidden_size, 
+                                out_channels=hidden_size // 2,
+                                kernel_size=kernel_size,
+                                stride=stride,
+                                padding=dilation * (kernel_size - 1) // 2,
+                                dilation=dilation).to(DEVICE))
 
         self.layers = nn.ModuleList(layers)
         
