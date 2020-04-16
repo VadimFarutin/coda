@@ -24,8 +24,8 @@ class CnnDecoder(nn.Module):
                                                 out_channels=hidden_size,
                                                 kernel_size=kernel_size,
                                                 stride=stride,
-                                                padding=dilation * (kernel_size - 1) // 2,
-                                                dilation=dilation).to(DEVICE))
+                                                padding=dilation * 2 * (kernel_size - 1) // 2,
+                                                dilation=dilation * 2).to(DEVICE))
         conv_layers.append(nn.Conv1d(in_channels=hidden_size, 
                                      out_channels=hidden_size,
                                      kernel_size=kernel_size,
@@ -33,7 +33,7 @@ class CnnDecoder(nn.Module):
                                      padding=(kernel_size - 1) // 2).to(DEVICE))
         #bn_layers.append(nn.BatchNorm1d(num_features=hidden_size).to(DEVICE))
                                      
-        for _ in range(num_layers - 1):
+        for _ in range(num_layers - 2):
             deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size, 
                                                     out_channels=hidden_size,
                                                     kernel_size=kernel_size,
@@ -47,12 +47,24 @@ class CnnDecoder(nn.Module):
                                          padding=(kernel_size - 1) // 2).to(DEVICE))
             #bn_layers.append(nn.BatchNorm1d(num_features=hidden_size).to(DEVICE))
 
+        deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size, 
+                                                out_channels=hidden_size * 2,
+                                                kernel_size=kernel_size,
+                                                stride=stride,
+                                                padding=dilation * (kernel_size - 1) // 2,
+                                                dilation=dilation).to(DEVICE))
+        conv_layers.append(nn.Conv1d(in_channels=hidden_size * 2, 
+                                     out_channels=hidden_size * 2,
+                                     kernel_size=kernel_size,
+                                     stride=stride,
+                                     padding=(kernel_size - 1) // 2).to(DEVICE))
+
         self.deconv_layers = nn.ModuleList(deconv_layers)
         self.conv_layers = nn.ModuleList(conv_layers)
         #self.bn_layers = nn.ModuleList(bn_layers)
                                               
         padding = (seq_length - 1) // 2 if seq2seq else 0
-        self.fc = nn.Conv1d(in_channels=hidden_size, 
+        self.fc = nn.Conv1d(in_channels=hidden_size * 2, 
                             out_channels=out_channels,
                             kernel_size=seq_length,
                             stride=1,
