@@ -502,8 +502,8 @@ class SeqModel(object):
                     # memoryUse = py.memory_info()[0] / 2.0 ** 30
                     # print("before step ", memoryUse)
                     optimizer.step()
-                    print(np.sum(output[1].view(-1).cpu().detach().numpy()[output[1].view(-1).cpu().detach().numpy() != 0.0]))
-                    print(np.sum(labels[1].view(-1).cpu().detach().numpy()[labels[1].view(-1).cpu().detach().numpy() != 0.0]))
+                    print(torch.sum(output[output != 0.0]))
+                    print(torch.sum(labels[labels != 0.0]))
                     #for param in self.model.parameters():
                     #    print(param.data)
                     #    break
