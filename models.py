@@ -503,6 +503,7 @@ class SeqModel(object):
                     # print("before step ", memoryUse)
                     optimizer.step()
                     print(np.sum(output[1].view(-1).cpu().detach().numpy()[output[1].view(-1).cpu().detach().numpy() != 0.0]))
+                    print(np.sum(labels[1].view(-1).cpu().detach().numpy()[labels[1].view(-1).cpu().detach().numpy() != 0.0]))
                     #for param in self.model.parameters():
                     #    print(param.data)
                     #    break
