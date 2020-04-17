@@ -535,7 +535,7 @@ class SeqModel(object):
 
                 if epoch == 1 and abs(hist['val_loss'][1] - hist['val_loss'][0]) <= 1e-9:
                     print(f"Did not improve from {hist['val_loss'][0]} to {hist['val_loss'][1]}, breaking")
-                    break
+                    #break
                 # if earlystopper_patience == 0:
                 #     break
         

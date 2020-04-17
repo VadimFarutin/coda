@@ -79,7 +79,7 @@ def test_GM18526():
                         },
                         output_marks=[output_mark],
                         train_params={
-                            'nb_epoch': 10,
+                            'nb_epoch': 5,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
@@ -89,7 +89,7 @@ def test_GM18526():
                         zero_out_non_bins=True,
                         generate_bigWig=False,
                         pretrained_model_path=None)
-                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200416-105516548601-weights.pt')
+                        #pretrained_model_path='./models/weights/lstm-20200409-184703667556-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
