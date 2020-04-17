@@ -502,9 +502,10 @@ class SeqModel(object):
                     # memoryUse = py.memory_info()[0] / 2.0 ** 30
                     # print("before step ", memoryUse)
                     optimizer.step()
-                    for param in self.model.parameters():
-                        print(param.data)
-                        break
+                    print(output[0])
+                    #for param in self.model.parameters():
+                    #    print(param.data)
+                    #    break
                     # pid = os.getpid()
                     # py = psutil.Process(pid)
                     # memoryUse = py.memory_info()[0] / 2.0 ** 30
