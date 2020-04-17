@@ -84,7 +84,7 @@ MODEL_PRESET_PARAMS = {
         'model_type': 'cnn-encoder-decoder',
         'model_specific_params': {
             'hidden_size': 64,
-            'kernel_size': 11,
+            'kernel_size': 51,
             'stride': 1,
             'dilation': 1,
             'num_layers': 7,
@@ -95,7 +95,7 @@ MODEL_PRESET_PARAMS = {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
             'optimizer': 'adam',
-            'lr': 5e-5
+            'lr': 1e-4
         },
     },
     'adv-cnn-encoder-decoder': {
