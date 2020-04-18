@@ -58,6 +58,7 @@ class CnnDecoder(nn.Module):
                                      kernel_size=kernel_size,
                                      stride=stride,
                                      padding=(kernel_size - 1) // 2).to(DEVICE))
+        bn_layers.append(nn.BatchNorm1d(num_features=hidden_size * 2).to(DEVICE))
 
         self.deconv_layers = nn.ModuleList(deconv_layers)
         self.conv_layers = nn.ModuleList(conv_layers)
