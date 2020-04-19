@@ -590,7 +590,7 @@ class SeqModel(object):
 
             assert os.path.isfile(self.model_path) == False
 
-            torch.save(self.model, self.model_path)
+            # torch.save(self.model, self.model_path)
 
         return None
 
