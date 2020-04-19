@@ -73,6 +73,7 @@ class CnnDecoder(nn.Module):
         # self.last_linear = False
         
         self.last_linear = True
+        self.dropout = nn.Dropout(p_dropout)
         self.fc = nn.Linear(in_features=hidden_size * 2,
                             out_features=out_channels)
 
@@ -100,14 +101,13 @@ class CnnDecoder(nn.Module):
                 out = self.bn_layers[i](out)
                 out = nn.functional.relu(out)
             
-        #print("##############")
-        #print(f"Last layer input  {out.shape}")
         if self.last_linear:
             out = torch.transpose(out, 1, 2)
+        
+        out = self.dropout(out)
         out = self.fc(out)
         out = self.last_activation(out)
-        #print(f"Last layer output {out.shape}")
-        #print("##############")
+
         if not self.last_linear:
             out = torch.transpose(out, 1, 2)
 
