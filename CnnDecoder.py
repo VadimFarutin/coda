@@ -64,18 +64,18 @@ class CnnDecoder(nn.Module):
         self.conv_layers = nn.ModuleList(conv_layers)
         self.bn_layers = nn.ModuleList(bn_layers)
                                               
-        # padding = (seq_length - 1) // 2 if seq2seq else 0
-        # self.fc = nn.Conv1d(in_channels=hidden_size * 2, 
-        #                     out_channels=out_channels,
-        #                     kernel_size=seq_length,
-        #                     stride=1,
-        #                     padding=padding).to(DEVICE)
-        # self.last_linear = False
-        
-        self.last_linear = True
         self.dropout = nn.Dropout(p_dropout)
-        self.fc = nn.Linear(in_features=hidden_size * 2,
-                            out_features=out_channels)
+        padding = (seq_length - 1) // 2 if seq2seq else 0
+        self.last_linear = False
+        self.fc = nn.Conv1d(in_channels=hidden_size * 2, 
+                            out_channels=out_channels,
+                            kernel_size=seq_length,
+                            stride=1,
+                            padding=padding).to(DEVICE)
+        
+        # self.last_linear = True
+        # self.fc = nn.Linear(in_features=hidden_size * 2,
+        #                     out_features=out_channels)
 
         if predict_binary_output:
             self.last_activation = nn.Sigmoid()
