@@ -83,13 +83,13 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'cnn-encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 32,
-            'kernel_size': 101,
+            'hidden_size': 80,
+            'kernel_size': 51,
             'stride': 1,
-            'dilation': 2,
+            'dilation': 3,
             'num_layers': 5,
             'residual': True,
-            'dropout': 0.5
+            'dropout': 0.4
         },
         'compile_params': {
             'regression_loss': 'MSE',
