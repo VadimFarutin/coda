@@ -62,7 +62,7 @@ class CnnDecoder(nn.Module):
 
         self.deconv_layers = nn.ModuleList(deconv_layers)
         self.conv_layers = nn.ModuleList(conv_layers)
-        self.bn_layers = nn.ModuleList(bn_layers)
+        #self.bn_layers = nn.ModuleList(bn_layers)
                                               
         self.dropout = nn.Dropout(p_dropout)
         padding = (seq_length - 1) // 2 if seq2seq else 0
@@ -98,7 +98,7 @@ class CnnDecoder(nn.Module):
             if self.residual:
                 out = out + residual_output[self.num_layers - 1 - i]
                 out = self.conv_layers[i](out)
-                out = self.bn_layers[i](out)
+                #out = self.bn_layers[i](out)
                 out = nn.functional.relu(out)
             
         if self.last_linear:
