@@ -80,7 +80,7 @@ def test_GM18526():
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
-                            'nb_epoch': 20,
+                            'nb_epoch': 25,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
