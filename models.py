@@ -467,7 +467,7 @@ class SeqModel(object):
                     #print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
                     clean_data[:, :, torch.tensor(output_marks_idx).to(DEVICE)] = copy.deepcopy(labels).float()
                     _, latent_clean = self.model(clean_data, return_latent=True)
-                    optimizer.step()
+                    #optimizer.step()
                     loss_values.append(loss.item())
                     disc_fool_loss_values.append(gen_noisy_loss.item())
                     
