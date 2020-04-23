@@ -108,7 +108,7 @@ MODEL_PRESET_PARAMS = {
             'stride': 1,
             'dilation': 2,
             'num_layers': 5,
-            'residual': True,
+            'residual': False,
             'dropout': 0.0,
 
             'disc_kernel_size': 1001,
