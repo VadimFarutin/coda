@@ -467,7 +467,7 @@ class SeqModel(object):
                     #print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
                     clean_data[:, :, torch.tensor(output_marks_idx).to(DEVICE)] = copy.deepcopy(labels).float()
                     _, latent_clean = self.model(clean_data, return_latent=True)
-                    #optimizer.step()
+                    optimizer.step()
                     loss_values.append(loss.item())
                     disc_fool_loss_values.append(gen_noisy_loss.item())
                     
@@ -478,12 +478,11 @@ class SeqModel(object):
                     disc_noisy_output = self.model.discriminator(latent_noisy.detach())
                     disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
                     disc_noisy_loss.backward()
-                    #disc_optimizer.step()
+                    disc_optimizer.step()
                     
                     if len(noisy_latent_vectors) < 20:
-                        noisy_latent_vectors.append(data.detach().view(batch_data_size, -1))
-                        clean_latent_vectors.append(clean_data.detach().view(batch_data_size, -1))
-                    
+                        noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
+                        clean_latent_vectors.append(latent_clean.detach().view(batch_data_size, -1))
                 
                 print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)}")
                 if epoch == 0 or epoch == nb_epoch - 1:
@@ -502,52 +501,9 @@ class SeqModel(object):
                                 latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
                     #plt.show()
                     if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'Isomap at #{epoch}': wandb.Image(plt)}, step=epoch)
+                        wandb.log({f'Latent at #{epoch}': wandb.Image(plt)}, step=epoch)
                     plt.clf()
-                     
-                    manifold_method = manifold.SpectralEmbedding(n_neighbors=10, n_components=2)
-                    t0 = time.time()
-                    latent_transformed = manifold_method.fit_transform(all_latent.cpu().numpy())
-                    t1 = time.time()
-                    print(f"Manifold method time: {t1 - t0}sec Num vectors: {latent_transformed.shape[0]}")
-                    plt.scatter(latent_transformed[latent_transformed.shape[0] // 2:, 0], 
-                                latent_transformed[latent_transformed.shape[0] // 2:, 1], s=10, c='black')
-                    plt.scatter(latent_transformed[:latent_transformed.shape[0] // 2, 0], 
-                                latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
-                    #plt.show()
-                    if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'SpectralEmbedding at #{epoch}': wandb.Image(plt)}, step=epoch)
-                    plt.clf()
-                        
-                        
-                    manifold_method = manifold.LocallyLinearEmbedding(n_neighbors=10, n_components=2, eigen_solver='auto', method='standard')
-                    t0 = time.time()
-                    latent_transformed = manifold_method.fit_transform(all_latent.cpu().numpy())
-                    t1 = time.time()
-                    print(f"Manifold method time: {t1 - t0}sec Num vectors: {latent_transformed.shape[0]}")
-                    plt.scatter(latent_transformed[latent_transformed.shape[0] // 2:, 0], 
-                                latent_transformed[latent_transformed.shape[0] // 2:, 1], s=10, c='black')
-                    plt.scatter(latent_transformed[:latent_transformed.shape[0] // 2, 0], 
-                                latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
-                    #plt.show()
-                    if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'LocallyLinearEmbedding at #{epoch}': wandb.Image(plt)}, step=epoch)
-                    plt.clf()
-
-
-                    manifold_method = manifold.LocallyLinearEmbedding(n_neighbors=10, n_components=2, eigen_solver='auto', method='ltsa')
-                    t0 = time.time()
-                    latent_transformed = manifold_method.fit_transform(all_latent.cpu().numpy())
-                    t1 = time.time()
-                    print(f"Manifold method time: {t1 - t0}sec Num vectors: {latent_transformed.shape[0]}")
-                    plt.scatter(latent_transformed[latent_transformed.shape[0] // 2:, 0], 
-                                latent_transformed[latent_transformed.shape[0] // 2:, 1], s=10, c='black')
-                    plt.scatter(latent_transformed[:latent_transformed.shape[0] // 2, 0], 
-                                latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
-                    #plt.show()
-                    if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'LocallyLinearEmbedding LTSA at #{epoch}': wandb.Image(plt)}, step=epoch)
-                    plt.clf()
+                    
             else:
                 for batch_data in tqdm(train_loader):
                     optimizer.zero_grad()
