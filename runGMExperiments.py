@@ -78,9 +78,10 @@ def test_GM18526():
                             'only_chr1': True
                         },
                         output_marks=[output_mark],
+                        input_marks=[output_mark, 'INPUT'],
                         train_params={
                             'batch_size': 100,
-                            'nb_epoch': 3,
+                            'nb_epoch': 1,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
                             'eval_batch_size': 1000,

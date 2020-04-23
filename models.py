@@ -483,9 +483,12 @@ class SeqModel(object):
                     if len(noisy_latent_vectors) < 20:
                         noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
                         clean_latent_vectors.append(latent_clean.detach().view(batch_data_size, -1))
+                    else:
+                        print(data.shape)
+                        break
                 
                 print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)}")
-                if epoch == 0 or epoch == nb_epoch - 1:
+                if epoch == 0 or epoch == nb_epoch - 1 or (epoch % 5) == 0:
                     noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
                     clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
                     all_latent = torch.cat((noisy_latent_vectors_cat, clean_latent_vectors_cat), dim=0)
