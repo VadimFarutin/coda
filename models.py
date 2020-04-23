@@ -504,8 +504,6 @@ class SeqModel(object):
                     if self.model_params['train_params']['wandb_log']:
                         wandb.log({f'Isomap at #{epoch}': wandb.Image(plt)}, step=epoch)
                     plt.clf()
-                    if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'empty at #{epoch}': wandb.Image(plt)}, step=epoch)
                      
                     manifold_method = manifold.SpectralEmbedding(n_neighbors=10, n_components=2)
                     t0 = time.time()
