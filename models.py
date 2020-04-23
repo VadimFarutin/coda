@@ -478,7 +478,7 @@ class SeqModel(object):
                     disc_noisy_output = self.model.discriminator(latent_noisy.detach())
                     disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
                     disc_noisy_loss.backward()
-                    disc_optimizer.step()
+                    #disc_optimizer.step()
                     
                     if len(noisy_latent_vectors) < 10:
                         noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
@@ -501,7 +501,7 @@ class SeqModel(object):
                                 latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
                     #plt.show()
                     if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'latent at #{epoch}': wandb.Image(plt)})
+                        wandb.log({f'latent at #{epoch}': wandb.Image(plt), step=epoch})
 
             else:
                 for batch_data in tqdm(train_loader):
