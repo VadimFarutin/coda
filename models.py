@@ -10,6 +10,7 @@ import copy
 import math
 import random
 import psutil
+import time
 
 import numpy as np
 import pandas as pd
@@ -24,6 +25,7 @@ from keras.constraints import maxnorm
 from keras.regularizers import l2 #, activity_l2
 
 from sklearn.model_selection import train_test_split
+from sklearn import manifold
 import torch
 import torch.nn as nn
 from torch import optim
@@ -32,6 +34,7 @@ from torch.utils.data.dataloader import DataLoader
 import wandb
 from wandb.keras import WandbCallback
 from tqdm.auto import tqdm
+import matplotlib.pyplot as plt
 
 from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
@@ -441,10 +444,13 @@ class SeqModel(object):
         for epoch in tqdm(range(nb_epoch)):
             loss_values = []
             val_loss_values = []
-            disc_fool_loss_values = []
 
             self.model.train()
             if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
+                disc_fool_loss_values = []
+                noisy_latent_vectors = []
+                clean_latent_vectors = []
+                
                 for batch_data in tqdm(train_loader):
                     optimizer.zero_grad()
                     data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
@@ -473,9 +479,30 @@ class SeqModel(object):
                     disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
                     disc_noisy_loss.backward()
                     disc_optimizer.step()
+                    
+                    if len(noisy_latent_vectors) < 10:
+                        noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
+                        clean_latent_vectors.append(latent_clean.detach().view(batch_data_size, -1))
+                    
                 
                 print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)}")
-                
+                if epoch == 0 or epoch == nb_epoch - 1:
+                    noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
+                    clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
+                    all_latent = torch.cat((noisy_latent_vectors_cat, clean_latent_vectors_cat), dim=0)
+                    manifold_method = manifold.Isomap(n_neighbors=5, n_components=2)
+                    t0 = time.time()
+                    latent_transformed = manifold_method.fit_transform(all_latent.cpu().numpy())
+                    t1 = time.time()
+                    print(f"Manifold method time: {t1 - t0}sec Num vectors: {latent_transformed.shape[0]}")
+                    plt.scatter(latent_transformed[latent_transformed.shape[0] // 2:, 0], 
+                                latent_transformed[latent_transformed.shape[0] // 2:, 1], s=10, c='black')
+                    plt.scatter(latent_transformed[:latent_transformed.shape[0] // 2, 0], 
+                                latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
+                    #plt.show()
+                    if self.model_params['train_params']['wandb_log']:
+                        wandb.log({f'latent at #{epoch}': plt})
+
             else:
                 for batch_data in tqdm(train_loader):
                     optimizer.zero_grad()
