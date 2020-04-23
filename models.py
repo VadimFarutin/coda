@@ -481,8 +481,8 @@ class SeqModel(object):
                     #disc_optimizer.step()
                     
                     if len(noisy_latent_vectors) < 10:
-                        noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
-                        clean_latent_vectors.append(latent_clean.detach().view(batch_data_size, -1))
+                        noisy_latent_vectors.append(data.detach().view(batch_data_size, -1))
+                        clean_latent_vectors.append(clean_data.detach().view(batch_data_size, -1))
                     
                 
                 print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)}")
@@ -501,7 +501,7 @@ class SeqModel(object):
                                 latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
                     #plt.show()
                     if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'latent at #{epoch}': wandb.Image(plt)}, step=epoch)
+                        wandb.log({f'data at #{epoch}': wandb.Image(plt)}, step=epoch)
 
             else:
                 for batch_data in tqdm(train_loader):
