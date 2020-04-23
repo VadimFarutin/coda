@@ -70,7 +70,7 @@ def test_GM18526():
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
                             'num_train_examples': 100000,
                             'seq_length': 1001,
-                            'peak_fraction': 0.7,
+                            'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
                             'train_chroms': HG19_ALL_CHROMS,
@@ -88,8 +88,8 @@ def test_GM18526():
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        #pretrained_model_path=None)
-                        pretrained_model_path='./models/weights/cnn-encoder-decoder-20200422-130105882667-weights.pt')
+                        pretrained_model_path=None)
+                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200422-130105882667-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
