@@ -20,7 +20,7 @@ class CnnDecoder(nn.Module):
         conv_layers = []
         bn_layers = []
         
-        deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size // 2, 
+        deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size // 4, 
                                                 out_channels=hidden_size,
                                                 kernel_size=kernel_size,
                                                 stride=stride,

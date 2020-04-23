@@ -34,7 +34,7 @@ class CnnEncoder(nn.Module):
                                     dilation=dilation).to(DEVICE))
 
         layers.append(nn.Conv1d(in_channels=hidden_size, 
-                                out_channels=hidden_size // 2,
+                                out_channels=hidden_size // 4,
                                 kernel_size=kernel_size,
                                 stride=stride,
                                 padding=dilation * 2 * (kernel_size - 1) // 2,
