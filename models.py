@@ -320,8 +320,9 @@ class SeqModel(object):
         (train_X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY) = self.get_processed_data(
             self.train_dataset)
 
-        self.normalizer.fit(train_X)
-        train_X = self.normalizer.transform(train_X)
+        if self.model_params['model_type'] != 'adv-cnn-encoder-decoder':
+            self.normalizer.fit(train_X)
+            train_X = self.normalizer.transform(train_X)
         train_inputs_X = train_X
 
         if self.model_params['predict_binary_output']:
@@ -440,6 +441,7 @@ class SeqModel(object):
         for epoch in tqdm(range(nb_epoch)):
             loss_values = []
             val_loss_values = []
+            disc_fool_loss_values = []
 
             self.model.train()
             if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
@@ -455,31 +457,25 @@ class SeqModel(object):
                     gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
                     gen_noisy_loss.backward()
 
-                    # TODO (batch_data_size, seq_length, 6)
-
                     clean_data = copy.deepcopy(data)
-                    print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
-                    original = clean_data.gather(2, 
-                                                 torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])) \
-                                                 .view(data.shape[0], data.shape[1], 1).to(DEVICE))
-                    original = copy.deepcopy(labels).float()
-                    print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
-                    clean_data = self.normalizer.transform(clean_data)
-
+                    #print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
+                    clean_data[:, :, torch.tensor(output_marks_idx).to(DEVICE)] = copy.deepcopy(labels).float()
                     _, latent_clean = self.model(clean_data, return_latent=True)
-
                     optimizer.step()
                     loss_values.append(loss.item())
+                    disc_fool_loss_values.append(gen_noisy_loss.item())
                     
                     disc_optimizer.zero_grad()
                     disc_clean_output = self.model.discriminator(latent_clean.detach())
                     disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
-                    disc_clean_loss.backward()
+                    disc_clean_loss.backward(retain_graph=True)
                     disc_noisy_output = self.model.discriminator(latent_noisy.detach())
                     disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
                     disc_noisy_loss.backward()
                     disc_optimizer.step()
-                    
+                
+                print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)}")
+                
             else:
                 for batch_data in tqdm(train_loader):
                     optimizer.zero_grad()
@@ -646,7 +642,8 @@ class SeqModel(object):
         # Then compare the true data with the output of the model
         # Process the data properly
         X = self.process_X(X)
-        X = self.normalizer.transform(X)
+        if self.model_params['model_type'] != 'adv-cnn-encoder-decoder':
+            X = self.normalizer.transform(X)
 
         # We have to batch the prediction so that the GPU doesn't run out of memory
         if 'eval_batch_size' in self.model_params['train_params']:
@@ -850,7 +847,8 @@ class SeqModel(object):
             num_batches = int(math.ceil(1.0 * chrom_length / GENOME_BATCH_SIZE))
 
             test_Y_pred = np.empty(test_Y.shape)
-            test_X = self.normalizer.transform(test_X)
+            if self.model_params['model_type'] != 'adv-cnn-encoder-decoder':
+                test_X = self.normalizer.transform(test_X)
 
             print(num_batches, GENOME_BATCH_SIZE)
 
