@@ -501,7 +501,7 @@ class SeqModel(object):
                                 latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
                     #plt.show()
                     if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'latent at #{epoch}': wandb.Image(plt), step=epoch})
+                        wandb.log({f'latent at #{epoch}': wandb.Image(plt)}, step=epoch)
 
             else:
                 for batch_data in tqdm(train_loader):
