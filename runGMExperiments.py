@@ -35,19 +35,19 @@ def run_model(model_params, evaluate, evaluate_genome_only):
     return results
 
 # GM_MARKS = ['H3K27AC', 'H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
-# GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
-GM_MARKS = ['H3K27AC']
+GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
+# GM_MARKS = ['H3K27AC']
 
 
 def test_GM18526():
 
     for test_cell_line in ['GM18526']:
         for subsample_target_string in ['0.5e6']:
-            for predict_binary_output in [False]:
+            for predict_binary_output in [False, True]:
                 for output_mark in GM_MARKS:                            
+                    model_type = 'cnn'
                     wandb_log = True
                     evaluate = True
-                    model_type = 'adv-cnn-encoder-decoder'
                     evaluate_genome_only = True
                     
                     preset_params = MODEL_PRESET_PARAMS[model_type]
@@ -80,7 +80,7 @@ def test_GM18526():
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
-                            'nb_epoch': 8,
+                            'nb_epoch': 30,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
