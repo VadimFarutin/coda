@@ -63,7 +63,7 @@ def test_GM18526():
                         compile_params={
                             'loss': loss,
                             'optimizer': preset_params['compile_params']['optimizer'],
-                            'lr': preset_params['compile_params']['lr']
+                            #'lr': preset_params['compile_params']['lr']
                         },
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
