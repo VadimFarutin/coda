@@ -83,11 +83,11 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'cnn-encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 16,
+            'hidden_size': 4,
             'kernel_size': 51,
             'stride': 1,
             'dilation': 2,
-            'num_layers': 4,
+            'num_layers': 5,
             'residual': True,
             'dropout': 0.0
         },
@@ -95,7 +95,7 @@ MODEL_PRESET_PARAMS = {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
             'optimizer': 'adam',
-            'lr': 5e-4
+            'lr': 1e-4
         },
     },
     'adv-cnn-encoder-decoder': {
