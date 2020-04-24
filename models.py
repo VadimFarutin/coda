@@ -447,7 +447,7 @@ class SeqModel(object):
 
             self.model.train()
             if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
-                disc_fool_loss_values = []
+                disc_fool_loss_values = [0]
                 noisy_latent_vectors = []
                 clean_latent_vectors = []
                 
@@ -458,10 +458,10 @@ class SeqModel(object):
                     loss = loss_function(output, labels.float())
                     loss.backward(retain_graph=True)
                     
-                    batch_data_size = data.shape[0]
-                    gen_noisy_output = self.model.discriminator(latent_noisy)
-                    gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
-                    gen_noisy_loss.backward()
+                    #batch_data_size = data.shape[0]
+                    #gen_noisy_output = self.model.discriminator(latent_noisy)
+                    #gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
+                    #gen_noisy_loss.backward()
 
                     clean_data = copy.deepcopy(data)
                     #print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
@@ -469,20 +469,23 @@ class SeqModel(object):
                     _, latent_clean = self.model(clean_data, return_latent=True)
                     optimizer.step()
                     loss_values.append(loss.item())
-                    disc_fool_loss_values.append(gen_noisy_loss.item())
                     
-                    disc_optimizer.zero_grad()
-                    disc_clean_output = self.model.discriminator(latent_clean.detach())
-                    disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
-                    disc_clean_loss.backward(retain_graph=True)
-                    disc_noisy_output = self.model.discriminator(latent_noisy.detach())
-                    disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
-                    disc_noisy_loss.backward()
-                    disc_optimizer.step()
+                    #disc_fool_loss_values.append(gen_noisy_loss.item())
+                    #disc_optimizer.zero_grad()
+                    #disc_clean_output = self.model.discriminator(latent_clean.detach())
+                    #disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
+                    #disc_clean_loss.backward(retain_graph=True)
+                    #disc_noisy_output = self.model.discriminator(latent_noisy.detach())
+                    #disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
+                    #disc_noisy_loss.backward()
+                    #disc_optimizer.step()
                     
                     if len(noisy_latent_vectors) < 20:
                         noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
                         clean_latent_vectors.append(latent_clean.detach().view(batch_data_size, -1))
+                    else:
+                        print("breaking")
+                        break
                 
                 print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)}")
                 if epoch == 0 or epoch == nb_epoch - 1 or (epoch % 5) == 0:
