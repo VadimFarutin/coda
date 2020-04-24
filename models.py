@@ -458,7 +458,7 @@ class SeqModel(object):
                     loss = loss_function(output, labels.float())
                     loss.backward(retain_graph=True)
                     
-                    #batch_data_size = data.shape[0]
+                    batch_data_size = data.shape[0]
                     #gen_noisy_output = self.model.discriminator(latent_noisy)
                     #gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
                     #gen_noisy_loss.backward()
