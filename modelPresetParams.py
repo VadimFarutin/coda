@@ -86,8 +86,8 @@ MODEL_PRESET_PARAMS = {
             'hidden_size': 4,
             'kernel_size': 51,
             'stride': 1,
-            'dilation': 1,
-            'num_layers': 5,
+            'dilation': 2,
+            'num_layers': 3,
             'residual': True,
             'dropout': 0.0
         },
