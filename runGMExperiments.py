@@ -43,11 +43,11 @@ def test_GM18526():
 
     for test_cell_line in ['GM18526']:
         for subsample_target_string in ['0.5e6']:
-            for predict_binary_output in [True]:
+            for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
                     wandb_log = True
                     evaluate = True
-                    model_type = 'cnn-encoder-decoder'
+                    model_type = 'adv-cnn-encoder-decoder'
                     evaluate_genome_only = True
                     
                     preset_params = MODEL_PRESET_PARAMS[model_type]
