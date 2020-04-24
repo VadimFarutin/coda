@@ -95,7 +95,7 @@ MODEL_PRESET_PARAMS = {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
             'optimizer': 'adam',
-            'lr': 3e-4
+            'lr': 1e-4
         },
     },
     'adv-cnn-encoder-decoder': {
