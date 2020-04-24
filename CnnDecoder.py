@@ -24,8 +24,8 @@ class CnnDecoder(nn.Module):
                                                 out_channels=hidden_size,
                                                 kernel_size=kernel_size,
                                                 stride=stride,
-                                                padding=dilation * 2 * (kernel_size - 1) // 2,
-                                                #padding=0,
+                                                #padding=dilation * 2 * (kernel_size - 1) // 2,
+                                                padding=0,
                                                 dilation=dilation * 2).to(DEVICE))
         conv_layers.append(nn.Conv1d(in_channels=hidden_size, 
                                      out_channels=hidden_size,
@@ -52,7 +52,8 @@ class CnnDecoder(nn.Module):
                                                 out_channels=hidden_size * 4,
                                                 kernel_size=kernel_size,
                                                 stride=stride,
-                                                padding=dilation * (kernel_size - 1) // 2,
+                                                padding=0,
+                                                #padding=dilation * (kernel_size - 1) // 2,
                                                 dilation=dilation).to(DEVICE))
         conv_layers.append(nn.Conv1d(in_channels=hidden_size * 4, 
                                      out_channels=hidden_size * 4,
