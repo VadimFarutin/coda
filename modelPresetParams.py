@@ -103,13 +103,13 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'adv-cnn-encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 32,
+            'hidden_size': 16,
             'kernel_size': 51,
             'stride': 1,
             'dilation': 2,
-            'num_layers': 3,
+            'num_layers': 4,
             'residual': True,
-            'dropout': 0.4,
+            'dropout': 0.0,
 
             'disc_hidden_size': 16,
             'disc_kernel_size': 1001,

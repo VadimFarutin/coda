@@ -48,17 +48,17 @@ class CnnDecoder(nn.Module):
             bn_layers.append(nn.BatchNorm1d(num_features=hidden_size).to(DEVICE))
 
         deconv_layers.append(nn.ConvTranspose1d(in_channels=hidden_size, 
-                                                out_channels=hidden_size * 2,
+                                                out_channels=hidden_size * 4,
                                                 kernel_size=kernel_size,
                                                 stride=stride,
                                                 padding=dilation * (kernel_size - 1) // 2,
                                                 dilation=dilation).to(DEVICE))
-        conv_layers.append(nn.Conv1d(in_channels=hidden_size * 2, 
-                                     out_channels=hidden_size * 2,
+        conv_layers.append(nn.Conv1d(in_channels=hidden_size * 4, 
+                                     out_channels=hidden_size * 4,
                                      kernel_size=kernel_size,
                                      stride=stride,
                                      padding=(kernel_size - 1) // 2).to(DEVICE))
-        bn_layers.append(nn.BatchNorm1d(num_features=hidden_size * 2).to(DEVICE))
+        bn_layers.append(nn.BatchNorm1d(num_features=hidden_size * 4).to(DEVICE))
 
         self.deconv_layers = nn.ModuleList(deconv_layers)
         self.conv_layers = nn.ModuleList(conv_layers)
@@ -67,7 +67,7 @@ class CnnDecoder(nn.Module):
         self.dropout = nn.Dropout(p_dropout)
         padding = (seq_length - 1) // 2 if seq2seq else 0
         self.last_linear = False
-        self.fc = nn.Conv1d(in_channels=hidden_size * 2, 
+        self.fc = nn.Conv1d(in_channels=hidden_size * 4, 
                             out_channels=out_channels,
                             kernel_size=seq_length,
                             stride=1,

@@ -13,12 +13,12 @@ class CnnEncoder(nn.Module):
         super(CnnEncoder, self).__init__()
 
         layers = [nn.Conv1d(in_channels=in_channels, 
-                            out_channels=hidden_size * 2,
+                            out_channels=hidden_size * 4,
                             kernel_size=kernel_size,
                             stride=stride,
                             padding=(kernel_size - 1) // 2).to(DEVICE)]
 
-        layers.append(nn.Conv1d(in_channels=hidden_size * 2, 
+        layers.append(nn.Conv1d(in_channels=hidden_size * 4, 
                                 out_channels=hidden_size,
                                 kernel_size=kernel_size,
                                 stride=stride,
