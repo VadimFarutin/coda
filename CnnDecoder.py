@@ -87,16 +87,16 @@ class CnnDecoder(nn.Module):
 
     def forward(self, encoder_output, residual_output):
         out = encoder_output
-        #print("############################")
-        #print(f"Decoder input {out.shape}")
-        #print("##############")
+        print("############################")
+        print(f"Decoder input {out.shape}")
+        print("##############")
 
         for i in range(self.num_layers):
-            #print("##############")
-            #print(f"Layer input  {out.shape}")
+            print("##############")
+            print(f"Layer input  {out.shape}")
             out = nn.functional.relu(self.deconv_layers[i](out))
-            #print(f"Layer output {out.shape}")
-            #print("##############")
+            print(f"Layer output {out.shape}")
+            print("##############")
             if self.residual:
                 out = out + residual_output[self.num_layers - 1 - i]
                 out = self.conv_layers[i](out)
@@ -106,6 +106,8 @@ class CnnDecoder(nn.Module):
         if self.last_linear:
             out = torch.transpose(out, 1, 2)
         
+        print("##############")
+        print(f"Layer input  {out.shape}")
         out = self.dropout(out)
         out = self.fc(out)
         out = self.last_activation(out)
