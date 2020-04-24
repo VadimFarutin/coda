@@ -38,7 +38,7 @@ class CnnEncoder(nn.Module):
                                 kernel_size=kernel_size,
                                 stride=stride,
                                 padding=dilation * 2 * (kernel_size - 1) // 2,
-                                padding=0,
+                                #padding=0,
                                 dilation=dilation * 2).to(DEVICE))
 
         self.layers = nn.ModuleList(layers)
