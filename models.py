@@ -492,6 +492,7 @@ class SeqModel(object):
                     noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
                     clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
                     all_latent = torch.cat((noisy_latent_vectors_cat, clean_latent_vectors_cat), dim=0)
+                    print(f"All latent shape: {all_latent.shape}")
                     
                     manifold_method = manifold.Isomap(n_neighbors=10, n_components=2)
                     t0 = time.time()
