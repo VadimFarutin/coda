@@ -112,7 +112,7 @@ MODEL_PRESET_PARAMS = {
             'dropout': 0.0,
 
             'disc_hidden_size': 8,
-            'disc_kernel_size': 1001,
+            'disc_kernel_size': 401,
             'disc_dilation': 1,
             'disc_num_layers': 1            
         },
