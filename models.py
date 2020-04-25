@@ -443,7 +443,7 @@ class SeqModel(object):
             output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
 
         for epoch in tqdm(range(nb_epoch)):
-            loss_values = []
+            loss_values = [0.0]
             val_loss_values = []
 
             self.model.train()
