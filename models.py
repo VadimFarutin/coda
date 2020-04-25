@@ -468,7 +468,7 @@ class SeqModel(object):
                     #clean_data[:, :, torch.tensor(output_marks_idx).to(DEVICE)] = copy.deepcopy(labels).float()
                     # TODO normalize
                     #_, latent_clean = self.model(clean_data, return_latent=True)
-                    latent_clean = torch.tensor(np.random.normal(0.0, 1.0, latent_noisy.shape).to(DEVICE)
+                    latent_clean = torch.from_numpy(np.random.normal(0.0, 1.0, latent_noisy.shape)).float().to(DEVICE)
                     optimizer.step()
                     loss_values.append(loss.item())
                     
