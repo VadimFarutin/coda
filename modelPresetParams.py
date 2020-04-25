@@ -88,14 +88,14 @@ MODEL_PRESET_PARAMS = {
             'stride': 1,
             'dilation': 2,
             'num_layers': 5,
-            'residual': False,
-            'dropout': 0.0
+            'residual': True,
+            'dropout': 0.5
         },
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
             'optimizer': 'adam',
-            'lr': 1e-3
+            'lr': 1e-4
         },
     },
     'adv-cnn-encoder-decoder': {
