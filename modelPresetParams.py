@@ -114,7 +114,7 @@ MODEL_PRESET_PARAMS = {
             'disc_hidden_size': 8,
             'disc_kernel_size': 401,
             'disc_dilation': 1,
-            'disc_num_layers': 1            
+            'disc_num_layers': 2           
         },
         'compile_params': {
             'regression_loss': 'MSE',

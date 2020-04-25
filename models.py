@@ -438,7 +438,7 @@ class SeqModel(object):
         if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
             lr = self.model_params['compile_params']['lr']
             gen_optimizer = optim.Adam(self.model.parameters(), lr=lr * 2)
-            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr / 2)
+            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr)
             disc_loss_function = torch.nn.modules.loss.BCELoss()
             output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
 
@@ -449,6 +449,8 @@ class SeqModel(object):
             self.model.train()
             if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
                 disc_fool_loss_values = []
+                disc_clean_loss_values = []
+                disc_noisy_loss_values = []
                 noisy_latent_vectors = []
                 clean_latent_vectors = []
                 batch_i = 0
@@ -488,6 +490,9 @@ class SeqModel(object):
                     disc_noisy_loss.backward()
                     disc_optimizer.step()
                     
+                    disc_clean_loss_values.append(disc_clean_loss.item())
+                    disc_noisy_loss_values.append(disc_noisy_loss.item())
+
                     if len(noisy_latent_vectors) < 20:
                         noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
                         clean_latent_vectors.append(latent_clean.detach().view(batch_data_size, -1))
@@ -495,7 +500,7 @@ class SeqModel(object):
                     #    print("breaking")
                     #    break
                 
-                print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)}")
+                print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)} Disc clean loss: {np.mean(disc_clean_loss_values)} Disc noisy loss: {np.mean(disc_noisy_loss_values)}")
                 if epoch == 0 or epoch == nb_epoch - 1 or (epoch % 5) == 0:
                     noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
                     clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
