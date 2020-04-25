@@ -18,6 +18,7 @@ class CnnEncoder(nn.Module):
                             stride=stride,
                             padding=(kernel_size - 1) // 2
                             ).to(DEVICE)]
+        bn_layers = [nn.BatchNorm1d(num_features=hidden_size * 4).to(DEVICE)]
 
         layers.append(nn.Conv1d(in_channels=hidden_size * 4, 
                                 out_channels=hidden_size,
@@ -26,6 +27,7 @@ class CnnEncoder(nn.Module):
                                 #padding=dilation * (kernel_size - 1) // 2,
                                 padding=0,
                                 dilation=dilation).to(DEVICE))
+        bn_layers.append(nn.BatchNorm1d(num_features=hidden_size).to(DEVICE))
                             
         for _ in range(num_layers - 2):
             layers.append(nn.Conv1d(in_channels=hidden_size, 
@@ -35,6 +37,7 @@ class CnnEncoder(nn.Module):
                                     #padding=dilation * (kernel_size - 1) // 2,
                                     padding=0,
                                     dilation=dilation).to(DEVICE))
+            bn_layers.append(nn.BatchNorm1d(num_features=hidden_size).to(DEVICE))
 
         layers.append(nn.Conv1d(in_channels=hidden_size, 
                                 out_channels=hidden_size // 4,
@@ -43,8 +46,10 @@ class CnnEncoder(nn.Module):
                                 #padding=dilation * 2 * (kernel_size - 1) // 2,
                                 padding=0,
                                 dilation=dilation * 2).to(DEVICE))
+        bn_layers.append(nn.BatchNorm1d(num_features=hidden_size // 4).to(DEVICE))
 
         self.layers = nn.ModuleList(layers)
+        self.bn_layers = nn.ModuleList(bn_layers)
         
     def forward(self, x):
         #print("############################")
@@ -55,10 +60,12 @@ class CnnEncoder(nn.Module):
 
         residual_output = []
     
-        for layer in self.layers:
+        for i, layer in enumerate(self.layers):
             #print("##############")
             #print(f"Layer input  {x.shape}")
-            x = nn.functional.relu(layer(x))
+            x = layer(x)
+            x = self.bn_layers[i](x)
+            x = nn.functional.relu(x)
             #print(f"Layer output {x.shape}")
             #print("##############")
             residual_output.append(x)
