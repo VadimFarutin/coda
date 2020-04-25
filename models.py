@@ -457,7 +457,7 @@ class SeqModel(object):
                     data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
                     output, latent_noisy = self.model(data, return_latent=True)
                     loss = loss_function(output, labels.float())
-                    loss.backward()
+                    loss.backward(retain_graph=True)
                     optimizer.step()
                     loss_values.append(loss.item())
                     
