@@ -448,9 +448,9 @@ class SeqModel(object):
 
             self.model.train()
             if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
-                disc_fool_loss_values = []
-                disc_clean_loss_values = []
-                disc_noisy_loss_values = []
+                disc_fool_loss_values = [0.0]
+                disc_clean_loss_values = [0.0]
+                disc_noisy_loss_values = [0.0]
                 noisy_latent_vectors = []
                 clean_latent_vectors = []
                 batch_i = 0
@@ -491,8 +491,8 @@ class SeqModel(object):
                         disc_noisy_loss.backward()
                         disc_optimizer.step()
                     
-                    disc_clean_loss_values.append(disc_clean_loss.item())
-                    disc_noisy_loss_values.append(disc_noisy_loss.item())
+                        disc_clean_loss_values.append(disc_clean_loss.item())
+                        disc_noisy_loss_values.append(disc_noisy_loss.item())
 
                     if len(noisy_latent_vectors) < 20:
                         noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
