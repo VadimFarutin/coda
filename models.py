@@ -451,15 +451,18 @@ class SeqModel(object):
                 disc_fool_loss_values = []
                 noisy_latent_vectors = []
                 clean_latent_vectors = []
+                batch_i = 0
                 
                 for batch_data in tqdm(train_loader):
+                    batch_i += 1
                     optimizer.zero_grad()
                     data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
                     output, latent_noisy = self.model(data, return_latent=True)
-                    loss = loss_function(output, labels.float())
-                    loss.backward(retain_graph=True)
-                    optimizer.step()
-                    loss_values.append(loss.item())
+                    if (batch_i % 1000) == 0:
+                        loss = loss_function(output, labels.float())
+                        loss.backward(retain_graph=True)
+                        optimizer.step()
+                        loss_values.append(loss.item())
                     
                     gen_optimizer.zero_grad()
                     batch_data_size = data.shape[0]
