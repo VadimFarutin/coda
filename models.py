@@ -506,12 +506,14 @@ class SeqModel(object):
                     noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
                     clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
 
-                    #count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy(), 30, density=True, color='b')
-                    #plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
+                    count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy().flatten(), 30, density=True, color='b')
+                    plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
                     #plt.show()
-                    #plt.clf()
+                    if self.model_params['train_params']['wandb_log']:
+                        wandb.log({f'Latent normal values at #{epoch}': wandb.Image(plt)}, step=epoch)
+                    plt.clf()
                     
-                    count, bins, ignored = plt.hist(noisy_latent_vectors_cat.cpu().numpy(), 30, density=True, color='b')
+                    count, bins, ignored = plt.hist(noisy_latent_vectors_cat.cpu().numpy().flatten(), 30, density=True, color='b')
                     plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
                     #plt.show()
                     if self.model_params['train_params']['wandb_log']:
