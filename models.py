@@ -463,10 +463,12 @@ class SeqModel(object):
                     gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
                     gen_noisy_loss.backward()
 
-                    clean_data = copy.deepcopy(data)
+                    #clean_data = copy.deepcopy(data)
                     #print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
-                    clean_data[:, :, torch.tensor(output_marks_idx).to(DEVICE)] = copy.deepcopy(labels).float()
-                    _, latent_clean = self.model(clean_data, return_latent=True)
+                    #clean_data[:, :, torch.tensor(output_marks_idx).to(DEVICE)] = copy.deepcopy(labels).float()
+                    # TODO normalize
+                    #_, latent_clean = self.model(clean_data, return_latent=True)
+                    latent_clean = torch.tensor(np.random.normal(0.0, 1.0, latent_noisy.shape).to(DEVICE)
                     optimizer.step()
                     loss_values.append(loss.item())
                     

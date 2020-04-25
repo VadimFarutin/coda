@@ -65,7 +65,10 @@ class CnnEncoder(nn.Module):
             #print(f"Layer input  {x.shape}")
             x = layer(x)
             #x = self.bn_layers[i](x)
-            x = nn.functional.relu(x)
+            if i != len(self.layers) - 1:
+                x = nn.functional.relu(x)
+            else:
+                x = nn.functional.tanh(x)                
             #print(f"Layer output {x.shape}")
             #print("##############")
             residual_output.append(x)

@@ -45,7 +45,7 @@ def test_GM18526():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
-                    model_type = 'cnn-encoder-decoder'
+                    model_type = 'adv-cnn-encoder-decoder'
                     wandb_log = True
                     evaluate = True
                     evaluate_genome_only = True
@@ -89,8 +89,8 @@ def test_GM18526():
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        #pretrained_model_path=None)
-                        pretrained_model_path='./models/weights/cnn-encoder-decoder-20200425-111545564105-weights.pt')
+                        pretrained_model_path=None)
+                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200425-111545564105-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
