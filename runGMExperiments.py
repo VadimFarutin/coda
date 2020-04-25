@@ -90,7 +90,7 @@ def test_GM18526():
                         zero_out_non_bins=True,
                         generate_bigWig=False,
                         #pretrained_model_path=None)
-                        pretrained_model_path='./models/weights/cnn-encoder-decoder-20200425-105055784482-weights.pt')
+                        pretrained_model_path='./models/weights/cnn-encoder-decoder-20200425-111545564105-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
