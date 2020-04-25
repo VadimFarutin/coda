@@ -466,13 +466,14 @@ class SeqModel(object):
                         optimizer.step()
                         loss_values.append(loss.item())
                     
-                    gen_optimizer.zero_grad()
                     batch_data_size = data.shape[0]
-                    gen_noisy_output = self.model.discriminator(latent_noisy)
-                    gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
-                    gen_noisy_loss.backward()
-                    gen_optimizer.step()
-                    disc_fool_loss_values.append(gen_noisy_loss.item())
+                    if (batch_i % 5) == 0:
+                        gen_optimizer.zero_grad()
+                        gen_noisy_output = self.model.discriminator(latent_noisy)
+                        gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
+                        gen_noisy_loss.backward()
+                        gen_optimizer.step()
+                        disc_fool_loss_values.append(gen_noisy_loss.item())
 
                     #clean_data = copy.deepcopy(data)
                     #print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
@@ -481,7 +482,7 @@ class SeqModel(object):
                     #_, latent_clean = self.model(clean_data, return_latent=True)
                     latent_clean = torch.from_numpy(np.random.normal(0.0, 1.0, latent_noisy.shape)).float().to(DEVICE)
                     
-                    if (batch_i % 2) == 0:
+                    if (batch_i % 1) == 0:
                         disc_optimizer.zero_grad()
                         disc_clean_output = self.model.discriminator(latent_clean.detach())
                         disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
@@ -506,12 +507,12 @@ class SeqModel(object):
                     noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
                     clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
 
-                    count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy().flatten(), 30, density=True, color='b')
-                    plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
-                    #plt.show()
-                    if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'Latent normal values at #{epoch}': wandb.Image(plt)}, step=epoch)
-                    plt.clf()
+                    #count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy().flatten(), 30, density=True, color='b')
+                    #plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
+                    ##plt.show()
+                    #if self.model_params['train_params']['wandb_log']:
+                    #    wandb.log({f'Latent normal values at #{epoch}': wandb.Image(plt)}, step=epoch)
+                    #plt.clf()
                     
                     count, bins, ignored = plt.hist(noisy_latent_vectors_cat.cpu().numpy().flatten(), 30, density=True, color='b')
                     plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
