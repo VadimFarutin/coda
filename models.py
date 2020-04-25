@@ -437,7 +437,7 @@ class SeqModel(object):
 
         if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
             lr = self.model_params['compile_params']['lr']
-            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr)
+            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr / 2)
             disc_loss_function = torch.nn.modules.loss.BCELoss()
             output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
 
