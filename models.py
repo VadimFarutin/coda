@@ -437,8 +437,8 @@ class SeqModel(object):
 
         if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
             lr = self.model_params['compile_params']['lr']
-            gen_optimizer = optim.Adam(self.model.parameters(), lr=lr * 2)
-            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr)
+            gen_optimizer = optim.Adam(self.model.parameters(), lr=lr)
+            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr / 2)
             disc_loss_function = torch.nn.modules.loss.BCELoss()
             output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
 
@@ -502,38 +502,38 @@ class SeqModel(object):
                     #    break
                 
                 print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)} Disc clean loss: {np.mean(disc_clean_loss_values)} Disc noisy loss: {np.mean(disc_noisy_loss_values)}")
-                if epoch == 0 or epoch == nb_epoch - 1 or (epoch % 5) == 0:
+                if epoch == 0 or epoch == nb_epoch - 1 or (epoch % 3) == 0:
                     noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
                     clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
 
-                    #count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy(), 30, density=True)
+                    #count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy(), 30, density=True, color='b')
                     #plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
                     #plt.show()
                     #plt.clf()
                     
-                    count, bins, ignored = plt.hist(noisy_latent_vectors_cat.cpu().numpy(), 30, density=True)
+                    count, bins, ignored = plt.hist(noisy_latent_vectors_cat.cpu().numpy(), 30, density=True, color='b')
                     plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
                     #plt.show()
                     if self.model_params['train_params']['wandb_log']:
                         wandb.log({f'Latent values at #{epoch}': wandb.Image(plt)}, step=epoch)
                     plt.clf()
                     
-                    all_latent = torch.cat((noisy_latent_vectors_cat, clean_latent_vectors_cat), dim=0)
-                    print(f"All latent shape: {all_latent.shape}")
-                    
-                    manifold_method = manifold.Isomap(n_neighbors=10, n_components=2)
-                    t0 = time.time()
-                    latent_transformed = manifold_method.fit_transform(all_latent.cpu().numpy())
-                    t1 = time.time()
-                    print(f"Manifold method time: {t1 - t0}sec Num vectors: {latent_transformed.shape[0]}")
-                    plt.scatter(latent_transformed[latent_transformed.shape[0] // 2:, 0], 
-                                latent_transformed[latent_transformed.shape[0] // 2:, 1], s=10, c='black')
-                    plt.scatter(latent_transformed[:latent_transformed.shape[0] // 2, 0], 
-                                latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
-                    #plt.show()
-                    if self.model_params['train_params']['wandb_log']:
-                        wandb.log({f'Latent at #{epoch}': wandb.Image(plt)}, step=epoch)
-                    plt.clf()
+                    #all_latent = torch.cat((noisy_latent_vectors_cat, clean_latent_vectors_cat), dim=0)
+                    #print(f"All latent shape: {all_latent.shape}")
+                    #
+                    #manifold_method = manifold.Isomap(n_neighbors=10, n_components=2)
+                    #t0 = time.time()
+                    #latent_transformed = manifold_method.fit_transform(all_latent.cpu().numpy())
+                    #t1 = time.time()
+                    #print(f"Manifold method time: {t1 - t0}sec Num vectors: {latent_transformed.shape[0]}")
+                    #plt.scatter(latent_transformed[latent_transformed.shape[0] // 2:, 0], 
+                    #            latent_transformed[latent_transformed.shape[0] // 2:, 1], s=10, c='black')
+                    #plt.scatter(latent_transformed[:latent_transformed.shape[0] // 2, 0], 
+                    #            latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
+                    ##plt.show()
+                    #if self.model_params['train_params']['wandb_log']:
+                    #    wandb.log({f'Latent at #{epoch}': wandb.Image(plt)}, step=epoch)
+                    #plt.clf()
                     
             else:
                 for batch_data in tqdm(train_loader):
