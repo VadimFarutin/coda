@@ -481,14 +481,15 @@ class SeqModel(object):
                     #_, latent_clean = self.model(clean_data, return_latent=True)
                     latent_clean = torch.from_numpy(np.random.normal(0.0, 1.0, latent_noisy.shape)).float().to(DEVICE)
                     
-                    disc_optimizer.zero_grad()
-                    disc_clean_output = self.model.discriminator(latent_clean.detach())
-                    disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
-                    disc_clean_loss.backward(retain_graph=True)
-                    disc_noisy_output = self.model.discriminator(latent_noisy.detach())
-                    disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
-                    disc_noisy_loss.backward()
-                    disc_optimizer.step()
+                    if (batch_i % 2) == 0:
+                        disc_optimizer.zero_grad()
+                        disc_clean_output = self.model.discriminator(latent_clean.detach())
+                        disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
+                        disc_clean_loss.backward(retain_graph=True)
+                        disc_noisy_output = self.model.discriminator(latent_noisy.detach())
+                        disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
+                        disc_noisy_loss.backward()
+                        disc_optimizer.step()
                     
                     disc_clean_loss_values.append(disc_clean_loss.item())
                     disc_noisy_loss_values.append(disc_noisy_loss.item())
