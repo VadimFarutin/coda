@@ -505,6 +505,19 @@ class SeqModel(object):
                 if epoch == 0 or epoch == nb_epoch - 1 or (epoch % 5) == 0:
                     noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
                     clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
+
+                    #count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy(), 30, density=True)
+                    #plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
+                    #plt.show()
+                    #plt.clf()
+                    
+                    count, bins, ignored = plt.hist(noisy_latent_vectors_cat.cpu().numpy(), 30, density=True)
+                    plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
+                    #plt.show()
+                    if self.model_params['train_params']['wandb_log']:
+                        wandb.log({f'Latent values at #{epoch}': wandb.Image(plt)}, step=epoch)
+                    plt.clf()
+                    
                     all_latent = torch.cat((noisy_latent_vectors_cat, clean_latent_vectors_cat), dim=0)
                     print(f"All latent shape: {all_latent.shape}")
                     
