@@ -123,4 +123,17 @@ MODEL_PRESET_PARAMS = {
             'lr': 1e-4
         },
     },
+    'wavelets': {
+        'model_library': 'pytorch',
+        'model_class': 'SeqToSeq',
+        'model_type': 'wavelets',
+        'model_specific_params': {
+        },
+        'compile_params': {
+            'regression_loss': None,
+            'class_loss': None,
+            'optimizer': None,
+            'lr': None
+        },
+    },
 }

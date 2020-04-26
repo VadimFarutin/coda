@@ -36,6 +36,7 @@ from wandb.keras import WandbCallback
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 
+from waveletsWrapper import WaveletsWrapper
 from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
 from EncoderDecoder import EncoderDecoder
@@ -334,6 +335,8 @@ class SeqModel(object):
             train_Y = Y
 
         if self.model_params['train_params']['nb_epoch'] == 0:
+            return None
+        if self.model_params['model_type'] == 'wavelets':
             return None
 
         if self.model_library == 'keras':
@@ -908,20 +911,48 @@ class SeqModel(object):
             # We have to batch this up so that the GPU doesn't run out of memory
             # Assume a fixed batch size of 5M bins
             num_batches = int(math.ceil(1.0 * chrom_length / GENOME_BATCH_SIZE))
+            print(f"num_batches: {num_batches}, GENOME_BATCH_SIZE: {GENOME_BATCH_SIZE}")
 
+            if self.model_params['model_type'] == 'wavelets':
+                for name in ['sym4']:
+                    for threshold in [0.04]:
+                        print(f"name={name} threshold={threshold}")
+                        self.model.name = name
+                        self.model.threshold = threshold
+                    
+                        test_Y_pred = np.empty(test_Y.shape)
+
+                        for batch in tqdm(range(num_batches)):
+                            start_idx = batch * GENOME_BATCH_SIZE
+                            end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
+                            test_Y_pred[start_idx : end_idx] = self.predict_sequence(
+                                test_X[start_idx : end_idx])
+                                               
+                        print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
+                        denoised_results_all[chrom] = evaluations.compare(
+                            test_Y_pred,
+                            test_Y,
+                            predict_binary_output=self.model_params['predict_binary_output'])
+                        if not self.model_params['predict_binary_output']:
+                            print("Test %s, %.2E bins - Denoised, only peaks:" % (chrom, chrom_length))
+                            denoised_results_peaks[chrom] = evaluations.compare(
+                                test_Y_pred,
+                                test_Y,
+                                predict_binary_output=False,
+                                peaks=peaks)
+
+                
+            #########################################################
             test_Y_pred = np.empty(test_Y.shape)
-            if self.model_params['model_type'] != 'adv-cnn-encoder-decoder':
+            if self.model_params['model_type'] not in ['adv-cnn-encoder-decoder', 'wavelets']:
+                print("Normalizing genome input...")
                 test_X = self.normalizer.transform(test_X)
-
-            print(num_batches, GENOME_BATCH_SIZE)
 
             for batch in tqdm(range(num_batches)):
                 start_idx = batch * GENOME_BATCH_SIZE
                 end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
                 test_Y_pred[start_idx : end_idx] = self.predict_sequence(
                     test_X[start_idx : end_idx])
-                # test_Y_pred[start_idx : end_idx] = self.predict_sequence(
-                #     test_X[start_idx : end_idx], torch.device('cpu'))
                 # with np.printoptions(precision=3):
                 #     print('###########')
                 #     #print(test_X[end_idx - 50 : end_idx])
@@ -1489,6 +1520,8 @@ class SeqToSeq(SeqModel):
                 disc_kernel_size=disc_kernel_size, 
                 disc_dilation=disc_dilation
             )
+        elif model_params['model_type'] == 'wavelets':
+            model = WaveletsWrapper()
         else:
             raise Exception("Model type not recognized")
 
@@ -1539,6 +1572,17 @@ class SeqToSeq(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
+            if self.model_params['model_type'] == 'wavelets':
+                #print(f"signalX.shape={signalX.shape}")
+                output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
+                X = signalX[..., output_marks_idx]
+                #print(f"X.shape={X.shape}")
+                X = np.reshape(X, -1)
+                #print(f"X.shape={X.shape}")
+                Y = self.model(X)
+                Y = np.reshape(Y, (num_bins, 1))
+                return Y
+        
             if True:
                 device = DEVICE
             self.model = self.model.to(device)
