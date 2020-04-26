@@ -227,7 +227,8 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
             true_var.append(np.var(test_Y_mark))
             MSE.append(get_MSE(pred_Y_mark, test_Y_mark))
             pearsonR.append(get_pearsonR(pred_Y_mark, test_Y_mark))
-            SNR.append(get_SNR(pred_Y_mark))
+            #SNR.append(get_SNR(pred_Y_mark))
+            SNR.append(0.0)
             
             print("MSE %2.3f (true var %2.3f), pearsonR %2.3f, SNR %2.3f" % 
                 (MSE[mark_idx], true_var[mark_idx], pearsonR[mark_idx], SNR[mark_idx]))      

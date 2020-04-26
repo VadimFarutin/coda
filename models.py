@@ -916,7 +916,7 @@ class SeqModel(object):
             if self.model_params['model_type'] == 'wavelets':
                 for name in ['sym4']:
                     for threshold in [0.04]:
-                        print(f"Current parans: name={name} threshold={threshold}")
+                        print(f"Current params: name={name} threshold={threshold}")
                         self.model.name = name
                         self.model.threshold = threshold
                     
