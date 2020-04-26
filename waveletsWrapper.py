@@ -34,8 +34,8 @@ class WaveletsWrapper():
             print("nan")
         
         model = pywt.Wavelet(self.name)
-        #maxlev = pywt.dwt_max_level(len(x), model.dec_len)
-        maxlev = 2
+        maxlev = pywt.dwt_max_level(len(x), model.dec_len)
+        #maxlev = 2
         coeffs = pywt.wavedec(x, self.name, level=maxlev)
 
         show_plot = False
