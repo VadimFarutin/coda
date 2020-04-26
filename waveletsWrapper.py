@@ -1,5 +1,6 @@
 import pywt
 import matplotlib.pyplot as plt
+import numpy as np
 
 from diConstants import DEVICE
 
@@ -28,10 +29,13 @@ class WaveletsWrapper():
     def __call__(self, x):
         return self.forward(x)
 
-    def forward(self, x):  
+    def forward(self, x):
+        if np.count_nonzero(np.isnan(x)) != 0:
+            print("nan")
+        
         model = pywt.Wavelet(self.name)
-        maxlev = pywt.dwt_max_level(len(x), model.dec_len)
-        # maxlev = 2
+        #maxlev = pywt.dwt_max_level(len(x), model.dec_len)
+        maxlev = 2
         coeffs = pywt.wavedec(x, self.name, level=maxlev)
 
         show_plot = False
@@ -45,7 +49,11 @@ class WaveletsWrapper():
             plt.show()
         else:
             for i in range(1, len(coeffs)):
-                coeffs[i] = pywt.threshold(coeffs[i], self.threshold * max(coeffs[i]))
+                if np.count_nonzero(np.isnan(coeffs[i])) != 0:
+                    print("coeffs nan")
+                #print(max(coeffs[i]))
+                if max(coeffs[i]) != 0:
+                    coeffs[i] = pywt.threshold(coeffs[i], self.threshold * max(coeffs[i]))
             
         output = pywt.waverec(coeffs, self.name)
         return output

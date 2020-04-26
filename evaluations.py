@@ -118,7 +118,7 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
     # save_curves has to be False if predict_binary_output is also False
     if not predict_binary_output: save_curves = False
     
-    pred_Y_is_binary = is_binary(pred_Y)
+    #pred_Y_is_binary = is_binary(pred_Y)
     test_Y_is_binary = is_binary(test_Y)   
     assert pred_Y.shape == test_Y.shape, \
         "pred_Y.shape = %s doesn't match test_Y.shape = %s" % (str(pred_Y.shape), str(test_Y.shape))
