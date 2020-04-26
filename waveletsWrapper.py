@@ -37,7 +37,6 @@ class WaveletsWrapper():
         #model = pywt.Wavelet(self.name)
         #maxlev = pywt.dwt_max_level(len(x), model.dec_len)
         coeffs = pywt.wavedec(x, self.name, level=self.level)
-        new_coeffs = []
         
         show_plot = False
         if show_plot:
@@ -50,12 +49,10 @@ class WaveletsWrapper():
             plt.show()
         else:
             for i in range(1, len(coeffs)):
-                new_coeffs.append(coeffs[i])
                 if np.count_nonzero(np.isnan(coeffs[i])) != 0:
                     print("coeffs nan")
-                #print(max(coeffs[i]))
                 if max(coeffs[i]) != 0:
                     coeffs[i] = pywt.threshold(coeffs[i], self.threshold * max(coeffs[i]))
             
-        output = pywt.waverec(new_coeffs, self.name)
+        output = pywt.waverec(coeffs, self.name)
         return output
