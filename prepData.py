@@ -1027,7 +1027,7 @@ def run_GM_pipeline():
 def run_uli_pipeline():
     try:        
         run_pipeline_commands(
-            ['GSE63523'],
+            ['MOUSE'],
             ['H3K4ME3'],
             [None], #'0.5e6'?
             ULI_DATASET_NAME_TEMPLATE, 
