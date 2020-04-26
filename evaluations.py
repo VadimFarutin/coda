@@ -119,10 +119,10 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
     if not predict_binary_output: save_curves = False
     
     #pred_Y_is_binary = is_binary(pred_Y)
-    test_Y_is_binary = is_binary(test_Y)   
+    #test_Y_is_binary = is_binary(test_Y)   
     assert pred_Y.shape == test_Y.shape, \
         "pred_Y.shape = %s doesn't match test_Y.shape = %s" % (str(pred_Y.shape), str(test_Y.shape))
-    assert test_Y_is_binary == predict_binary_output 
+    #assert test_Y_is_binary == predict_binary_output 
 
     #test_Y (the true labels) ought to be binary IFF we're predicting binary output. 
     #pred_Y should be a set of continuous scores, regardless of whether we're predicting binary output. 

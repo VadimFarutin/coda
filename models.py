@@ -922,7 +922,7 @@ class SeqModel(object):
                     
                         test_Y_pred = np.empty(test_Y.shape)
 
-                        for batch in tqdm(range(num_batches)):
+                        for batch in range(num_batches):
                             start_idx = batch * GENOME_BATCH_SIZE
                             end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
                             test_Y_pred[start_idx : end_idx] = self.predict_sequence(
