@@ -914,7 +914,7 @@ class SeqModel(object):
             print(f"num_batches: {num_batches}, GENOME_BATCH_SIZE: {GENOME_BATCH_SIZE}")
 
             if self.model_params['model_type'] == 'wavelets':
-                for name in ['sym4']:
+                for name in ['sym4', 'sym8', 'sym12']:
                     for threshold in [0.05, 0.10, 0.25, 0.5]:
                         print(f"    Current params: name={name}, threshold={threshold}")
                         self.model.name = name
