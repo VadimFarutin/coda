@@ -915,31 +915,33 @@ class SeqModel(object):
 
             if self.model_params['model_type'] == 'wavelets':
                 for name in ['sym4', 'sym8', 'sym12']:
-                    for threshold in [0.05, 0.10, 0.25, 0.5, 0.75]:
-                        print(f"    Current params: name={name}, threshold={threshold}")
-                        self.model.name = name
-                        self.model.threshold = threshold
-                    
-                        test_Y_pred = np.empty(test_Y.shape)
+                    for level in [3, 5, 10]:
+                        for threshold in [0.25, 0.5, 0.75]:
+                            print(f"    Current params: name={name}, level={level}, threshold={threshold}")
+                            self.model.name = name
+                            self.model.level = level
+                            self.model.threshold = threshold
+                        
+                            test_Y_pred = np.empty(test_Y.shape)
 
-                        for batch in range(num_batches):
-                            start_idx = batch * GENOME_BATCH_SIZE
-                            end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
-                            test_Y_pred[start_idx : end_idx] = self.predict_sequence(
-                                test_X[start_idx : end_idx])
-                                               
-                        #print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
-                        denoised_results_all[chrom] = evaluations.compare(
-                            test_Y_pred,
-                            test_Y,
-                            predict_binary_output=self.model_params['predict_binary_output'])
-                        if not self.model_params['predict_binary_output']:
-                            #print("Test %s, %.2E bins - Denoised, only peaks:" % (chrom, chrom_length))
-                            denoised_results_peaks[chrom] = evaluations.compare(
+                            for batch in range(num_batches):
+                                start_idx = batch * GENOME_BATCH_SIZE
+                                end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
+                                test_Y_pred[start_idx : end_idx] = self.predict_sequence(
+                                    test_X[start_idx : end_idx])
+                                                   
+                            #print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
+                            denoised_results_all[chrom] = evaluations.compare(
                                 test_Y_pred,
                                 test_Y,
-                                predict_binary_output=False,
-                                peaks=peaks)
+                                predict_binary_output=self.model_params['predict_binary_output'])
+                            if not self.model_params['predict_binary_output']:
+                                #print("Test %s, %.2E bins - Denoised, only peaks:" % (chrom, chrom_length))
+                                denoised_results_peaks[chrom] = evaluations.compare(
+                                    test_Y_pred,
+                                    test_Y,
+                                    predict_binary_output=False,
+                                    peaks=peaks)
 
                 
             #########################################################

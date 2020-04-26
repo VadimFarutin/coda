@@ -24,6 +24,7 @@ class WaveletsWrapper():
         # 'sym12', 'sym13', 'sym14', 'sym15', 'sym16', 'sym17', 'sym18', 'sym19', 'sym20']
 
         self.name = 'sym4'
+        self.level = 5
         self.threshold = 0.04
                                  
     def __call__(self, x):
@@ -33,16 +34,15 @@ class WaveletsWrapper():
         if np.count_nonzero(np.isnan(x)) != 0:
             print("nan")
         
-        model = pywt.Wavelet(self.name)
+        #model = pywt.Wavelet(self.name)
         #maxlev = pywt.dwt_max_level(len(x), model.dec_len)
-        maxlev = 5
-        coeffs = pywt.wavedec(x, self.name, level=maxlev)
+        coeffs = pywt.wavedec(x, self.name, level=self.level)
 
         show_plot = False
         if show_plot:
             plt.figure()
             for i in range(1, len(coeffs)):
-                plt.subplot(maxlev, 1, i)
+                plt.subplot(self.level, 1, i)
                 plt.plot(coeffs[i])
                 coeffs[i] = pywt.threshold(coeffs[i], self.threshold * max(coeffs[i]))
                 plt.plot(coeffs[i])
