@@ -916,7 +916,7 @@ class SeqModel(object):
             if self.model_params['model_type'] == 'wavelets':
                 for name in ['sym4']:
                     for threshold in [0.04]:
-                        print(f"name={name} threshold={threshold}")
+                        print(f"Current parans: name={name} threshold={threshold}")
                         self.model.name = name
                         self.model.threshold = threshold
                     
@@ -973,7 +973,7 @@ class SeqModel(object):
                     test_Y,
                     predict_binary_output=False,
                     peaks=peaks)
-
+            print("Finished testing")
 
 
             # If we're generating a bigWig file from the output, we need to save the results
