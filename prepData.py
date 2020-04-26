@@ -24,7 +24,7 @@ from diConstants import (PIPELINE_ROOT, CODE_ROOT, DATA_ROOT, RAW_ROOT, MERGED_R
     HG19_BLACKLIST_FILE, MM9_BLACKLIST_FILE,
     BIN_SIZE, HG19_CHROM_SIZES, HG19_CHROM_SIZES_PATH, MM9_CHROM_SIZES, MM9_CHROM_SIZES_PATH,
     PEAK_BASE_DIR, #COMBINED_PEAK_DIR, SUBSAMPLE_TARGETS,
-    GM_CELL_LINES, GM_FACTORS, GM_DATASET_NAME_TEMPLATE,        
+    GM_CELL_LINES, GM_FACTORS, GM_DATASET_NAME_TEMPLATE, ULI_DATASET_NAME_TEMPLATE,       
     HG19_ALL_CHROMS, MM9_ALL_CHROMS,
     MAPQ_THRESHOLD)
 
@@ -964,19 +964,19 @@ def run_pipeline_commands(cell_lines_to_use, factors_to_use, subsample_targets_t
     """
     
     # GM-specific processing    
-    if cell_lines_to_use[0].startswith('GM'):
-        if 'merge_bam' not in steps_to_skip:
-            merge_bam_cmds = merge_BAMs(cell_lines_to_use, factors_to_use)
-            for cmd_set in merge_bam_cmds:
-                run_in_parallel('Merge BAM', n_processes, callCommand, [[cmd] for cmd in cmd_set])
-        if 'filter_bam' not in steps_to_skip:
-            filter_bam_cmds = filter_and_convert_BAMs(cell_lines_to_use, factors_to_use)
-            for cmd_set in filter_bam_cmds:
-                run_in_parallel('Filter BAM', n_processes, callCommand, [[cmd] for cmd in cmd_set])
-        if 'subsample_bam' not in steps_to_skip:
-            subsample_bam_cmds = subsample_BAMs(cell_lines_to_use, factors_to_use, subsample_targets_to_use)
-            for cmd_set in subsample_bam_cmds:
-                run_in_parallel('Subsample BAM', n_processes, callCommand, [[cmd] for cmd in cmd_set])
+    #if cell_lines_to_use[0].startswith('GM'):
+    if 'merge_bam' not in steps_to_skip:
+        merge_bam_cmds = merge_BAMs(cell_lines_to_use, factors_to_use)
+        for cmd_set in merge_bam_cmds:
+            run_in_parallel('Merge BAM', n_processes, callCommand, [[cmd] for cmd in cmd_set])
+    if 'filter_bam' not in steps_to_skip:
+        filter_bam_cmds = filter_and_convert_BAMs(cell_lines_to_use, factors_to_use)
+        for cmd_set in filter_bam_cmds:
+            run_in_parallel('Filter BAM', n_processes, callCommand, [[cmd] for cmd in cmd_set])
+    if 'subsample_bam' not in steps_to_skip:
+        subsample_bam_cmds = subsample_BAMs(cell_lines_to_use, factors_to_use, subsample_targets_to_use)
+        for cmd_set in subsample_bam_cmds:
+            run_in_parallel('Subsample BAM', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
     # Common processing
     if 'get_signal_tracks' not in steps_to_skip:
@@ -1024,6 +1024,22 @@ def run_GM_pipeline():
         sys.stderr.flush()
 
 
+def run_uli_pipeline():
+    try:        
+        run_pipeline_commands(
+            ['GSE63523'],
+            ['H3K4ME3'],
+            [None], #'0.5e6'?
+            ULI_DATASET_NAME_TEMPLATE, 
+            steps_to_skip=['merge_bam', 'subsample_bam'],
+            n_processes=12)
+
+    except:
+        print_exc()
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+        
 if __name__ == '__main__':
     """
     Calls a method using arguments from command line. Eg, 
