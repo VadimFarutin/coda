@@ -224,10 +224,13 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
             # my_auc = roc_auc_score(test_Y_mark[downsample_idxs], pred_Y_mark[downsample_idxs])
             # print("==============================", my_auprc, my_auc)
         else:
-            true_var.append(np.var(test_Y_mark))
-            MSE.append(get_MSE(pred_Y_mark, test_Y_mark))
-            pearsonR.append(get_pearsonR(pred_Y_mark, test_Y_mark))
+            #true_var.append(np.var(test_Y_mark))
+            #MSE.append(get_MSE(pred_Y_mark, test_Y_mark))
+            #pearsonR.append(get_pearsonR(pred_Y_mark, test_Y_mark))
             #SNR.append(get_SNR(pred_Y_mark))
+            true_var.append(0.0)
+            MSE.append(0.0)
+            pearsonR.append(0.0)
             SNR.append(0.0)
             
             print("MSE %2.3f (true var %2.3f), pearsonR %2.3f, SNR %2.3f" % 
