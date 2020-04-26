@@ -1031,7 +1031,7 @@ def run_uli_pipeline():
             ['H3K4ME3'],
             [None], #'0.5e6'?
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks', 'get_average_signal'],
+            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam'],
             n_processes=12)
 
     except:
