@@ -405,6 +405,7 @@ def filter_and_convert_BAMs(cell_lines_to_use, factors_to_use):
     and then outputs a tagAlign.gz file with only the filtered reads 
     in the same MERGED_ROOT folder.
     """
+    print("run filter_and_convert_BAMs!!!")
     all_cmds = [[], []]
     for cell_line in cell_lines_to_use:
         for factor in factors_to_use:
@@ -1024,14 +1025,14 @@ def run_GM_pipeline():
         sys.stderr.flush()
 
 
-def run_uli_pipeline():
+def uli():
     try:        
         run_pipeline_commands(
             ['MOUSE'],
             ['H3K4ME3'],
             [None], #'0.5e6'?
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam'],
+            steps_to_skip=['merge_bam', 'subsample_bam'],
             n_processes=12)
 
     except:
