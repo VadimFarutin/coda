@@ -7,7 +7,7 @@ import torch
 REMOTE_ROOT = "/mnt/data/chromatinVariation1/rawdata/mapped/bam/personal/reconcile/dedup"    
 
 # Where the AQUAS pipeline is installed
-PIPELINE_ROOT = "/users/pangwei/TF_chipseq_pipeline/"
+PIPELINE_ROOT = "../TF_chipseq_pipeline/TF_chipseq_pipeline/"
 
 # Where the code is
 CODE_ROOT = "/users/pangwei/deepimpute_pub"
