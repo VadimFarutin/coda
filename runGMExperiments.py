@@ -45,8 +45,8 @@ def test_GM18526():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [False]:
                 for output_mark in GM_MARKS:                            
-                    wandb_log = True
                     model_type = 'wavelets'
+                    wandb_log = False
                     evaluate = True
                     evaluate_genome_only = True
                     
