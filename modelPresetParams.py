@@ -89,7 +89,7 @@ MODEL_PRESET_PARAMS = {
             'dilation': 2,
             'num_layers': 5,
             'residual': True,
-            'dropout': 0.5
+            'dropout': 0.0
         },
         'compile_params': {
             'regression_loss': 'MSE',
