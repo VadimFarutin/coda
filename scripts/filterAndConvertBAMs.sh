@@ -11,8 +11,14 @@ mapQThreshold=$3
 # module load samtools/1.2
 # module load bedtools/2.23.0
 
-samtools view -F 1804 -f 2 -q ${mapQThreshold} -u ${BAMPath} | \
+#samtools view -F 1804 -f 2 -q ${mapQThreshold} -u ${BAMPath} | \
+#    samtools sort -m 10000M -O bam -n -T ${BAMPath} - | \
+#    samtools fixmate -r -O 'bam' - - | \
+#    samtools view -F 1804 -f 2 -u - | \
+#    bedtools bamtobed -bedpe -i stdin > ${BEDPath}
+
+samtools view -F 1804 -q ${mapQThreshold} -u ${BAMPath} | \
     samtools sort -m 10000M -O bam -n -T ${BAMPath} - | \
     samtools fixmate -r -O 'bam' - - | \
-    samtools view -F 1804 -f 2 -u - | \
+    samtools view -F 1804 -u - | \
     bedtools bamtobed -bedpe -i stdin > ${BEDPath}
