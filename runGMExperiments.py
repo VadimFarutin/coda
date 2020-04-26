@@ -35,8 +35,8 @@ def run_model(model_params, evaluate, evaluate_genome_only):
     return results
 
 # GM_MARKS = ['H3K27AC', 'H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
-GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3', 'H3K27AC']
-#GM_MARKS = ['H3K27AC']
+#GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3', 'H3K27AC']
+GM_MARKS = ['H3K27AC']
 
 
 def test_GM18526():
