@@ -35,7 +35,7 @@ def run_model(model_params, evaluate, evaluate_genome_only):
     return results
 
 # GM_MARKS = ['H3K27AC', 'H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
-# GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
+#GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3', 'H3K27AC']
 GM_MARKS = ['H3K27AC']
 
 
@@ -43,7 +43,7 @@ def test_GM18526():
 
     for test_cell_line in ['GM18526']:
         for subsample_target_string in ['0.5e6']:
-            for predict_binary_output in [False]:
+            for predict_binary_output in [False, True]:
                 for output_mark in GM_MARKS:                            
                     model_type = 'cnn-encoder-decoder'
                     wandb_log = True
@@ -78,18 +78,19 @@ def test_GM18526():
                             'only_chr1': True
                         },
                         output_marks=[output_mark],
+                        #input_marks=[output_mark, 'INPUT'],
                         train_params={
                             'nb_epoch': 10,
                             'batch_size': 100,
                             'validation_split': 0.2,
-                            'wandb_log': wandb_log
+                            'wandb_log': wandb_log,
                             'eval_batch_size': 1000,
                         },
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
                         pretrained_model_path=None)
-                        #pretrained_model_path='./models/weights/encoder-decoder-20200410-164212869646-weights.pt')
+                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200425-111545564105-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"

@@ -65,7 +65,7 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 32,
+            'hidden_size': 16,
             'num_layers': 1,
             'bidirectional': True,
             'teacher_forcing': 0.0,
@@ -83,19 +83,19 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'cnn-encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 8,
-            'kernel_size': 3,
+            'hidden_size': 64,
+            'kernel_size': 51,
             'stride': 1,
-            'dilation': 3,
-            'num_layers': 3,
+            'dilation': 2,
+            'num_layers': 5,
             'residual': True,
-            'dropout': 0.0
+            'dropout': 0.4
         },
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
             'optimizer': 'adam',
-            'lr': 5e-4
+            'lr': 1e-4
         },
     },
     'adv-cnn-encoder-decoder': {
@@ -103,24 +103,37 @@ MODEL_PRESET_PARAMS = {
         'model_class': 'SeqToSeq',
         'model_type': 'adv-cnn-encoder-decoder',
         'model_specific_params': {
-            'hidden_size': 64,
-            'kernel_size': 17,
+            'hidden_size': 4,
+            'kernel_size': 51,
             'stride': 1,
             'dilation': 2,
-            'num_layers': 4,
+            'num_layers': 5,
             'residual': True,
             'dropout': 0.0,
 
-            'disc_hidden_size': 128,
-            'disc_kernel_size': 17,
+            'disc_hidden_size': 8,
+            'disc_kernel_size': 401,
             'disc_dilation': 1,
-            'disc_num_layers': 2            
+            'disc_num_layers': 2           
         },
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
             'optimizer': 'adam',
-            'lr': 1e-3
+            'lr': 1e-4
+        },
+    },
+    'wavelets': {
+        'model_library': 'pytorch',
+        'model_class': 'SeqToSeq',
+        'model_type': 'wavelets',
+        'model_specific_params': {
+        },
+        'compile_params': {
+            'regression_loss': None,
+            'class_loss': None,
+            'optimizer': None,
+            'lr': None
         },
     },
 }

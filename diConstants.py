@@ -7,7 +7,7 @@ import torch
 REMOTE_ROOT = "/mnt/data/chromatinVariation1/rawdata/mapped/bam/personal/reconcile/dedup"    
 
 # Where the AQUAS pipeline is installed
-PIPELINE_ROOT = "/users/pangwei/TF_chipseq_pipeline/"
+PIPELINE_ROOT = "../TF_chipseq_pipeline/TF_chipseq_pipeline/"
 
 # Where the code is
 CODE_ROOT = "/users/pangwei/deepimpute_pub"
@@ -99,7 +99,7 @@ MM9_CHROM_SIZES = {
     'chr19': 61342430
 }
 BIN_SIZE = 25
-GENOME_BATCH_SIZE = 10000
+GENOME_BATCH_SIZE = 50000
 NUM_BASES = 4
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

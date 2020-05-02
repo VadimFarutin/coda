@@ -10,6 +10,7 @@ import copy
 import math
 import random
 import psutil
+import time
 
 import numpy as np
 import pandas as pd
@@ -24,6 +25,7 @@ from keras.constraints import maxnorm
 from keras.regularizers import l2 #, activity_l2
 
 from sklearn.model_selection import train_test_split
+from sklearn import manifold
 import torch
 import torch.nn as nn
 from torch import optim
@@ -32,7 +34,9 @@ from torch.utils.data.dataloader import DataLoader
 import wandb
 from wandb.keras import WandbCallback
 from tqdm.auto import tqdm
+import matplotlib.pyplot as plt
 
+from waveletsWrapper import WaveletsWrapper
 from atacWorksModel import AtacWorksModel
 from LSTMModel import LSTMModel
 from EncoderDecoder import EncoderDecoder
@@ -320,8 +324,9 @@ class SeqModel(object):
         (train_X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY) = self.get_processed_data(
             self.train_dataset)
 
-        self.normalizer.fit(train_X)
-        train_X = self.normalizer.transform(train_X)
+        if self.model_params['model_type'] != 'adv-cnn-encoder-decoder':
+            self.normalizer.fit(train_X)
+            train_X = self.normalizer.transform(train_X)
         train_inputs_X = train_X
 
         if self.model_params['predict_binary_output']:
@@ -330,6 +335,8 @@ class SeqModel(object):
             train_Y = Y
 
         if self.model_params['train_params']['nb_epoch'] == 0:
+            return None
+        if self.model_params['model_type'] == 'wavelets':
             return None
 
         if self.model_library == 'keras':
@@ -427,43 +434,113 @@ class SeqModel(object):
         earlystopper_patience = 3
         best_epoch_val_loss = None
         hist = {'loss': [], 'val_loss': []}
+        params_num = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+        print(f"Model parameters: {params_num}")
+        print(f"Model checkpoint path: {checkpoint_path}")
 
         if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
             lr = self.model_params['compile_params']['lr']
-            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr)
+            gen_optimizer = optim.Adam(self.model.parameters(), lr=lr)
+            disc_optimizer = optim.Adam(self.model.discriminator.parameters(), lr=lr * 5)
             disc_loss_function = torch.nn.modules.loss.BCELoss()
+            output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
 
         for epoch in tqdm(range(nb_epoch)):
-            loss_values = []
+            loss_values = [0.0]
             val_loss_values = []
 
             self.model.train()
             if self.model_params['model_type'] == 'adv-cnn-encoder-decoder':
+                disc_fool_loss_values = [0.0]
+                disc_clean_loss_values = [0.0]
+                disc_noisy_loss_values = [0.0]
+                noisy_latent_vectors = []
+                clean_latent_vectors = []
+                batch_i = 0
+                
                 for batch_data in tqdm(train_loader):
+                    batch_i += 1
                     optimizer.zero_grad()
                     data, labels = batch_data[0].to(DEVICE), batch_data[1].to(DEVICE)
+                    # TODO normalize
                     output, latent_noisy = self.model(data, return_latent=True)
-                    loss = loss_function(output, labels.float())
-                    loss.backward()
+                    if (batch_i % 1000) == 0:
+                        loss = loss_function(output, labels.float())
+                        loss.backward(retain_graph=True)
+                        optimizer.step()
+                        loss_values.append(loss.item())
                     
-                    gen_noisy_output = self.model.discriminator(latent_noisy)
-                    gen_noisy_loss = disc_loss_function(gen_noisy_output, 1)
-                    gen_noisy_loss.backward()
+                    batch_data_size = data.shape[0]
+                    if (batch_i % 5) == 0:
+                        gen_optimizer.zero_grad()
+                        gen_noisy_output = self.model.discriminator(latent_noisy)
+                        gen_noisy_loss = disc_loss_function(gen_noisy_output, torch.ones((batch_data_size, 1)).to(DEVICE))
+                        gen_noisy_loss.backward()
+                        gen_optimizer.step()
+                        disc_fool_loss_values.append(gen_noisy_loss.item())
 
-                    labels = self.normalizer.transform(labels.copy().float())
-                    _, latent_clean = self.model(labels.float(), return_latent=True)
-
-                    optimizer.step()
-                    loss_values.append(loss.item())
+                    #clean_data = copy.deepcopy(data)
+                    #print(clean_data.gather(2, torch.tensor(output_marks_idx * (data.shape[0] * data.shape[1])).view(data.shape[0], data.shape[1], 1).to(DEVICE)))
+                    #clean_data[:, :, torch.tensor(output_marks_idx).to(DEVICE)] = copy.deepcopy(labels).float()
+                    # TODO normalize
+                    #_, latent_clean = self.model(clean_data, return_latent=True)
+                    latent_clean = torch.from_numpy(np.random.normal(0.0, 1.0, latent_noisy.shape)).float().to(DEVICE)
                     
-                    disc_optimizer.zero_grad()
-                    disc_clean_output = self.model.discriminator(latent_clean.detach())
-                    disc_clean_loss = disc_loss_function(disc_clean_output, 1)
-                    disc_clean_loss.backward()
-                    disc_noisy_output = self.model.discriminator(latent_noisy.detach())
-                    disc_noisy_loss = disc_loss_function(disc_noisy_output, 0)
-                    disc_noisy_loss.backward()
-                    disc_optimizer.step()
+                    if (batch_i % 1) == 0:
+                        disc_optimizer.zero_grad()
+                        disc_clean_output = self.model.discriminator(latent_clean.detach())
+                        disc_clean_loss = disc_loss_function(disc_clean_output, torch.ones((batch_data_size, 1)).to(DEVICE))
+                        disc_clean_loss.backward(retain_graph=True)
+                        disc_noisy_output = self.model.discriminator(latent_noisy.detach())
+                        disc_noisy_loss = disc_loss_function(disc_noisy_output, torch.zeros((batch_data_size, 1)).to(DEVICE))
+                        disc_noisy_loss.backward()
+                        disc_optimizer.step()
+                    
+                        disc_clean_loss_values.append(disc_clean_loss.item())
+                        disc_noisy_loss_values.append(disc_noisy_loss.item())
+
+                    if len(noisy_latent_vectors) < 20:
+                        noisy_latent_vectors.append(latent_noisy.detach().view(batch_data_size, -1))
+                        clean_latent_vectors.append(latent_clean.detach().view(batch_data_size, -1))
+                    #else:
+                    #    print("breaking")
+                    #    break
+                
+                print(f"Epoch: {epoch} Disc fool loss: {np.mean(disc_fool_loss_values)} Disc clean loss: {np.mean(disc_clean_loss_values)} Disc noisy loss: {np.mean(disc_noisy_loss_values)}")
+                if epoch == 0 or epoch == nb_epoch - 1 or (epoch % 3) == 0:
+                    noisy_latent_vectors_cat = torch.cat(noisy_latent_vectors, dim=0)
+                    clean_latent_vectors_cat = torch.cat(clean_latent_vectors, dim=0)
+
+                    #count, bins, ignored = plt.hist(clean_latent_vectors_cat.cpu().numpy().flatten(), 30, density=True, color='b')
+                    #plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
+                    ##plt.show()
+                    #if self.model_params['train_params']['wandb_log']:
+                    #    wandb.log({f'Latent normal values at #{epoch}': wandb.Image(plt)}, step=epoch)
+                    #plt.clf()
+                    
+                    count, bins, ignored = plt.hist(noisy_latent_vectors_cat.cpu().numpy().flatten(), 30, density=True, color='b')
+                    plt.plot(bins, 1 / (np.sqrt(2 * np.pi)) * np.exp(-(bins)**2 / 2), linewidth=2, color='r')
+                    #plt.show()
+                    if self.model_params['train_params']['wandb_log']:
+                        wandb.log({f'Latent values at #{epoch}': wandb.Image(plt)}, step=epoch)
+                    plt.clf()
+                    
+                    #all_latent = torch.cat((noisy_latent_vectors_cat, clean_latent_vectors_cat), dim=0)
+                    #print(f"All latent shape: {all_latent.shape}")
+                    #
+                    #manifold_method = manifold.Isomap(n_neighbors=10, n_components=2)
+                    #t0 = time.time()
+                    #latent_transformed = manifold_method.fit_transform(all_latent.cpu().numpy())
+                    #t1 = time.time()
+                    #print(f"Manifold method time: {t1 - t0}sec Num vectors: {latent_transformed.shape[0]}")
+                    #plt.scatter(latent_transformed[latent_transformed.shape[0] // 2:, 0], 
+                    #            latent_transformed[latent_transformed.shape[0] // 2:, 1], s=10, c='black')
+                    #plt.scatter(latent_transformed[:latent_transformed.shape[0] // 2, 0], 
+                    #            latent_transformed[:latent_transformed.shape[0] // 2, 1], s=10, c='red')
+                    ##plt.show()
+                    #if self.model_params['train_params']['wandb_log']:
+                    #    wandb.log({f'Latent at #{epoch}': wandb.Image(plt)}, step=epoch)
+                    #plt.clf()
                     
             else:
                 for batch_data in tqdm(train_loader):
@@ -487,6 +564,12 @@ class SeqModel(object):
                     # memoryUse = py.memory_info()[0] / 2.0 ** 30
                     # print("before step ", memoryUse)
                     optimizer.step()
+                    
+                    if torch.sum(output[output != 0.0]) == 0.0:
+                        print("sum(output) == 0, expected: ", torch.sum(labels[labels != 0.0]))
+                    #for param in self.model.parameters():
+                    #    print(param.data)
+                    #    break
                     # pid = os.getpid()
                     # py = psutil.Process(pid)
                     # memoryUse = py.memory_info()[0] / 2.0 ** 30
@@ -520,7 +603,7 @@ class SeqModel(object):
 
                 if epoch == 1 and abs(hist['val_loss'][1] - hist['val_loss'][0]) <= 1e-9:
                     print(f"Did not improve from {hist['val_loss'][0]} to {hist['val_loss'][1]}, breaking")
-                    break
+                    #break
                 # if earlystopper_patience == 0:
                 #     break
         
@@ -569,7 +652,7 @@ class SeqModel(object):
 
             assert os.path.isfile(self.model_path) == False
 
-            torch.save(self.model, self.model_path)
+            # torch.save(self.model, self.model_path)
 
         return None
 
@@ -625,7 +708,8 @@ class SeqModel(object):
         # Then compare the true data with the output of the model
         # Process the data properly
         X = self.process_X(X)
-        X = self.normalizer.transform(X)
+        if self.model_params['model_type'] != 'adv-cnn-encoder-decoder':
+            X = self.normalizer.transform(X)
 
         # We have to batch the prediction so that the GPU doesn't run out of memory
         if 'eval_batch_size' in self.model_params['train_params']:
@@ -827,19 +911,50 @@ class SeqModel(object):
             # We have to batch this up so that the GPU doesn't run out of memory
             # Assume a fixed batch size of 5M bins
             num_batches = int(math.ceil(1.0 * chrom_length / GENOME_BATCH_SIZE))
+            print(f"num_batches: {num_batches}, GENOME_BATCH_SIZE: {GENOME_BATCH_SIZE}")
 
+            if self.model_params['model_type'] == 'wavelets':
+                for name in ['sym4', 'sym8']:
+                    for level in [5, 7, 10]:
+                        for threshold in [0.25, 0.5, 0.75, 0.9]:
+                            print(f"    Current params: name={name}, level={level}, threshold={threshold}")
+                            self.model.name = name
+                            self.model.level = level
+                            self.model.threshold = threshold
+                        
+                            test_Y_pred = np.empty(test_Y.shape)
+
+                            for batch in range(num_batches):
+                                start_idx = batch * GENOME_BATCH_SIZE
+                                end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
+                                test_Y_pred[start_idx : end_idx] = self.predict_sequence(
+                                    test_X[start_idx : end_idx])
+                                                   
+                            #print("Test %s, %.2E bins - Denoised, all signal:" % (chrom, chrom_length))
+                            denoised_results_all[chrom] = evaluations.compare(
+                                test_Y_pred,
+                                test_Y,
+                                predict_binary_output=self.model_params['predict_binary_output'])
+                            if not self.model_params['predict_binary_output']:
+                                #print("Test %s, %.2E bins - Denoised, only peaks:" % (chrom, chrom_length))
+                                denoised_results_peaks[chrom] = evaluations.compare(
+                                    test_Y_pred,
+                                    test_Y,
+                                    predict_binary_output=False,
+                                    peaks=peaks)
+
+                
+            #########################################################
             test_Y_pred = np.empty(test_Y.shape)
-            test_X = self.normalizer.transform(test_X)
-
-            print(num_batches, GENOME_BATCH_SIZE)
+            if self.model_params['model_type'] not in ['adv-cnn-encoder-decoder', 'wavelets']:
+                print("Normalizing genome input...")
+                test_X = self.normalizer.transform(test_X)
 
             for batch in tqdm(range(num_batches)):
                 start_idx = batch * GENOME_BATCH_SIZE
                 end_idx = min((batch + 1) * GENOME_BATCH_SIZE, chrom_length)
                 test_Y_pred[start_idx : end_idx] = self.predict_sequence(
                     test_X[start_idx : end_idx])
-                # test_Y_pred[start_idx : end_idx] = self.predict_sequence(
-                #     test_X[start_idx : end_idx], torch.device('cpu'))
                 # with np.printoptions(precision=3):
                 #     print('###########')
                 #     #print(test_X[end_idx - 50 : end_idx])
@@ -860,7 +975,7 @@ class SeqModel(object):
                     test_Y,
                     predict_binary_output=False,
                     peaks=peaks)
-
+            print("Finished testing")
 
 
             # If we're generating a bigWig file from the output, we need to save the results
@@ -1165,6 +1280,32 @@ class SeqToPoint(SeqModel):
                                    num_filters=num_filters,
                                    kernel_size=filter_length)
 
+        elif model_params['model_type'] == 'cnn-encoder-decoder':
+            predict_binary_output = model_params['predict_binary_output']
+            hidden_size = model_params['hidden_size']
+            kernel_size = model_params['kernel_size']
+            stride = model_params['stride']
+            dilation = model_params['dilation']
+            num_layers = model_params['num_layers']
+            residual = model_params['residual']
+            dropout = model_params['dropout']
+            seq_length = self.dataset_params['seq_length']
+
+            model = CnnEncoderDecoder(
+                predict_binary_output=predict_binary_output,
+                in_channels=self.num_input_marks,
+                out_channels=self.num_output_marks,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                kernel_size=kernel_size,
+                stride=stride,
+                dilation=dilation,
+                residual=residual,
+                p_dropout=dropout,
+                seq_length=seq_length,
+                seq2seq=False
+            )
+
         else:
             raise Exception("Model type not recognized")
 
@@ -1346,6 +1487,43 @@ class SeqToSeq(SeqModel):
                 seq_length=seq_length,
                 seq2seq=True
             )
+
+        elif model_params['model_type'] == 'adv-cnn-encoder-decoder':
+            predict_binary_output = model_params['predict_binary_output']
+            hidden_size = model_params['hidden_size']
+            kernel_size = model_params['kernel_size']
+            stride = model_params['stride']
+            dilation = model_params['dilation']
+            num_layers = model_params['num_layers']
+            residual = model_params['residual']
+            dropout = model_params['dropout']
+            seq_length = self.dataset_params['seq_length']
+
+            disc_hidden_size = model_params['disc_hidden_size'] 
+            disc_num_layers = model_params['disc_num_layers']
+            disc_kernel_size = model_params['disc_kernel_size']
+            disc_dilation = model_params['disc_dilation']            
+            
+            model = AdvCnnEncoderDecoder(
+                predict_binary_output=predict_binary_output,
+                in_channels=self.num_input_marks,
+                out_channels=self.num_output_marks,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                kernel_size=kernel_size,
+                stride=stride,
+                dilation=dilation,
+                residual=residual,
+                p_dropout=dropout,
+                seq_length=seq_length, 
+                seq2seq=True,
+                disc_hidden_size=disc_hidden_size, 
+                disc_num_layers=disc_num_layers,
+                disc_kernel_size=disc_kernel_size, 
+                disc_dilation=disc_dilation
+            )
+        elif model_params['model_type'] == 'wavelets':
+            model = WaveletsWrapper()
         else:
             raise Exception("Model type not recognized")
 
@@ -1396,6 +1574,17 @@ class SeqToSeq(SeqModel):
         if self.model_library == 'keras':
             Y = self.model.predict(signalX)
         elif self.model_library == 'pytorch':
+            if self.model_params['model_type'] == 'wavelets':
+                #print(f"signalX.shape={signalX.shape}")
+                output_marks_idx = [self.input_marks.index(output_mark) for output_mark in self.output_marks]
+                X = signalX[..., output_marks_idx]
+                #print(f"X.shape={X.shape}")
+                X = np.reshape(X, -1)
+                #print(f"X.shape={X.shape}")
+                Y = self.model(X)
+                Y = np.reshape(Y, (num_bins, 1))
+                return Y
+        
             if True:
                 device = DEVICE
             self.model = self.model.to(device)
@@ -1404,9 +1593,10 @@ class SeqToSeq(SeqModel):
             self.model.eval()
             with torch.no_grad():
                 if num_bins == 10000:
-                    X = torch.from_numpy(signalX).float().view(10, 1000, num_input_marks).to(device)
+                    #X = torch.from_numpy(signalX).float().view(10, 1000, num_input_marks).to(device)
+                    X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
                 else:
-                    print("num_bins", num_bins)
+                    #print("num_bins", num_bins)
                     X = torch.from_numpy(signalX).float().view(-1, num_bins, num_input_marks).to(device)
                 Y = self.model(X).detach().cpu().view(-1, num_bins, self.num_output_marks).numpy()
                 Y = Y[0]

@@ -118,11 +118,11 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
     # save_curves has to be False if predict_binary_output is also False
     if not predict_binary_output: save_curves = False
     
-    pred_Y_is_binary = is_binary(pred_Y)
-    test_Y_is_binary = is_binary(test_Y)   
+    #pred_Y_is_binary = is_binary(pred_Y)
+    #test_Y_is_binary = is_binary(test_Y)   
     assert pred_Y.shape == test_Y.shape, \
         "pred_Y.shape = %s doesn't match test_Y.shape = %s" % (str(pred_Y.shape), str(test_Y.shape))
-    assert test_Y_is_binary == predict_binary_output 
+    #assert test_Y_is_binary == predict_binary_output 
 
     #test_Y (the true labels) ought to be binary IFF we're predicting binary output. 
     #pred_Y should be a set of continuous scores, regardless of whether we're predicting binary output. 
@@ -228,6 +228,11 @@ def compare(pred_Y, test_Y, predict_binary_output, peaks=None,
             MSE.append(get_MSE(pred_Y_mark, test_Y_mark))
             pearsonR.append(get_pearsonR(pred_Y_mark, test_Y_mark))
             SNR.append(get_SNR(pred_Y_mark))
+            #print("append 0.0")
+            #true_var.append(0.0)
+            #MSE.append(0.0)
+            #pearsonR.append(0.0)
+            #SNR.append(0.0)
             
             print("MSE %2.3f (true var %2.3f), pearsonR %2.3f, SNR %2.3f" % 
                 (MSE[mark_idx], true_var[mark_idx], pearsonR[mark_idx], SNR[mark_idx]))      
