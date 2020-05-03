@@ -14,7 +14,7 @@ bds ${pipelineDir}/chipseq.bds \
     -histone \
     -input tag \
     -final_stage xcor \
-    -subsample_xcor "5M" \
+    -subsample_xcor "20M" \
     -tag1 ${tagAlignPath} \
     -tag2bw \
     -species ${species} \
