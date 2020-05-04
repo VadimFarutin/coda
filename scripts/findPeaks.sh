@@ -8,6 +8,8 @@ bds ${1}/chipseq.bds \
        -tag1 ${3} \
        -callpeak macs2 \
        -species ${4} \
+       -gensz "mm" \
+       -chrsz "./data/mm9.male.chrom.sizes" \
        -nth 2
 
 
