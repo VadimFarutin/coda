@@ -832,21 +832,22 @@ def call_all_peaks(cell_lines_to_use, factors_to_use, subsample_targets_to_use):
                 else:
                     input_file = get_tagAlign_path(cell_line, factor, subsample_target_string = subsample_target_string)
                     control_input_file = get_tagAlign_path(cell_line, 'INPUT', subsample_target_string = subsample_target_string)
-                    if os.path.exists(input_file) and os.path.exists(control_input_file):
+                    #if os.path.exists(input_file) and os.path.exists(control_input_file):
+                    if os.path.exists(input_file):
                         print('%-8s %-8s %-8s peak files DO NOT exist, regenerating' % (cell_line, factor, subsample_target_string))
-                        controls_and_inputs.append([input_file, control_input_file])
+                        controls_and_inputs.append(input_file)
                     else:
                         print('%-8s %-8s %-8s input files DO NOT exist, cannot call peaks' % (cell_line, factor, subsample_target_string))
                         print(input_file)
                         print(control_input_file)
                         continue
 
-            for input_file, control_input_file in controls_and_inputs:                
+            #for input_file, control_input_file in controls_and_inputs:                
+            for input_file in controls_and_inputs:                
                 
-                if os.path.isfile(input_file) and os.path.isfile(control_input_file):
-
-                    if os.path.isfile(control_input_file):                    
-                        cmd = "bash scripts/findPeaks.sh %s %s %s %s %s" % (PIPELINE_ROOT, PEAK_BASE_DIR, input_file, control_input_file, species)                        
+                #if os.path.isfile(input_file) and os.path.isfile(control_input_file):
+                if os.path.isfile(input_file):
+                    cmd = "bash scripts/findPeaks.sh %s %s %s %s" % (PIPELINE_ROOT, PEAK_BASE_DIR, input_file, species)                        
 
                     all_cmds[0].append(cmd)                        
 
