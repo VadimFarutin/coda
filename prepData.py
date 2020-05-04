@@ -998,10 +998,10 @@ def run_pipeline_commands(cell_lines_to_use, factors_to_use, subsample_targets_t
 
             run_in_parallel('Average signal', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
-    generate_all_dataset_cmds = generate_datasets(cell_lines_to_use, dataset_name_template, 
-                                                  factors_to_use, subsample_targets_to_use)
-    for cmd_set in generate_all_dataset_cmds:
-            run_in_parallel('Generate dataset', n_processes, callCommand, [[cmd] for cmd in cmd_set])
+    #generate_all_dataset_cmds = generate_datasets(cell_lines_to_use, dataset_name_template, 
+    #                                              factors_to_use, subsample_targets_to_use)
+    #for cmd_set in generate_all_dataset_cmds:
+    #        run_in_parallel('Generate dataset', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
 
 def run_GM_pipeline():
