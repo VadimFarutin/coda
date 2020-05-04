@@ -18,4 +18,7 @@ bds ${pipelineDir}/chipseq.bds \
     -tag1 ${tagAlignPath} \
     -tag2bw \
     -species ${species} \
+    -seq "./data/fasta/mm9"\
+    -umap "./data/umap/mm9/globalmap_k20tok54" \
+    -chrsz "./data/mm9.male.chrom.sizes" \
     -nth 2
