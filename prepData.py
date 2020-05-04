@@ -837,6 +837,8 @@ def call_all_peaks(cell_lines_to_use, factors_to_use, subsample_targets_to_use):
                         controls_and_inputs.append([input_file, control_input_file])
                     else:
                         print('%-8s %-8s %-8s input files DO NOT exist, cannot call peaks' % (cell_line, factor, subsample_target_string))
+                        print(input_file)
+                        print(control_input_file)
                         continue
 
             for input_file, control_input_file in controls_and_inputs:                
