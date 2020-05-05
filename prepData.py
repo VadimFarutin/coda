@@ -158,6 +158,7 @@ def get_blacklisted_locs(cell_line):
         blacklist_file = HG19_BLACKLIST_FILE
 
     d = pd.read_csv(blacklist_file, sep = "\t")
+    print("Blacklist file successfully read")
     blacklist_dictionary = {}
     for i in range(len(d)):
         chrom = d.iloc[i]['chromosome']
