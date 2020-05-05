@@ -800,9 +800,9 @@ def generate_datasets(cell_lines_to_use, dataset_name_template, factors_to_use, 
     factors_string = '-'.join(factors_to_use)
     for cell_line in cell_lines_to_use:        
         for subsample_target in subsample_targets_to_use:
-            all_cmds[0].append('python prepData.py ' \
-                + ' prep_dataset_wrapper peak_pvals_by_bin_%s %s %s %s None True' % \
-                (dataset_name_template % cell_line, cell_line, factors_string, subsample_target))
+            # all_cmds[0].append('python prepData.py ' \
+            #     + ' prep_dataset_wrapper peak_pvals_by_bin_%s %s %s %s None True' % \
+            #     (dataset_name_template % cell_line, cell_line, factors_string, subsample_target))
             all_cmds[0].append('python prepData.py ' \
                 + ' prep_dataset_wrapper %s %s %s %s arcsinh False' % \
                 (dataset_name_template % cell_line, cell_line, factors_string, subsample_target))
