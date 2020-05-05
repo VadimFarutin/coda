@@ -999,11 +999,11 @@ def run_pipeline_commands(cell_lines_to_use, factors_to_use, subsample_targets_t
 
     if 'get_average_signal' not in steps_to_skip:
         
-        #get_average_signal_peaks_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = True)
+        get_average_signal_peaks_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = True)
         get_average_signal_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = False)
 
-        #for cmd_set in get_average_signal_cmds + get_average_signal_peaks_cmds:
-        for cmd_set in get_average_signal_cmds:
+        for cmd_set in get_average_signal_cmds + get_average_signal_peaks_cmds:
+        #for cmd_set in get_average_signal_cmds:
 
             run_in_parallel('Average signal', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
