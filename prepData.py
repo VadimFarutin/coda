@@ -161,8 +161,8 @@ def get_blacklisted_locs(cell_line):
     print("Blacklist file successfully read")
     blacklist_dictionary = {}
     for i in range(len(d)):
-        print("row idx ", i)
-        print("row ", d.iloc[i])
+        #print("row idx ", i)
+        #print("row ", d.iloc[i])
         chrom = d.iloc[i]['chromosome']
         start = d.iloc[i]['start']
         end =  d.iloc[i]['end']
@@ -1007,10 +1007,10 @@ def run_pipeline_commands(cell_lines_to_use, factors_to_use, subsample_targets_t
 
             run_in_parallel('Average signal', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
-    generate_all_dataset_cmds = generate_datasets(cell_lines_to_use, dataset_name_template, 
-                                                  factors_to_use, subsample_targets_to_use)
-    for cmd_set in generate_all_dataset_cmds:
-            run_in_parallel('Generate dataset', n_processes, callCommand, [[cmd] for cmd in cmd_set])
+    #generate_all_dataset_cmds = generate_datasets(cell_lines_to_use, dataset_name_template, 
+    #                                              factors_to_use, subsample_targets_to_use)
+    #for cmd_set in generate_all_dataset_cmds:
+    #        run_in_parallel('Generate dataset', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
 
 def run_GM_pipeline():
@@ -1041,7 +1041,7 @@ def uli():
             ['H3K4ME3'],
             ['0.5e6'], #None?
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks', 'get_average_signal'],
+            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'get_average_signal'],
             n_processes=12)
 
     except:
