@@ -44,7 +44,7 @@ def test_MOUSE():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [False]:
                 for output_mark in MM_MARKS:                            
-                    model_type = 'cnn'
+                    model_type = 'cnn-encoder-decoder'
                     wandb_log = True
                     evaluate = True
                     evaluate_genome_only = True
@@ -62,7 +62,7 @@ def test_MOUSE():
                         compile_params={
                             'loss': loss,
                             'optimizer': preset_params['compile_params']['optimizer'],
-                            #'lr': preset_params['compile_params']['lr']
+                            'lr': preset_params['compile_params']['lr']
                         },
                         dataset_params={
                             'train_dataset_name': 'MOUSE_3marks_all',
@@ -80,7 +80,7 @@ def test_MOUSE():
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
-                            'nb_epoch': 30,
+                            'nb_epoch': 7,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
