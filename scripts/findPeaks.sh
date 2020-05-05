@@ -7,6 +7,7 @@ bds ${1}/chipseq.bds \
        -histone \
        -tag1 ${3} \
        -callpeak macs2 \
+       -final_stage peak \
        -species ${4} \
        -gensz "mm" \
        -chrsz "./data/mm9.male.chrom.sizes" \
