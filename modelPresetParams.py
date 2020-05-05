@@ -10,7 +10,8 @@ MODEL_PRESET_PARAMS = {
         'compile_params': {
             'regression_loss': 'MSE',
             'class_loss': 'binary_crossentropy',
-            'optimizer': 'adagrad'
+            'optimizer': 'adagrad',
+            'lr': 1e-3
         },
     },
     'coda': {
