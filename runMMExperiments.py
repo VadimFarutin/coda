@@ -45,7 +45,7 @@ def test_MOUSE():
             for predict_binary_output in [False]:
                 for output_mark in MM_MARKS:                            
                     model_type = 'cnn'
-                    wandb_log = False
+                    wandb_log = True
                     evaluate = True
                     evaluate_genome_only = True
                     
@@ -67,8 +67,8 @@ def test_MOUSE():
                         dataset_params={
                             'train_dataset_name': 'MOUSE_3marks_all',
                             'test_dataset_name': '%s_3marks_all' % test_cell_line,
-                            'num_train_examples': 1000,
-                            'seq_length': 101,
+                            'num_train_examples': 100000,
+                            'seq_length': 1001,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
@@ -80,7 +80,7 @@ def test_MOUSE():
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
-                            'nb_epoch': 2,
+                            'nb_epoch': 30,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
