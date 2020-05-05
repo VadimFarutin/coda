@@ -714,7 +714,7 @@ def prep_dataset(dataset_name, cell_line, factors_to_include, chroms_to_include,
             metadata_path = get_metadata_path(dataset_name, subsample_target_string, normalization)
             with open(metadata_path, 'w') as f:
                 f.write(json.dumps(metadata))
-
+            print("Wrote metadata ", metadata)
 
         # Construct output matrix
 
