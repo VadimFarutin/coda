@@ -578,6 +578,7 @@ def check_whether_BW_files_exist(cell_line, factor, subsample_target_string, ave
     else:
         bigWig_path = get_bigWig_path(cell_line, factor, subsample_target_string)
     if not (os.path.isfile(bigWig_path)):
+        print("Missing ", bigWig_path)
         allFilesExist = False
 
     species = get_species(cell_line)
@@ -585,6 +586,7 @@ def check_whether_BW_files_exist(cell_line, factor, subsample_target_string, ave
     for chrom in chrom_sizes.keys():
         BED_path = get_intervals_path(chrom, species)        
         if not os.path.isfile(BED_path):  
+            print("Missing ", BED_path)
             allFilesExist = False
 
     return allFilesExist
@@ -1035,7 +1037,7 @@ def uli():
             ['H3K4ME3'],
             [None], #'0.5e6'?
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'get_average_signal'],
+            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks'],
             n_processes=12)
 
     except:
