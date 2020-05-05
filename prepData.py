@@ -161,6 +161,8 @@ def get_blacklisted_locs(cell_line):
     print("Blacklist file successfully read")
     blacklist_dictionary = {}
     for i in range(len(d)):
+        print("row idx ", i)
+        print("row ", d.iloc[i])
         chrom = d.iloc[i]['chromosome']
         start = d.iloc[i]['start']
         end =  d.iloc[i]['end']
