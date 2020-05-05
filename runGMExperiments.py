@@ -68,20 +68,21 @@ def test_GM18526():
                         dataset_params={
                             'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
                             'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
-                            'num_train_examples': 100000,
-                            'seq_length': 1001,
+                            'num_train_examples': 1000,
+                            'seq_length': 101,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
                             'train_chroms': HG19_ALL_CHROMS,
                             'test_chroms': HG19_ALL_CHROMS,
-                            'only_chr1': True
+                            'only_chr1': True,
+                            'wout_peaks': False
                         },
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
+                            'nb_epoch': 2,
                             'batch_size': 100,
-                            'nb_epoch': 20,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
                             'eval_batch_size': 1000,
