@@ -46,7 +46,7 @@ def test_MOUSE():
                 for output_mark in MM_MARKS:                            
                     model_type = 'cnn'
                     wandb_log = False
-                    evaluate = False
+                    evaluate = True
                     evaluate_genome_only = True
                     
                     preset_params = MODEL_PRESET_PARAMS[model_type]
