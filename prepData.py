@@ -1007,10 +1007,10 @@ def run_pipeline_commands(cell_lines_to_use, factors_to_use, subsample_targets_t
 
             run_in_parallel('Average signal', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
-    generate_all_dataset_cmds = generate_datasets(cell_lines_to_use, dataset_name_template, 
-                                                  factors_to_use, subsample_targets_to_use)
-    for cmd_set in generate_all_dataset_cmds:
-            run_in_parallel('Generate dataset', n_processes, callCommand, [[cmd] for cmd in cmd_set])
+    #generate_all_dataset_cmds = generate_datasets(cell_lines_to_use, dataset_name_template, 
+    #                                              factors_to_use, subsample_targets_to_use)
+    #for cmd_set in generate_all_dataset_cmds:
+    #        run_in_parallel('Generate dataset', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
 
 def run_GM_pipeline():
@@ -1039,9 +1039,9 @@ def uli():
         run_pipeline_commands(
             ['MOUSE'],
             ['H3K4ME3'],
-            [None], #'0.5e6'?
+            ['0.5e6'], #None?
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks', 'get_average_signal'],
+            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks'],
             n_processes=12)
 
     except:
