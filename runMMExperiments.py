@@ -74,7 +74,8 @@ def test_MOUSE():
                             'num_bins_to_test': None,
                             'train_chroms': MM9_TRAIN_CHROMS,
                             'test_chroms': TEST_CHROMS,
-                            'only_chr1': False
+                            'only_chr1': False,
+                            'wout_peaks': True
                         },
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],

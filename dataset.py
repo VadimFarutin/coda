@@ -75,7 +75,7 @@ class Dataset(object):
 
     def __init__(self, dataset_name, num_examples,
                  X_subsample_target_string, Y_subsample_target_string,
-                 random_seed, normalization, peak_fraction, chroms):
+                 random_seed, normalization, peak_fraction, chroms, wout_peaks):
         self.dataset_name = dataset_name
         self.num_examples = num_examples
         self.X_subsample_target_string = Dataset.process_subsample_target_string(X_subsample_target_string)
@@ -84,7 +84,8 @@ class Dataset(object):
         self.normalization = normalization
         self.peak_fraction = peak_fraction
         self.chroms = chroms
-
+        self.wout_peaks = wout_peaks
+        
         self.species = get_species_from_dataset_name(self.dataset_name)
         if self.species == 'hg19':
             all_chroms = HG19_ALL_CHROMS
@@ -215,19 +216,26 @@ class Dataset(object):
             with np.load(dataset_path) as data:
                 X = data['X'].astype('float32')
                 Y = data['Y'].astype('float32')
-                peakPValueX = data['peakPValueX'].astype('float32')
-                peakPValueY = data['peakPValueY'].astype('float32')
-                peakBinaryX = data['peakBinaryX'].astype('int8')
-                peakBinaryY = data['peakBinaryY'].astype('int8')
+                if not self.wout_peaks:
+                    peakPValueX = data['peakPValueX'].astype('float32')
+                    peakPValueY = data['peakPValueY'].astype('float32')
+                    peakBinaryX = data['peakBinaryX'].astype('int8')
+                    peakBinaryY = data['peakBinaryY'].astype('int8')
 
         except:
             print("Dataset %s doesn't exist or is missing a required matrix. Creating..." % dataset_path)
             
-            X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = self.extract_seq_dataset(
-                seq_length,                
-                output_marks,
-                dataset_path)
-
+            if not self.wout_peaks:
+                X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = self.extract_seq_dataset(
+                    seq_length,                
+                    output_marks,
+                    dataset_path)
+            else:
+                X, Y = self.extract_seq_dataset(
+                    seq_length,                
+                    output_marks,
+                    dataset_path)
+                    
         # Only select the input marks that we want
         marks_idx = []
         peak_marks_idx = []
@@ -245,25 +253,28 @@ class Dataset(object):
             peak_marks_idx.append(factors_without_input.index(mark))    
 
         X = X[..., marks_idx]
-        peakPValueX = peakPValueX[..., peak_marks_idx]
-        peakBinaryX = peakBinaryX[..., peak_marks_idx]
+        if not self.wout_peaks:
+            peakPValueX = peakPValueX[..., peak_marks_idx]
+            peakBinaryX = peakBinaryX[..., peak_marks_idx]
 
-        assert(np.all(peakPValueX >= 0) & np.all(peakPValueY >= 0))
+            assert(np.all(peakPValueX >= 0) & np.all(peakPValueY >= 0))
 
         if (X.shape[0], X.shape[1]) != (Y.shape[0], Y.shape[1]):
             raise Exception("First two dimensions of X and Y shapes (num_examples, seq_length) \
                               need to agree.")
-        if (peakPValueX.shape[0], peakPValueX.shape[1]) != (peakPValueY.shape[0], peakPValueY.shape[1]):
-            raise Exception("First two dimensions of peakPValueX and peakPValueY shapes \
-                              (num_examples, seq_length) need to agree.")
-        if len(peakPValueX) != len(X):
-            raise Exception("peakPValueX and X must have same length.")
-        
-        if ((seq_length != X.shape[1]) or (seq_length != peakPValueX.shape[1])):
-            raise Exception("seq_length between model and data needs to agree")
+        if not self.wout_peaks:
+            if (peakPValueX.shape[0], peakPValueX.shape[1]) != (peakPValueY.shape[0], peakPValueY.shape[1]):
+                raise Exception("First two dimensions of peakPValueX and peakPValueY shapes \
+                                  (num_examples, seq_length) need to agree.")
+            if len(peakPValueX) != len(X):
+                raise Exception("peakPValueX and X must have same length.")
+            
+            if ((seq_length != X.shape[1]) or (seq_length != peakPValueX.shape[1])):
+                raise Exception("seq_length between model and data needs to agree")
 
-        return X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY
-
+        if not self.wout_peaks:
+            return X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY
+        return X, Y
 
     def extract_seq_dataset(self, seq_length, output_marks, dataset_path):
         """
@@ -295,8 +306,9 @@ class Dataset(object):
             """
             assert os.path.isfile(full_path), "%s does not exist" % full_path
             assert os.path.isfile(sub_path), "%s does not exist" % sub_path
-            assert os.path.isfile(full_peak_path), "%s does not exist" % full_peak_path
-            assert os.path.isfile(sub_peak_path), "%s does not exist" % sub_peak_path
+            if not self.wout_peaks:
+                assert os.path.isfile(full_peak_path), "%s does not exist" % full_peak_path
+                assert os.path.isfile(sub_peak_path), "%s does not exist" % sub_peak_path
 
             with np.load(full_path) as full_data:
                 with np.load(sub_path) as sub_data:
@@ -376,6 +388,7 @@ class Dataset(object):
             if 'INPUT' in factors_for_peaks:
                 factors_for_peaks.remove('INPUT')
         
+            # TODO: reads from gappedPeaks, remove?
             # Get peaks that correspond to the "full" data as specified by Y_subsample_target_string
             for factor in factors_for_peaks:
                 peaks[factor], _ = get_peaks(cell_line, factor, Y_subsample_target_string)
@@ -589,15 +602,17 @@ class Dataset(object):
 
         full_path = get_base_path(dataset_name, Y_subsample_target_string, normalization)
         sub_path = get_base_path(dataset_name, X_subsample_target_string, normalization)
-        full_peak_path = get_base_path(dataset_name, Y_subsample_target_string, normalization=None, peaks=True)
-        sub_peak_path = get_base_path(dataset_name, X_subsample_target_string, normalization=None, peaks=True)
+        if not self.wout_peaks:
+            full_peak_path = get_base_path(dataset_name, Y_subsample_target_string, normalization=None, peaks=True)
+            sub_peak_path = get_base_path(dataset_name, X_subsample_target_string, normalization=None, peaks=True)
 
         print('input', input_marks)
         print('output', output_marks)
         print('sub path', sub_path)
         print('full path', full_path)
-        print('sub peak path', sub_peak_path)
-        print('full peak path', full_peak_path)
+        if not self.wout_peaks:
+            print('sub peak path', sub_peak_path)
+            print('full peak path', full_peak_path)
 
         # Sanity check the input
         sanity_check()
@@ -606,54 +621,61 @@ class Dataset(object):
         # then extract the datasets
         start_positions = get_start_positions(full_path, cell_line, chroms)
         X = extract_single_dataset(sub_path, start_positions, input_marks)
-        peakPValueX = extract_single_dataset(
-            sub_peak_path, 
-            start_positions, 
-            [a for a in input_marks if a != 'INPUT'])
-        peakBinaryX = extract_binary_peak_dataset(
-            sub_path, 
-            X_subsample_target_string, 
-            start_positions, 
-            cell_line, 
-            [a for a in input_marks if a != 'INPUT'])
+        if not self.wout_peaks:
+            peakPValueX = extract_single_dataset(
+                sub_peak_path, 
+                start_positions, 
+                [a for a in input_marks if a != 'INPUT'])
+            peakBinaryX = extract_binary_peak_dataset(
+                sub_path, 
+                X_subsample_target_string, 
+                start_positions, 
+                cell_line, 
+                [a for a in input_marks if a != 'INPUT'])
         
         Y = extract_single_dataset(full_path, start_positions, output_marks)
-        peakPValueY = extract_single_dataset(
-            full_peak_path, 
-            start_positions, 
-            [a for a in output_marks if a != 'INPUT'])
-        peakBinaryY = extract_binary_peak_dataset(
-            full_path, 
-            Y_subsample_target_string, 
-            start_positions, 
-            cell_line, 
-            [a for a in output_marks if a != 'INPUT'])
+        if not self.wout_peaks:
+            peakPValueY = extract_single_dataset(
+                full_peak_path, 
+                start_positions, 
+                [a for a in output_marks if a != 'INPUT'])
+            peakBinaryY = extract_binary_peak_dataset(
+                full_path, 
+                Y_subsample_target_string, 
+                start_positions, 
+                cell_line, 
+                [a for a in output_marks if a != 'INPUT'])
 
         
         # Sanity check the output
         assert (X.shape[0], X.shape[1]) == (Y.shape[0], Y.shape[1])
-        assert (peakPValueX.shape[0], peakPValueX.shape[1]) == (peakPValueY.shape[0], peakPValueY.shape[1])
+        if not self.wout_peaks:
+            assert (peakPValueX.shape[0], peakPValueX.shape[1]) == (peakPValueY.shape[0], peakPValueY.shape[1])
         assert X.shape[2] == len(input_marks)
-        assert peakPValueX.shape[2] + ('INPUT' in input_marks) == len(input_marks)
+        if not self.wout_peaks:
+            assert peakPValueX.shape[2] + ('INPUT' in input_marks) == len(input_marks)
         assert Y.shape[2] == len(output_marks)
-        assert peakPValueY.shape[2] + ('INPUT' in output_marks) == len(output_marks)
-        assert(peakPValueY.shape == peakBinaryY.shape)
-        assert(peakPValueX.shape == peakBinaryX.shape)
+        if not self.wout_peaks:
+            assert peakPValueY.shape[2] + ('INPUT' in output_marks) == len(output_marks)
+            assert(peakPValueY.shape == peakBinaryY.shape)
+            assert(peakPValueX.shape == peakBinaryX.shape)
 
         assert X.shape[0] == num_examples
         assert X.shape[1] == seq_length
-        assert peakPValueX.shape[0] == num_examples
-        assert peakPValueX.shape[1] == seq_length
+        if not self.wout_peaks:
+            assert peakPValueX.shape[0] == num_examples
+            assert peakPValueX.shape[1] == seq_length
         
-        assert np.all(peakPValueX >= 0)
-        assert np.all(peakPValueY >= 0)
+            assert np.all(peakPValueX >= 0)
+            assert np.all(peakPValueY >= 0)
 
-        # If we only have one output mark, make sure the peak fraction is close. 
-        if len(output_marks) == 1 and output_marks != ['INPUT']:
-            midpoint = (seq_length - 1) // 2#
-            true_peak_fraction = peakBinaryY[:, midpoint, 0].mean()
+        if not self.wout_peaks:
+            # If we only have one output mark, make sure the peak fraction is close. 
+            if len(output_marks) == 1 and output_marks != ['INPUT']:
+                midpoint = (seq_length - 1) // 2#
+                true_peak_fraction = peakBinaryY[:, midpoint, 0].mean()
 
-            assert np.abs(true_peak_fraction - peak_fraction) < 1e-2, 'Error: true peak fraction is %2.3f, desired fraction is %2.3f' % (true_peak_fraction, peak_fraction)
+                assert np.abs(true_peak_fraction - peak_fraction) < 1e-2, 'Error: true peak fraction is %2.3f, desired fraction is %2.3f' % (true_peak_fraction, peak_fraction)
 
 
         # Randomize the ordering of return_dataset so we don't see consecutive elements 
@@ -661,35 +683,45 @@ class Dataset(object):
         random_ordering = np.random.permutation(X.shape[0])
         X = X[random_ordering]
         Y = Y[random_ordering]
-        peakPValueX = peakPValueX[random_ordering]
-        peakPValueY = peakPValueY[random_ordering]
-        peakBinaryX = peakBinaryX[random_ordering]
-        peakBinaryY = peakBinaryY[random_ordering]
+        if not self.wout_peaks:
+            peakPValueX = peakPValueX[random_ordering]
+            peakPValueY = peakPValueY[random_ordering]
+            peakBinaryX = peakBinaryX[random_ordering]
+            peakBinaryY = peakBinaryY[random_ordering]
 
         # Downsize
         X = X.astype('float32')
         Y = Y.astype('float32')
-        peakPValueX = peakPValueX.astype('float32')
-        peakPValueY = peakPValueY.astype('float32')
-        peakBinaryX = peakBinaryX.astype('int8')
-        peakBinaryY = peakBinaryY.astype('int8')
+        if not self.wout_peaks:
+            peakPValueX = peakPValueX.astype('float32')
+            peakPValueY = peakPValueY.astype('float32')
+            peakBinaryX = peakBinaryX.astype('int8')
+            peakBinaryY = peakBinaryY.astype('int8')
 
 
 
         # Write output to disk
         print("Writing output to %s" % dataset_path)
         
-        np.savez_compressed(
-            dataset_path, 
-            X=X, 
-            Y=Y, 
-            peakPValueX=peakPValueX, 
-            peakPValueY=peakPValueY,
-            peakBinaryX=peakBinaryX,
-            peakBinaryY=peakBinaryY)
+        if not self.wout_peaks:
+            np.savez_compressed(
+                dataset_path, 
+                X=X, 
+                Y=Y, 
+                peakPValueX=peakPValueX, 
+                peakPValueY=peakPValueY,
+                peakBinaryX=peakBinaryX,
+                peakBinaryY=peakBinaryY)
 
-        return (X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY)
+            return (X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY)
+        else:
+            np.savez_compressed(
+                dataset_path, 
+                X=X, 
+                Y=Y)
 
+            return (X, Y)
+                    
 
     def load_genome(self, X_or_Y, marks, only_chr1=False, peaks=False):
             """
