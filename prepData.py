@@ -999,11 +999,11 @@ def run_pipeline_commands(cell_lines_to_use, factors_to_use, subsample_targets_t
 
     if 'get_average_signal' not in steps_to_skip:
         
-        get_average_signal_peaks_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = True)
+        #get_average_signal_peaks_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = True)
         get_average_signal_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = False)
 
-        for cmd_set in get_average_signal_cmds + get_average_signal_peaks_cmds:
-        #for cmd_set in get_average_signal_cmds:
+        #for cmd_set in get_average_signal_cmds + get_average_signal_peaks_cmds:
+        for cmd_set in get_average_signal_cmds:
 
             run_in_parallel('Average signal', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
@@ -1038,10 +1038,10 @@ def uli():
     try:        
         run_pipeline_commands(
             ['MOUSE'],
-            ['H3K4ME3'],
-            ['0.5e6'], #None?
+            ['H3K27ME3'],
+            [None], # None, '0.5e6'
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks'],
+            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'get_average_signal'],
             n_processes=12)
 
     except:
