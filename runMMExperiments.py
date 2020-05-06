@@ -80,7 +80,7 @@ def test_MOUSE():
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
-                            'nb_epoch': 10,
+                            'nb_epoch': 0,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
