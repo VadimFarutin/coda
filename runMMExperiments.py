@@ -44,7 +44,7 @@ def test_MOUSE():
         for subsample_target_string in ['0.5e6']:
             for predict_binary_output in [False]:
                 for output_mark in MM_MARKS:                            
-                    model_type = 'cnn-encoder-decoder'
+                    model_type = 'cnn'
                     wandb_log = True
                     evaluate = True
                     evaluate_genome_only = True
@@ -73,14 +73,14 @@ def test_MOUSE():
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
                             'train_chroms': MM9_TRAIN_CHROMS,
-                            'test_chroms': VALID_CHROMS,
+                            'test_chroms': TEST_CHROMS,
                             'only_chr1': False,
                             'wout_peaks': True
                         },
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
-                            'nb_epoch': 0,
+                            'nb_epoch': 30,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
@@ -89,8 +89,8 @@ def test_MOUSE():
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        #pretrained_model_path=None)
-                        pretrained_model_path='./models/weights/cnn-encoder-decoder-20200506-153131504296-weights.pt')
+                        pretrained_model_path=None)
+                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200506-153131504296-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
