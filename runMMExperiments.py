@@ -73,7 +73,7 @@ def test_MOUSE():
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
                             'train_chroms': MM9_TRAIN_CHROMS,
-                            'test_chroms': TEST_CHROMS,
+                            'test_chroms': ['chr1', 'chr2', 'chr3', 'chr4'],
                             'only_chr1': False,
                             'wout_peaks': True
                         },
@@ -89,8 +89,8 @@ def test_MOUSE():
                         predict_binary_output=predict_binary_output,
                         zero_out_non_bins=True,
                         generate_bigWig=False,
-                        pretrained_model_path=None)
-                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200425-111545564105-weights.pt')
+                        #pretrained_model_path=None)
+                        pretrained_model_path='./models/weights/cnn-encoder-decoder-20200506-091853444412-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
