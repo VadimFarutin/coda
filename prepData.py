@@ -1041,7 +1041,7 @@ def uli():
             ['H3K27ME3'],
             [None], # None, '0.5e6'
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'get_average_signal'],
+            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks'], # get_average_signal
             n_processes=12)
 
     except:
