@@ -35,7 +35,7 @@ def run_model(model_params, evaluate, evaluate_genome_only):
     return results
 
 
-MM_MARKS = ['H3K27ME3']
+MM_MARKS = ['H3K4ME3']
 
 
 def test_MOUSE():
