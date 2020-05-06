@@ -73,7 +73,7 @@ def test_MOUSE():
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
                             'train_chroms': MM9_TRAIN_CHROMS,
-                            'test_chroms': TEST_CHROMS,
+                            'test_chroms': VALID_CHROMS,
                             'only_chr1': False,
                             'wout_peaks': True
                         },
