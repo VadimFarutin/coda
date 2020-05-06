@@ -62,7 +62,7 @@ def test_MOUSE():
                         compile_params={
                             'loss': loss,
                             'optimizer': preset_params['compile_params']['optimizer'],
-                            'lr': preset_params['compile_params']['lr']
+                            #'lr': preset_params['compile_params']['lr']
                         },
                         dataset_params={
                             'train_dataset_name': 'MOUSE_3marks_all',
