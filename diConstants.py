@@ -7,7 +7,7 @@ import torch
 REMOTE_ROOT = "/mnt/data/chromatinVariation1/rawdata/mapped/bam/personal/reconcile/dedup"    
 
 # Where the AQUAS pipeline is installed
-PIPELINE_ROOT = "../TF_chipseq_pipeline/TF_chipseq_pipeline/"
+PIPELINE_ROOT = "../chipseq_pipeline/"
 
 # Where the code is
 CODE_ROOT = "/users/pangwei/deepimpute_pub"
@@ -105,6 +105,8 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 GM_CELL_LINES = ['GM12878', 'GM19239', 'GM10847', 'GM18505', 'GM18526', 'GM18951', 'GM2610']
 GM_FACTORS = ['H3K27AC','H3K27ME3', 'H3K36ME3','H3K4ME1', 'H3K4ME3', 'INPUT']
+MM_CELL_LINES = ['MOUSE']
+MM_FACTORS = ['H3K4ME3']
 SUBSAMPLE_TARGETS = ['0.1e6','0.25e6', '0.5e6','1e6', '2.5e6', '5e6','7.5e6', '10e6','30e6','20e6', None]
 
 GM_DATASET_NAME_TEMPLATE = '%s_5+1marks-K4me3_all'

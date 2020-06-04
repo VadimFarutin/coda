@@ -158,8 +158,11 @@ def get_blacklisted_locs(cell_line):
         blacklist_file = HG19_BLACKLIST_FILE
 
     d = pd.read_csv(blacklist_file, sep = "\t")
+    print("Blacklist file successfully read")
     blacklist_dictionary = {}
     for i in range(len(d)):
+        #print("row idx ", i)
+        #print("row ", d.iloc[i])
         chrom = d.iloc[i]['chromosome']
         start = d.iloc[i]['start']
         end =  d.iloc[i]['end']
@@ -578,6 +581,7 @@ def check_whether_BW_files_exist(cell_line, factor, subsample_target_string, ave
     else:
         bigWig_path = get_bigWig_path(cell_line, factor, subsample_target_string)
     if not (os.path.isfile(bigWig_path)):
+        print("Missing ", bigWig_path)
         allFilesExist = False
 
     species = get_species(cell_line)
@@ -585,6 +589,7 @@ def check_whether_BW_files_exist(cell_line, factor, subsample_target_string, ave
     for chrom in chrom_sizes.keys():
         BED_path = get_intervals_path(chrom, species)        
         if not os.path.isfile(BED_path):  
+            print("Missing ", BED_path)
             allFilesExist = False
 
     return allFilesExist
@@ -712,7 +717,7 @@ def prep_dataset(dataset_name, cell_line, factors_to_include, chroms_to_include,
             metadata_path = get_metadata_path(dataset_name, subsample_target_string, normalization)
             with open(metadata_path, 'w') as f:
                 f.write(json.dumps(metadata))
-
+            print("Wrote metadata ", metadata)
 
         # Construct output matrix
 
@@ -798,9 +803,9 @@ def generate_datasets(cell_lines_to_use, dataset_name_template, factors_to_use, 
     factors_string = '-'.join(factors_to_use)
     for cell_line in cell_lines_to_use:        
         for subsample_target in subsample_targets_to_use:
-            all_cmds[0].append('python prepData.py ' \
-                + ' prep_dataset_wrapper peak_pvals_by_bin_%s %s %s %s None True' % \
-                (dataset_name_template % cell_line, cell_line, factors_string, subsample_target))
+            # all_cmds[0].append('python prepData.py ' \
+            #     + ' prep_dataset_wrapper peak_pvals_by_bin_%s %s %s %s None True' % \
+            #     (dataset_name_template % cell_line, cell_line, factors_string, subsample_target))
             all_cmds[0].append('python prepData.py ' \
                 + ' prep_dataset_wrapper %s %s %s %s arcsinh False' % \
                 (dataset_name_template % cell_line, cell_line, factors_string, subsample_target))
@@ -832,19 +837,22 @@ def call_all_peaks(cell_lines_to_use, factors_to_use, subsample_targets_to_use):
                 else:
                     input_file = get_tagAlign_path(cell_line, factor, subsample_target_string = subsample_target_string)
                     control_input_file = get_tagAlign_path(cell_line, 'INPUT', subsample_target_string = subsample_target_string)
-                    if os.path.exists(input_file) and os.path.exists(control_input_file):
+                    #if os.path.exists(input_file) and os.path.exists(control_input_file):
+                    if os.path.exists(input_file):
                         print('%-8s %-8s %-8s peak files DO NOT exist, regenerating' % (cell_line, factor, subsample_target_string))
-                        controls_and_inputs.append([input_file, control_input_file])
+                        controls_and_inputs.append(input_file)
                     else:
                         print('%-8s %-8s %-8s input files DO NOT exist, cannot call peaks' % (cell_line, factor, subsample_target_string))
+                        print(input_file)
+                        print(control_input_file)
                         continue
 
-            for input_file, control_input_file in controls_and_inputs:                
+            #for input_file, control_input_file in controls_and_inputs:                
+            for input_file in controls_and_inputs:                
                 
-                if os.path.isfile(input_file) and os.path.isfile(control_input_file):
-
-                    if os.path.isfile(control_input_file):                    
-                        cmd = "bash scripts/findPeaks.sh %s %s %s %s %s" % (PIPELINE_ROOT, PEAK_BASE_DIR, input_file, control_input_file, species)                        
+                #if os.path.isfile(input_file) and os.path.isfile(control_input_file):
+                if os.path.isfile(input_file):
+                    cmd = "bash scripts/findPeaks.sh %s %s %s %s" % (PIPELINE_ROOT, PEAK_BASE_DIR, input_file, species)                        
 
                     all_cmds[0].append(cmd)                        
 
@@ -991,10 +999,11 @@ def run_pipeline_commands(cell_lines_to_use, factors_to_use, subsample_targets_t
 
     if 'get_average_signal' not in steps_to_skip:
         
-        get_average_signal_peaks_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = True)
+        #get_average_signal_peaks_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = True)
         get_average_signal_cmds = get_average_signal_over_intervals(cell_lines_to_use, factors_to_use, subsample_targets_to_use, average_peaks = False)
 
-        for cmd_set in get_average_signal_cmds + get_average_signal_peaks_cmds:
+        #for cmd_set in get_average_signal_cmds + get_average_signal_peaks_cmds:
+        for cmd_set in get_average_signal_cmds:
 
             run_in_parallel('Average signal', n_processes, callCommand, [[cmd] for cmd in cmd_set])
 
@@ -1029,10 +1038,10 @@ def uli():
     try:        
         run_pipeline_commands(
             ['MOUSE'],
-            ['H3K4ME3'],
-            [None], #'0.5e6'?
+            ['H3K27ME3'],
+            ['0.5e6'], # None, '0.5e6'
             ULI_DATASET_NAME_TEMPLATE, 
-            steps_to_skip=['merge_bam', 'subsample_bam'],
+            steps_to_skip=['merge_bam', 'filter_bam', 'subsample_bam', 'get_signal_tracks', 'call_peaks', 'get_average_signal'], # get_average_signal
             n_processes=12)
 
     except:

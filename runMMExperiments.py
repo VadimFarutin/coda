@@ -34,18 +34,17 @@ def run_model(model_params, evaluate, evaluate_genome_only):
 
     return results
 
-# GM_MARKS = ['H3K27AC', 'H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3']
-#GM_MARKS = ['H3K4ME1', 'H3K4ME3', 'H3K27ME3', 'H3K36ME3', 'H3K27AC']
-GM_MARKS = ['H3K27AC']
+
+MM_MARKS = ['H3K4ME3']
 
 
-def test_GM18526():
+def test_MOUSE():
 
-    for test_cell_line in ['GM18526']:
+    for test_cell_line in ['MOUSE']:
         for subsample_target_string in ['0.5e6']:
-            for predict_binary_output in [False, True]:
-                for output_mark in GM_MARKS:                            
-                    model_type = 'cnn-encoder-decoder'
+            for predict_binary_output in [False]:
+                for output_mark in MM_MARKS:                            
+                    model_type = 'cnn'
                     wandb_log = True
                     evaluate = True
                     evaluate_genome_only = True
@@ -63,25 +62,25 @@ def test_GM18526():
                         compile_params={
                             'loss': loss,
                             'optimizer': preset_params['compile_params']['optimizer'],
-                            'lr': preset_params['compile_params']['lr']
+                            #'lr': preset_params['compile_params']['lr']
                         },
                         dataset_params={
-                            'train_dataset_name': 'GM12878_5+1marks-K4me3_all',
-                            'test_dataset_name': '%s_5+1marks-K4me3_all' % test_cell_line,
+                            'train_dataset_name': 'MOUSE_3marks_all',
+                            'test_dataset_name': '%s_3marks_all' % test_cell_line,
                             'num_train_examples': 100000,
                             'seq_length': 1001,
                             'peak_fraction': 0.5,
                             'train_X_subsample_target_string': subsample_target_string,
                             'num_bins_to_test': None,
-                            'train_chroms': HG19_ALL_CHROMS,
-                            'test_chroms': HG19_ALL_CHROMS,
-                            'only_chr1': True,
-                            'wout_peaks': False
+                            'train_chroms': MM9_TRAIN_CHROMS,
+                            'test_chroms': VALID_CHROMS,
+                            'only_chr1': False,
+                            'wout_peaks': True
                         },
                         output_marks=[output_mark],
                         #input_marks=[output_mark, 'INPUT'],
                         train_params={
-                            'nb_epoch': 15,
+                            'nb_epoch': 30,
                             'batch_size': 100,
                             'validation_split': 0.2,
                             'wandb_log': wandb_log,
@@ -91,13 +90,13 @@ def test_GM18526():
                         zero_out_non_bins=True,
                         generate_bigWig=False,
                         pretrained_model_path=None)
-                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200425-111545564105-weights.pt')
+                        #pretrained_model_path='./models/weights/cnn-encoder-decoder-20200506-153131504296-weights.pt')
 
                     if wandb_log:
                         group = "peaks" if predict_binary_output else "signal"
                         name = model_type + "_" + output_mark
                         # Initilize a new wandb run
-                        wandb.init(entity="vadim-farutin", project="coda", name=name,
+                        wandb.init(entity="vadim-farutin", project="coda-mm", name=name,
                                    reinit=True,
                                    config=model_params, group=group, tags=[output_mark, model_type])
                         # wandb.watch_called = False # Re-run the model without restarting the runtime, unnecessary after our next release
@@ -152,4 +151,4 @@ def test_GM18526():
 
 
 if __name__ == '__main__':
-    test_GM18526()
+    test_MOUSE()

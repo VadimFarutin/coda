@@ -175,6 +175,7 @@ class SeqModel(object):
 
         self.verbose = True
 
+        self.wout_peaks = model_params['wout_peaks']
         # print("Initialized model with parameters:")
         # print(json.dumps(model_params, indent=4, cls=DatasetEncoder))
 
@@ -249,30 +250,37 @@ class SeqModel(object):
 
         This function resets the random seed.
         """
-        X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = dataset.load_seq_dataset(
-            seq_length=self.dataset_params['seq_length'],
-            input_marks=self.input_marks,
-            output_marks=self.output_marks)
+        if not self.wout_peaks:
+            X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = dataset.load_seq_dataset(
+                seq_length=self.dataset_params['seq_length'],
+                input_marks=self.input_marks,
+                output_marks=self.output_marks)
 
-        if self.model_params['zero_out_non_bins']:
-            peakPValueX = peakPValueX * peakBinaryX
-            peakPValueY = peakPValueY * peakBinaryY
+            if self.model_params['zero_out_non_bins']:
+                peakPValueX = peakPValueX * peakBinaryX
+                peakPValueY = peakPValueY * peakBinaryY
 
-        if ((self.num_input_marks != X.shape[2]) or
-            (self.num_input_marks != peakPValueX.shape[2] + ('INPUT' in self.input_marks))):
-            raise Exception("num_input_marks between model and data needs to agree")
-        if ((self.num_output_marks != Y.shape[2]) or
-            (self.num_output_marks != peakPValueY.shape[2] + ('INPUT' in self.output_marks))):
-            raise Exception("num_output_marks between model and data needs to agree")
-
+            if ((self.num_input_marks != X.shape[2]) or
+                (self.num_input_marks != peakPValueX.shape[2] + ('INPUT' in self.input_marks))):
+                raise Exception("num_input_marks between model and data needs to agree")
+            if ((self.num_output_marks != Y.shape[2]) or
+                (self.num_output_marks != peakPValueY.shape[2] + ('INPUT' in self.output_marks))):
+                raise Exception("num_output_marks between model and data needs to agree")
+        else:
+            X, Y = dataset.load_seq_dataset(
+                seq_length=self.dataset_params['seq_length'],
+                input_marks=self.input_marks,
+                output_marks=self.output_marks)
+        
         # See comment in __init__ about random seeds
         os.environ['PYTHONHASHSEED'] = str(self.model_params['random_seed'] + 42)
         random.seed(self.model_params['random_seed'] + 42)
         np.random.seed(self.model_params['random_seed'] + 42)
         torch.manual_seed(self.model_params['random_seed'] + 42)
 
-        return (X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY)
-
+        if not self.wout_peaks:
+            return (X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY)
+        return (X, Y)
 
     def get_processed_data(self, dataset):
         """
@@ -296,17 +304,24 @@ class SeqModel(object):
 
         """
 
-        X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = self.get_unprocessed_data(dataset)
+        if not self.wout_peaks:
+            X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY = self.get_unprocessed_data(dataset)
 
-        X = self.process_X(X)
-        Y = self.process_Y(Y)
-        peakPValueX = self.process_X(peakPValueX)
-        peakPValueY = self.process_Y(peakPValueY)
-        peakBinaryX = self.process_X(peakBinaryX)
-        peakBinaryY = self.process_Y(peakBinaryY)
+            X = self.process_X(X)
+            Y = self.process_Y(Y)
+            peakPValueX = self.process_X(peakPValueX)
+            peakPValueY = self.process_Y(peakPValueY)
+            peakBinaryX = self.process_X(peakBinaryX)
+            peakBinaryY = self.process_Y(peakBinaryY)
 
-        return (X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY)
+            return (X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY)
+        else:
+            X, Y = self.get_unprocessed_data(dataset)
 
+            X = self.process_X(X)
+            Y = self.process_Y(Y)
+
+            return (X, Y)
 
     def compile_and_train_model(self):
         """
@@ -321,9 +336,13 @@ class SeqModel(object):
         assert self.model_params
 
         # Train model
-        (train_X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY) = self.get_processed_data(
-            self.train_dataset)
-
+        if not self.wout_peaks:
+            (train_X, Y, peakPValueX, peakPValueY, peakBinaryX, peakBinaryY) = self.get_processed_data(
+                self.train_dataset)
+        else:
+            (train_X, Y) = self.get_processed_data(
+                self.train_dataset)
+                
         if self.model_params['model_type'] != 'adv-cnn-encoder-decoder':
             self.normalizer.fit(train_X)
             train_X = self.normalizer.transform(train_X)

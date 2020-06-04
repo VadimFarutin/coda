@@ -17,6 +17,7 @@ def make_dataset_params(num_train_examples,
                         normalization='arcsinh',
                         peak_fraction=0.5,
                         only_chr1=True,
+                        wout_peaks=False,
                         num_bins_to_test=1000000,                        
                         train_chroms=None,
                         test_chroms=None):
@@ -59,7 +60,8 @@ def make_dataset_params(num_train_examples,
             random_seed=random_seed, 
             normalization=normalization,
             peak_fraction=peak_fraction,
-            chroms=train_chroms),
+            chroms=train_chroms,
+            wout_peaks=wout_peaks),
         'test_datasets': [Dataset(
             dataset_name=test_dataset_name,
             num_examples=num_test_examples, 
@@ -68,7 +70,8 @@ def make_dataset_params(num_train_examples,
             random_seed=random_seed, 
             normalization=normalization,
             peak_fraction=peak_fraction,
-            chroms=test_chroms)],
+            chroms=test_chroms,
+            wout_peaks=wout_peaks)],
         'seq_length': seq_length,        
         'num_bins_to_test': num_bins_to_test,
         'only_chr1': only_chr1,
@@ -115,7 +118,8 @@ def make_model_params(model_library,
         'generate_bigWig': generate_bigWig,
         'predict_binary_output': predict_binary_output,
         'zero_out_non_bins': zero_out_non_bins,
-        'pretrained_model_path': pretrained_model_path
+        'pretrained_model_path': pretrained_model_path,
+        'wout_peaks': dataset_params['wout_peaks']
     }
 
     params['dataset_params'] = make_dataset_params(**dataset_params)
